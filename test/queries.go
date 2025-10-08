@@ -17,7 +17,7 @@ func CreateAdminUser(ormService fluxaorm.Context, row map[string]interface{}) *e
 		for field, value := range row {
 			switch field {
 			case "RoleID":
-				adminUserEntity.RoleID = value.(*entityHitrix.RoleEntity)
+				adminUserEntity.RoleID = fluxaorm.Reference[entityHitrix.RoleEntity](value.(*entityHitrix.RoleEntity).ID)
 			}
 		}
 	}
@@ -73,16 +73,15 @@ func CreateResource(ormService fluxaorm.Context, row map[string]interface{}) *en
 
 func CreatePermission(ormService fluxaorm.Context, row map[string]interface{}) *entityHitrix.PermissionEntity {
 	permissionEntity := &entityHitrix.PermissionEntity{
-		ResourceID: nil,
-		Name:       "view",
-		CreatedAt:  service.DI().Clock().Now(),
+		Name:      "view",
+		CreatedAt: service.DI().Clock().Now(),
 	}
 
 	if len(row) != 0 {
 		for field, value := range row {
 			switch field {
 			case "ResourceID":
-				permissionEntity.ResourceID = value.(*entityHitrix.ResourceEntity)
+				permissionEntity.ResourceID = fluxaorm.Reference[entityHitrix.ResourceEntity](value.(*entityHitrix.ResourceEntity).ID)
 			case "Name":
 				permissionEntity.Name = value.(string)
 			case "CreatedAt":
@@ -98,8 +97,6 @@ func CreatePermission(ormService fluxaorm.Context, row map[string]interface{}) *
 
 func CreatePrivilege(ormService fluxaorm.Context, row map[string]interface{}) *entityHitrix.PrivilegeEntity {
 	privilegeEntity := &entityHitrix.PrivilegeEntity{
-		RoleID:        nil,
-		ResourceID:    nil,
 		PermissionIDs: nil,
 		CreatedAt:     service.DI().Clock().Now(),
 	}
@@ -108,9 +105,9 @@ func CreatePrivilege(ormService fluxaorm.Context, row map[string]interface{}) *e
 		for field, value := range row {
 			switch field {
 			case "RoleID":
-				privilegeEntity.RoleID = value.(*entityHitrix.RoleEntity)
+				privilegeEntity.RoleID = fluxaorm.Reference[entityHitrix.RoleEntity](value.(*entityHitrix.RoleEntity).ID)
 			case "ResourceID":
-				privilegeEntity.ResourceID = value.(*entityHitrix.ResourceEntity)
+				privilegeEntity.ResourceID = fluxaorm.Reference[entityHitrix.ResourceEntity](value.(*entityHitrix.ResourceEntity).ID)
 			case "PermissionIDs":
 				privilegeEntity.PermissionIDs = value.([]*entityHitrix.PermissionEntity)
 			case "CreatedAt":

@@ -14,24 +14,18 @@ import (
 func ListResources(c *gin.Context) *acl.ResourcesResponseDTO {
 	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	allPermissionEntities := make([]*entity.PermissionEntity, 0)
-
-	ormService.CachedSearchWithReferences(
-		&allPermissionEntities,
-		"CachedQueryAll",
-		beeorm.NewPager(1, 4000),
-		nil,
-		[]string{"ResourceID"},
-	)
+	permissionsEntityIterator := fluxaorm.GetAll[entity.PermissionEntity](ormService)
 
 	resourceDTOsMapping := resourceDTOsMapping{}
 
-	for _, permissionEntity := range allPermissionEntities {
-		dto, ok := resourceDTOsMapping[permissionEntity.ResourceID.ID]
+	for _, permissionEntity := range permissionsEntityIterator.All() {
+		//TODO Krasi ORM: fix after references are back
+		resourceEntity := permissionEntity.ResourceID.GetEntity(ormService)
+		dto, ok := resourceDTOsMapping[resourceEntity.ID]
 		if !ok {
 			dto = &acl.ResourceResponseDTO{
-				ID:          permissionEntity.ResourceID.ID,
-				Name:        permissionEntity.ResourceID.Name,
+				ID:          resourceEntity.ID,
+				Name:        resourceEntity.Name,
 				Permissions: make([]*acl.PermissionResponseDTO, 0),
 			}
 		}
@@ -41,7 +35,7 @@ func ListResources(c *gin.Context) *acl.ResourcesResponseDTO {
 			Name: permissionEntity.Name,
 		})
 
-		resourceDTOsMapping[permissionEntity.ResourceID.ID] = dto
+		resourceDTOsMapping[resourceEntity.ID] = dto
 	}
 
 	resultDTOs := make([]*acl.ResourceResponseDTO, 0)

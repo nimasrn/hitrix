@@ -16,14 +16,14 @@ import (
 	"github.com/coretrix/hitrix/service/registry/mocks"
 )
 
-func createUser(input map[string]interface{}) *entity.DevPanelUserEntity {
+func createDevPanelUser(input map[string]interface{}) *entity.DevPanelUserEntity {
 	ormService := service.DI().Orm()
 	devPanelUserEntity := &entity.DevPanelUserEntity{}
 
 	for field, val := range input {
 		switch field {
-		case "Email":
-			devPanelUserEntity.Email = val.(string)
+		case "Username":
+			devPanelUserEntity.Username = val.(string)
 		case "Password":
 			devPanelUserEntity.Password = val.(string)
 		}
@@ -64,8 +64,8 @@ func TestAuthenticate(t *testing.T) {
 		hashedPassword, _ := passwordService.HashPassword("1234")
 		ormService := service.DI().Orm()
 
-		createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
@@ -99,8 +99,8 @@ func TestAuthenticate(t *testing.T) {
 		hashedPassword, _ := passwordService.HashPassword("1234")
 		ormService := service.DI().Orm()
 
-		userEntity := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		userEntity := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
@@ -132,8 +132,8 @@ func TestAuthenticate(t *testing.T) {
 		hashedPassword, _ := passwordService.HashPassword("1234")
 		ormService := service.DI().Orm()
 
-		createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
@@ -166,14 +166,14 @@ func TestVerifyAccessToken(t *testing.T) {
 		passwordService := service.DI().Password()
 		hashedPassword, _ := passwordService.HashPassword("1234")
 
-		currentUser := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		currentUser := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
 		accessKey := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		ormService := service.DI().Orm()
-		ormService.GetRedis().Set(accessKey, "", 10)
+		ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Set(ormService, accessKey, "", 10)
 
 		authenticationService := service.DI().Authentication()
 		token, err := authenticationService.GenerateTokenPair(currentUser.ID, accessKey, 10)
@@ -202,14 +202,14 @@ func TestVerifyAccessToken(t *testing.T) {
 		passwordService := service.DI().Password()
 		hashedPassword, _ := passwordService.HashPassword("1234")
 
-		currentUser := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		currentUser := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
 		accessKey := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		ormService := service.DI().Orm()
-		ormService.GetRedis().Set(accessKey, "", 10)
+		ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Set(ormService, accessKey, "", 10)
 
 		authenticationService := service.DI().Authentication()
 		token, err := authenticationService.GenerateTokenPair(currentUser.ID, accessKey, 10)
@@ -242,14 +242,14 @@ func TestRefreshToken(t *testing.T) {
 		passwordService := service.DI().Password()
 		hashedPassword, _ := passwordService.HashPassword("1234")
 
-		currentUser := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		currentUser := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
 		accessKey := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		ormService := service.DI().Orm()
-		ormService.GetRedis().Set(accessKey, "", 10)
+		ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Set(ormService, accessKey, "", 10)
 
 		authenticationService := service.DI().Authentication()
 		refresh, err := authenticationService.GenerateTokenPair(currentUser.ID, accessKey, 10)
@@ -276,14 +276,14 @@ func TestRefreshToken(t *testing.T) {
 		passwordService := service.DI().Password()
 		hashedPassword, _ := passwordService.HashPassword("1234")
 
-		currentUser := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		currentUser := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
 		accessKey := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		ormService := service.DI().Orm()
-		ormService.GetRedis().Set(accessKey, "", 10)
+		ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Set(ormService, accessKey, "", 10)
 
 		authenticationService := service.DI().Authentication()
 		refresh, err := authenticationService.GenerateTokenPair(currentUser.ID, accessKey, 10)
@@ -315,14 +315,14 @@ func TestLogoutCurrentSession(t *testing.T) {
 		passwordService := service.DI().Password()
 		hashedPassword, _ := passwordService.HashPassword("1234")
 
-		currentUser := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		currentUser := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
 		accessKey := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		ormService := service.DI().Orm()
-		ormService.GetRedis().Set(accessKey, "", 10)
+		ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Set(ormService, accessKey, "", 10)
 
 		authenticationService := service.DI().Authentication()
 		accessToken, err := authenticationService.GenerateTokenPair(currentUser.ID, accessKey, 10)
@@ -358,17 +358,19 @@ func TestLogoutAllSessions(t *testing.T) {
 		passwordService := service.DI().Password()
 		hashedPassword, _ := passwordService.HashPassword("1234")
 
-		currentUser := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		currentUser := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
 		accessKey := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		ormService := service.DI().Orm()
-		ormService.GetRedis().Set(accessKey, "", 10)
+		appService := service.DI().App()
+
+		ormService.Engine().Redis(appService.RedisPools.Cache).Set(ormService, accessKey, "", 10)
 
 		accessListKey := fmt.Sprintf("USER_KEYS:%d", currentUser.ID)
-		ormService.GetRedis().Set(accessListKey, accessKey, 10)
+		ormService.Engine().Redis(appService.RedisPools.Cache).Set(ormService, accessListKey, accessKey, 10)
 
 		authenticationService := service.DI().Authentication()
 		accessToken, err := authenticationService.GenerateTokenPair(currentUser.ID, accessKey, 10)
@@ -399,19 +401,22 @@ func TestLogoutAllSessions(t *testing.T) {
 		passwordService := service.DI().Password()
 		hashedPassword, _ := passwordService.HashPassword("1234")
 
-		currentUser := createUser(map[string]interface{}{
-			"Email":    "test@test.com",
+		currentUser := createDevPanelUser(map[string]interface{}{
+			"Username": "test@test.com",
 			"Password": hashedPassword,
 		})
 
 		accessKey1 := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		accessKey2 := fmt.Sprintf("ACCESS:%d:%s", currentUser.ID, service.DI().UUID().Generate())
 		ormService := service.DI().Orm()
-		ormService.GetRedis().Set(accessKey1, "", 10)
-		ormService.GetRedis().Set(accessKey2, "", 10)
+		appService := service.DI().App()
+
+		ormService.Engine().Redis(appService.RedisPools.Cache).Set(ormService, accessKey1, "", 10)
+		ormService.Engine().Redis(appService.RedisPools.Cache).Set(ormService, accessKey2, "", 10)
 
 		accessListKey := fmt.Sprintf("USER_KEYS:%d", currentUser.ID)
-		ormService.GetRedis().Set(accessListKey, accessKey1+";"+accessKey2, 10)
+
+		ormService.Engine().Redis(appService.RedisPools.Cache).Set(ormService, accessListKey, accessKey1+";"+accessKey2, 10)
 
 		authenticationService := service.DI().Authentication()
 		accessToken1, err := authenticationService.GenerateTokenPair(currentUser.ID, accessKey1, 10)
@@ -451,15 +456,15 @@ func TestGenerateTokenPair(t *testing.T) {
 	passwordService := service.DI().Password()
 	hashedPassword, _ := passwordService.HashPassword("1234")
 
-	currentUser := createUser(map[string]interface{}{
-		"Email":    "test@test.com",
+	currentUser := createDevPanelUser(map[string]interface{}{
+		"Username": "test@test.com",
 		"Password": hashedPassword,
 	})
 
 	authenticationService := service.DI().Authentication()
 
 	ormService := service.DI().Orm()
-	ormService.GetRedis().Set("test_key", "", 10)
+	ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Set(ormService, "test_key", "", 10)
 
 	accessToken, err := authenticationService.GenerateTokenPair(currentUser.ID, "test_key", 10)
 

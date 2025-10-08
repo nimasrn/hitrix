@@ -32,24 +32,26 @@ func TestListResourcesAction(t *testing.T) {
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
 	ormService := service.DI().Orm().Clone()
-	flusher := ormService.NewFlusher()
 
-	resource1 := CreateResource(flusher, map[string]interface{}{})
-	flusher.Flush()
-	resource2 := CreateResource(flusher, map[string]interface{}{"Name": "car"})
+	resource1 := CreateResource(ormService, map[string]interface{}{})
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
-	CreatePermission(flusher, map[string]interface{}{"ResourceID": resource1, "Name": "create"})
-	CreatePermission(flusher, map[string]interface{}{"ResourceID": resource1, "Name": "view"})
+	resource2 := CreateResource(ormService, map[string]interface{}{"Name": "car"})
 
-	CreatePermission(flusher, map[string]interface{}{"ResourceID": resource2, "Name": "unlock"})
-	CreatePermission(flusher, map[string]interface{}{"ResourceID": resource2, "Name": "lock"})
-	CreatePermission(flusher, map[string]interface{}{"ResourceID": resource2, "Name": "drive"})
+	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource1, "Name": "create"})
+	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource1, "Name": "view"})
 
-	flusher.Flush()
+	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource2, "Name": "unlock"})
+	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource2, "Name": "lock"})
+	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource2, "Name": "drive"})
+
+	err = ormService.Flush()
+	assert.Nil(t, err)
 
 	got := &acl.ResourcesResponseDTO{}
 
-	err := SendHTTPRequest(ctx, http.MethodGet, "/acl/resources/", false, got)
+	err = SendHTTPRequest(ctx, http.MethodGet, "/acl/resources/", false, got)
 	assert.Nil(t, err)
 
 	want := &acl.ResourcesResponseDTO{
@@ -107,18 +109,18 @@ func TestListRolesAction(t *testing.T) {
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
 	ormService := service.DI().Orm().Clone()
-	flusher := ormService.NewFlusher()
 
-	resource1 := CreateResource(flusher, map[string]interface{}{})
+	resource1 := CreateResource(ormService, map[string]interface{}{})
 
-	CreatePermission(flusher, map[string]interface{}{"ResourceID": resource1, "Name": "create"})
-	CreatePermission(flusher, map[string]interface{}{"ResourceID": resource1, "Name": "view"})
+	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource1, "Name": "create"})
+	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource1, "Name": "view"})
 
-	CreateRole(flusher, map[string]interface{}{})
-	CreateRole(flusher, map[string]interface{}{"Name": "super-admin"})
-	CreateRole(flusher, map[string]interface{}{"Name": "super-mega-admin"})
+	CreateRole(ormService, map[string]interface{}{})
+	CreateRole(ormService, map[string]interface{}{"Name": "super-admin"})
+	CreateRole(ormService, map[string]interface{}{"Name": "super-mega-admin"})
 
-	flusher.Flush()
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
 	got := &acl.RolesResponseDTO{}
 
@@ -127,7 +129,7 @@ func TestListRolesAction(t *testing.T) {
 		PageSize: pointer.Int(2),
 	}
 
-	err := SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/roles/", request, false, got)
+	err = SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/roles/", request, false, got)
 	assert.Nil(t, err)
 
 	want := &acl.RolesResponseDTO{
@@ -181,25 +183,24 @@ func TestGetRoleAction(t *testing.T) {
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
 	ormService := service.DI().Orm().Clone()
-	flusher := ormService.NewFlusher()
 
-	role := CreateRole(flusher, map[string]interface{}{})
+	role := CreateRole(ormService, map[string]interface{}{})
+	resource := CreateResource(ormService, map[string]interface{}{})
 
-	resource := CreateResource(flusher, map[string]interface{}{})
+	permission1 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "create"})
+	permission2 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "view"})
 
-	permission1 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "create"})
-	permission2 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "view"})
-
-	CreatePrivilege(flusher, map[string]interface{}{"RoleID": role, "ResourceID": resource, "PermissionIDs": []*entity.PermissionEntity{
+	CreatePrivilege(ormService, map[string]interface{}{"RoleID": role, "ResourceID": resource, "PermissionIDs": []*entity.PermissionEntity{
 		permission1,
 		permission2,
 	}})
 
-	flusher.Flush()
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
 	got := &acl.RoleResponseDTO{}
 
-	err := SendHTTPRequest(ctx, http.MethodGet, "/acl/role/1/", false, got)
+	err = SendHTTPRequest(ctx, http.MethodGet, "/acl/role/1/", false, got)
 	assert.Nil(t, err)
 
 	want := &acl.RoleResponseDTO{
@@ -241,14 +242,14 @@ func TestCreateRoleAction(t *testing.T) {
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
 	ormService := service.DI().Orm().Clone()
-	flusher := ormService.NewFlusher()
 
-	resource := CreateResource(flusher, map[string]interface{}{})
+	resource := CreateResource(ormService, map[string]interface{}{})
 
-	permission1 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "create"})
-	permission2 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "view"})
+	permission1 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "create"})
+	permission2 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "view"})
 
-	flusher.Flush()
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
 	request := &acl.CreateOrUpdateRoleRequestDTO{
 		Name: "admin",
@@ -260,14 +261,14 @@ func TestCreateRoleAction(t *testing.T) {
 		},
 	}
 
-	err := SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/role/", request, false, nil)
+	err = SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/role/", request, false, nil)
 	assert.Nil(t, err)
 
-	privilegeEntity := &entity.PrivilegeEntity{}
-	assert.True(t, ormService.LoadByID(1, privilegeEntity))
+	privilegeEntity, found := fluxaorm.GetByID[entity.PrivilegeEntity](ormService, 1)
+	assert.True(t, found)
 
-	assert.Equal(t, privilegeEntity.RoleID.ID, uint64(1))
-	assert.Equal(t, privilegeEntity.ResourceID.ID, uint64(1))
+	assert.Equal(t, privilegeEntity.RoleID.GetEntity(ormService).ID, uint64(1))
+	assert.Equal(t, privilegeEntity.ResourceID.GetEntity(ormService).ID, uint64(1))
 	assert.Equal(t, privilegeEntity.PermissionIDs[0].ID, uint64(1))
 	assert.Equal(t, privilegeEntity.PermissionIDs[1].ID, uint64(2))
 
@@ -287,21 +288,20 @@ func TestUpdateRoleAction(t *testing.T) {
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
 	ormService := service.DI().Orm().Clone()
-	flusher := ormService.NewFlusher()
 
-	role := CreateRole(flusher, map[string]interface{}{})
+	role := CreateRole(ormService, map[string]interface{}{})
+	resource := CreateResource(ormService, map[string]interface{}{})
 
-	resource := CreateResource(flusher, map[string]interface{}{})
+	permission1 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "create"})
+	permission2 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "view"})
 
-	permission1 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "create"})
-	permission2 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "view"})
-
-	CreatePrivilege(flusher, map[string]interface{}{"RoleID": role, "ResourceID": resource, "PermissionIDs": []*entity.PermissionEntity{
+	CreatePrivilege(ormService, map[string]interface{}{"RoleID": role, "ResourceID": resource, "PermissionIDs": []*entity.PermissionEntity{
 		permission1,
 		permission2,
 	}})
 
-	flusher.Flush()
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
 	request := &acl.CreateOrUpdateRoleRequestDTO{
 		Name: "super-admin",
@@ -313,17 +313,18 @@ func TestUpdateRoleAction(t *testing.T) {
 		},
 	}
 
-	err := SendHTTPRequestWithBody(ctx, http.MethodPut, "/acl/role/1/", request, false, nil)
+	err = SendHTTPRequestWithBody(ctx, http.MethodPut, "/acl/role/1/", request, false, nil)
 	assert.Nil(t, err)
 
-	privilegeEntity := &entity.PrivilegeEntity{}
-	assert.False(t, ormService.LoadByID(1, privilegeEntity))
-	privilegeEntity = &entity.PrivilegeEntity{}
-	assert.True(t, ormService.LoadByID(2, privilegeEntity, "RoleID"))
+	_, found := fluxaorm.GetByID[entity.PrivilegeEntity](ormService, 1)
+	assert.False(t, found)
 
-	assert.Equal(t, privilegeEntity.RoleID.ID, uint64(1))
-	assert.Equal(t, privilegeEntity.RoleID.Name, "super-admin")
-	assert.Equal(t, privilegeEntity.ResourceID.ID, uint64(1))
+	privilegeEntity, found := fluxaorm.GetByID[entity.PrivilegeEntity](ormService, 2)
+	assert.True(t, found)
+
+	assert.Equal(t, privilegeEntity.RoleID.GetEntity(ormService).ID, uint64(1))
+	assert.Equal(t, privilegeEntity.RoleID.GetEntity(ormService).Name, "super-admin")
+	assert.Equal(t, privilegeEntity.ResourceID.GetEntity(ormService).ID, uint64(1))
 	assert.Equal(t, privilegeEntity.PermissionIDs[0].ID, permission2.ID)
 	assert.Equal(t, len(privilegeEntity.PermissionIDs), 1)
 
@@ -343,31 +344,30 @@ func TestDeleteRoleAction(t *testing.T) {
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
 	ormService := service.DI().Orm().Clone()
-	flusher := ormService.NewFlusher()
 
-	role := CreateRole(flusher, map[string]interface{}{})
+	role := CreateRole(ormService, map[string]interface{}{})
+	resource := CreateResource(ormService, map[string]interface{}{})
 
-	resource := CreateResource(flusher, map[string]interface{}{})
+	permission1 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "create"})
+	permission2 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "view"})
 
-	permission1 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "create"})
-	permission2 := CreatePermission(flusher, map[string]interface{}{"ResourceID": resource, "Name": "view"})
-
-	CreatePrivilege(flusher, map[string]interface{}{"RoleID": role, "ResourceID": resource, "PermissionIDs": []*entity.PermissionEntity{
+	CreatePrivilege(ormService, map[string]interface{}{"RoleID": role, "ResourceID": resource, "PermissionIDs": []*entity.PermissionEntity{
 		permission1,
 		permission2,
 	}})
 
-	flusher.Flush()
-
-	err := SendHTTPRequest(ctx, http.MethodDelete, "/acl/role/1/", false, nil)
+	err := ormService.Flush()
 	assert.Nil(t, err)
 
-	roleEntity := &entity.RoleEntity{}
-	assert.True(t, ormService.LoadByID(1, roleEntity))
+	err = SendHTTPRequest(ctx, http.MethodDelete, "/acl/role/1/", false, nil)
+	assert.Nil(t, err)
+
+	roleEntity, found := fluxaorm.GetByID[entity.RoleEntity](ormService, 1)
+	assert.True(t, found)
 	assert.Equal(t, roleEntity.FakeDelete, true)
 
-	privilegeEntity := &entity.PrivilegeEntity{}
-	assert.True(t, ormService.LoadByID(1, privilegeEntity))
+	privilegeEntity, found := fluxaorm.GetByID[entity.PrivilegeEntity](ormService, 1)
+	assert.True(t, found)
 	assert.Equal(t, privilegeEntity.FakeDelete, true)
 
 	fakeClock.AssertExpectations(t)
@@ -406,8 +406,8 @@ func TestPostAssignRoleToUserAction(t *testing.T) {
 	userEntity, found := fluxaorm.GetByID[entityExample.AdminUserEntity](ormService, 1)
 	assert.True(t, found)
 
-	assert.Equal(t, userEntity.RoleID.ID, role2.ID)
-	assert.Equal(t, userEntity.RoleID.Name, role2.Name)
+	assert.Equal(t, userEntity.RoleID.GetEntity(ormService).ID, role2.ID)
+	assert.Equal(t, userEntity.RoleID.GetEntity(ormService).Name, role2.Name)
 
 	fakeClock.AssertExpectations(t)
 }
