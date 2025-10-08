@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/coretrix/hitrix/service"
 	"github.com/latolukasz/fluxaorm"
 	tusd "github.com/tus/tusd/pkg/handler"
 )
@@ -13,17 +14,20 @@ type RedisLocker struct {
 }
 
 func (locker *RedisLocker) NewLock(id string) (tusd.Lock, error) {
-	return &redisLock{id: id, redis: locker.ormService.GetRedis()}, nil
+	return &redisLock{id: id, ormService: locker.ormService}, nil
 }
 
 type redisLock struct {
-	id        string
-	redis     *beeorm.RedisCache
-	redisLock *beeorm.Lock
+	id         string
+	ormService fluxaorm.Context
+	redisLock  *fluxaorm.Lock
 }
 
 func (lock *redisLock) Lock() error {
-	redisLock, obtained := lock.redis.GetLocker().Obtain("tusd:upload:lock:"+lock.id, time.Hour*24, time.Second*2)
+	redisLock, obtained := lock.ormService.Engine().Redis(service.DI().App().RedisPools.Cache).GetLocker().Obtain(
+		lock.ormService,
+		"tusd:upload:lock:"+lock.id, time.Hour*24, time.Second*2,
+	)
 	if !obtained {
 		return errors.New("cannot obtain lock")
 	}
@@ -34,7 +38,7 @@ func (lock *redisLock) Lock() error {
 }
 
 func (lock *redisLock) Unlock() error {
-	lock.redisLock.Release()
+	lock.redisLock.Release(lock.ormService)
 
 	return nil
 }
