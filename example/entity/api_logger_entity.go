@@ -2,8 +2,6 @@ package entity
 
 import (
 	"time"
-
-	"github.com/latolukasz/beeorm"
 )
 
 const (
@@ -35,14 +33,13 @@ var APILogStatusAll = apiLogStatus{
 }
 
 type APILogEntity struct {
-	beeorm.ORM `orm:"table=api_log;redisCache"`
-	ID         uint64
-	Type       string `orm:"enum=entity.APILogTypeAll;required"`
-	Status     string `orm:"enum=entity.APILogStatusAll;required"`
-	Request    interface{}
-	Response   interface{}
-	Message    string
-	CreatedAt  time.Time `orm:"time=true"`
+	ID        uint64 `orm:"table=api_log;redisCache"`
+	Type      string `orm:"enum=entity.APILogTypeAll;required"`
+	Status    string `orm:"enum=entity.APILogStatusAll;required"`
+	Request   interface{}
+	Response  interface{}
+	Message   string
+	CreatedAt time.Time `orm:"time=true"`
 }
 
 func (e *APILogEntity) SetID(value uint64) {

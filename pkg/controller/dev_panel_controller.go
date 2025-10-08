@@ -8,8 +8,10 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
-	"github.com/latolukasz/beeorm/tools"
+	beeorm "github.com/latolukasz/fluxaorm"
+
+	//"github.com/latolukasz/fluxaorm"
+	//"github.com/latolukasz/fluxaorm/tools"
 
 	"github.com/coretrix/hitrix/pkg/binding"
 	"github.com/coretrix/hitrix/pkg/dto/indexes"
@@ -60,7 +62,7 @@ func (controller *DevPanelController) GetSettingsAction(c *gin.Context) {
 func (controller *DevPanelController) CreateDevPanelUserAction(c *gin.Context) {
 	passwordService := service.DI().Password()
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	form := &accountModel.LoginDevForm{}
 	if err := binding.ShouldBindQuery(c, form); err != nil {
@@ -76,14 +78,12 @@ func (controller *DevPanelController) CreateDevPanelUserAction(c *gin.Context) {
 		return
 	}
 
-	adminEntity := service.DI().App().DevPanel.UserEntity
-
 	passwordHash, err := passwordService.HashPassword(form.Password)
 	if err != nil {
 		response.ErrorResponseGlobal(c, err, nil)
 	}
 
-	adminTableSchema := ormService.GetRegistry().GetTableSchemaForEntity(adminEntity)
+	adminTableSchema := ormService.Engine().Registry().EntitySchema(service.DI().App().DevPanel.UserEntity)
 	response.SuccessResponse(
 		c,
 		fmt.Sprintf(`INSERT INTO %s (Email, Password) VALUES('%s', '%s')`, adminTableSchema.GetTableName(), form.Username, passwordHash))
@@ -114,7 +114,7 @@ func (controller *DevPanelController) PostLoginDevPanelAction(c *gin.Context) {
 }
 
 func (controller *DevPanelController) PostGenerateTokenAction(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	devPanelUserEntity := c.MustGet(account.LoggedDevPanelUserEntity).(app.IDevPanelUserEntity)
 
@@ -132,51 +132,47 @@ func (controller *DevPanelController) PostGenerateTokenAction(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetClearCacheAction(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	redisService := ormService.GetRedis()
-
-	redisService.FlushDB()
+	ormService.Engine().Redis(service.DI().App().RedisPools.Stream).FlushDB(ormService)
 
 	c.JSON(200, gin.H{})
 }
 
 func (controller *DevPanelController) GetClearRedisStreamsAction(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
-
 	appService := service.DI().App()
 	if appService.DevPanel == nil || appService.RedisPools.Stream == "" {
 		panic("stream pool is not defined")
 	}
 
-	redisStreamsService := ormService.GetRedis(appService.RedisPools.Stream)
-	redisStreamsService.FlushDB()
+	ormService := service.DI().OrmForContext(c.Request.Context())
+	ormService.Engine().Redis(appService.RedisPools.Stream).FlushDB(ormService)
 
 	c.JSON(200, gin.H{})
 }
 
 func (controller *DevPanelController) DeleteRedisStreamAction(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	appService := service.DI().App()
 	if appService.DevPanel == nil || appService.RedisPools.Stream == "" {
 		panic("stream pool is not defined")
 	}
 
-	redisStreamService := ormService.GetRedis(appService.RedisPools.Stream)
+	redisStreamService := ormService.Engine().Redis(appService.RedisPools.Stream)
 
 	name := c.Param("name")
 	if name == "" {
 		panic("provide stream name")
 	}
 
-	redisStreamService.XTrim(name, 0)
+	redisStreamService.XTrim(ormService, name, 0)
 
 	c.JSON(200, gin.H{})
 }
 
 func (controller *DevPanelController) GetAlters(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	alters := ormService.GetAlters()
 	result := make([]string, len(alters))
@@ -199,7 +195,7 @@ func (controller *DevPanelController) GetAlters(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetRedisStreams(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	stats := tools.GetRedisStreamsStatistics(ormService)
 	sort.Slice(stats, func(i, j int) bool {
@@ -209,7 +205,7 @@ func (controller *DevPanelController) GetRedisStreams(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetRedisStatistics(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	dragonflyDBPools := map[string]struct{}{}
 	dragonflyDBPoolsConfig, has := service.DI().Config().Strings("dragonflydb_pools")
@@ -228,13 +224,13 @@ func (controller *DevPanelController) GetRedisStatistics(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetRedisSearchStatistics(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	response.SuccessResponse(c, tools.GetRedisSearchStatistics(ormService))
 }
 
 func (controller *DevPanelController) GetRedisSearchAlters(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	altersSearch := ormService.GetRedisSearchIndexAlters()
 	result := make([]map[string]string, len(altersSearch))
@@ -255,7 +251,7 @@ func (controller *DevPanelController) GetRedisSearchAlters(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetRedisSearchIndexes(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	appService := service.DI().App()
 	if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
@@ -265,7 +261,7 @@ func (controller *DevPanelController) GetRedisSearchIndexes(c *gin.Context) {
 	indices := map[string][]string{}
 
 	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.GetRedisSearch(searchPool).ListIndices()
+		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
 		sort.Strings(poolIndices)
 
 		indices[searchPool] = poolIndices
@@ -275,7 +271,7 @@ func (controller *DevPanelController) GetRedisSearchIndexes(c *gin.Context) {
 
 	for searchPool, poolIndices := range indices {
 		for _, indexName := range poolIndices {
-			info := ormService.GetRedisSearch(searchPool).Info(indexName)
+			info := ormService.Engine().Redis(searchPool).Info(ormService, indexName)
 
 			indexList = append(
 				indexList,
@@ -295,7 +291,7 @@ func (controller *DevPanelController) GetRedisSearchIndexes(c *gin.Context) {
 }
 
 func (controller *DevPanelController) PostRedisSearchForceReindex(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	indexName := c.Param("index")
 	if indexName == "" {
@@ -310,10 +306,10 @@ func (controller *DevPanelController) PostRedisSearchForceReindex(c *gin.Context
 	}
 
 	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.GetRedisSearch(searchPool).ListIndices()
+		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
 		for _, poolIndexName := range poolIndices {
 			if poolIndexName == indexName {
-				ormService.GetRedisSearch(searchPool).ForceReindex(indexName)
+				ormService.Engine().Redis(searchPool).ForceReindex(indexName)
 
 				break
 			}
@@ -324,7 +320,7 @@ func (controller *DevPanelController) PostRedisSearchForceReindex(c *gin.Context
 }
 
 func (controller *DevPanelController) PostRedisSearchForceReindexAll(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	appService := service.DI().App()
 	if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
@@ -335,7 +331,7 @@ func (controller *DevPanelController) PostRedisSearchForceReindexAll(c *gin.Cont
 	indicesCount := 0
 
 	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.GetRedisSearch(searchPool).ListIndices()
+		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
 		sort.Strings(poolIndices)
 
 		indices[searchPool] = poolIndices
@@ -375,7 +371,7 @@ func (controller *DevPanelController) PostRedisSearchForceReindexAll(c *gin.Cont
 }
 
 func (controller *DevPanelController) PostRedisSearchIndexInfo(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	indexName := c.Param("index")
 	if indexName == "" {
@@ -406,7 +402,7 @@ func (controller *DevPanelController) PostRedisSearchIndexInfo(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetFeatureFlags(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	var featureFlagEntities []*entity.FeatureFlagEntity
 	ormService.CachedSearch(&featureFlagEntities, "CachedQueryAll", beeorm.NewPager(1, 1000))
@@ -438,7 +434,7 @@ func (controller *DevPanelController) PostEnableFeatureFlag(c *gin.Context) {
 		return
 	}
 
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	query := beeorm.NewRedisSearchQuery()
 	query.FilterString("Name", name)
@@ -466,7 +462,7 @@ func (controller *DevPanelController) PostDisableFeatureFlag(c *gin.Context) {
 		return
 	}
 
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	query := beeorm.NewRedisSearchQuery()
 	query.FilterString("Name", name)

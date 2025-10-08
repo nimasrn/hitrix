@@ -21,11 +21,11 @@ func createContextMyApp(
 		registry.ServiceProviderConfigDirectory("../example/config"),
 		registry.ServiceProviderOrmRegistry(entity.Init),
 		registry.ServiceProviderCrud(nil),
-		registry.ServiceProviderOrmEngine(),
+		registry.ServiceProviderOrm(),
 	}
 
 	defaultRequestServices := []*service.DefinitionRequest{
-		registry.ServiceProviderOrmEngineForContext(),
+		registry.ServiceProviderOrmForContext(),
 	}
 
 	return test.CreateAPIContext(t,

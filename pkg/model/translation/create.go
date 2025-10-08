@@ -10,7 +10,7 @@ import (
 )
 
 func Create(ctx context.Context, request *translation.RequestCreateTranslation) (*translation.ResponseTranslation, error) {
-	ormService := service.DI().OrmEngineForContext(ctx)
+	ormService := service.DI().OrmForContext(ctx)
 
 	newTranslationEntity := &entity.TranslationTextEntity{
 		Lang:   request.Lang.String(),

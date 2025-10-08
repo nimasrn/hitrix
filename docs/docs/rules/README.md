@@ -121,7 +121,7 @@ package controller
 type DevPanelController struct{
 }
 func (controller *DevPanelController) GetMarkAsDirtyPriceChanged(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	producer := producers.PriceChangedDirtyAllProducer{}
 
@@ -142,7 +142,7 @@ package model
 type PriceChangedDirtyAllProducer struct {
 }
 
-func (p *PriceChangedDirtyAllProducer) Produce(ormService *beeorm.Engine) error {
+func (p *PriceChangedDirtyAllProducer) Produce(ormService fluxaorm.Context) error {
 	variantEntity := entity.VariantEntity{}
 	where := beeorm.NewWhere("1 ORDER BY ID ASC")
 	pager := &beeorm.Pager{CurrentPage: 1, PageSize: 1000}

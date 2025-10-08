@@ -4,14 +4,6 @@ import (
 	"fmt"
 )
 
-//func RandStringBytes(n int, letters string) string {
-//	b := make([]byte, n)
-//	for i := range b {
-//		b[i] = letters[rand.Intn(len(letters))]
-//	}
-//	return string(b)
-//}
-
 func BoolToInt(b bool) int8 {
 	if b {
 		return 1

@@ -1,54 +1,126 @@
 package registry
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	"database/sql"
+	"errors"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/fatih/color"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/service"
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/config"
 )
 
-func ServiceProviderOrmEngine() *service.DefinitionGlobal {
-	return &service.DefinitionGlobal{
-		Name: "orm_engine_global",
+type ORMRegistryInitFunc func(registry fluxaorm.Registry)
 
+var sequence int
+
+func ServiceProviderOrmRegistry(init ORMRegistryInitFunc) *service.DefinitionGlobal {
+	return &service.DefinitionGlobal{
+		Name: service.ORMEngineService,
 		Build: func(ctn di.Container) (interface{}, error) {
-			ormConfigService, err := ctn.SafeGet(service.ORMConfigService)
+			appService := ctn.Get(service.AppService).(*app.App)
+			configService := ctn.Get(service.ConfigService).(config.IConfig)
+
+			registry := fluxaorm.NewRegistry()
+
+			configuration, ok := configService.Get("orm")
+			if !ok {
+				return nil, errors.New("no orm config")
+			}
+
+			yamlConfig := map[string]interface{}{}
+			for k, v := range configuration.(map[interface{}]interface{}) {
+				yamlConfig[fmt.Sprint(k)] = v
+			}
+
+			if appService.IsInTestMode() {
+				overwriteORMConfig(appService, configService, yamlConfig)
+			}
+
+			err := registry.InitByYaml(yamlConfig)
 			if err != nil {
 				return nil, err
 			}
 
-			ormEngine := ormConfigService.(beeorm.ValidatedRegistry).CreateEngine()
+			init(registry)
 
-			configService := ctn.Get(service.ConfigService).(config.IConfig)
-
-			ormDebug, ok := configService.Bool("orm_debug")
-			if ok && ormDebug {
-				ormEngine.EnableQueryDebug()
+			engine, err := registry.Validate()
+			if err != nil {
+				return nil, err
 			}
 
-			return ormEngine, nil
+			if appService.IsInTestMode() {
+				engine.Registry().DisableLogTables()
+			}
+
+			return engine, nil
 		},
 	}
 }
 
-func ServiceProviderOrmEngineForContext() *service.DefinitionRequest {
-	return &service.DefinitionRequest{
-		Name: "orm_engine_request",
-		Build: func(c *gin.Context) (interface{}, error) {
-			ormConfigService := service.DI().OrmConfig()
+func overwriteORMConfig(appService *app.App, configService config.IConfig, yamlConfig map[string]interface{}) {
+	mysqlConnection := strings.Split(configService.MustString("orm.default.mysql"), "/")
 
-			ormEngine := ormConfigService.CreateEngine()
+	db, err := sql.Open("mysql", mysqlConnection[0]+"/?multiStatements=true")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
-			configService := service.DI().Config()
+	newDBName := "t_" + appService.ParallelTestID
+	color.Blue("DB name: %s", newDBName)
 
-			ormDebug, ok := configService.Bool("orm_debug")
-			if ok && ormDebug {
-				ormEngine.EnableQueryDebug()
+	_, err = db.Exec("CREATE DATABASE IF NOT EXISTS `" + newDBName + "`")
+
+	if err != nil {
+		panic(err)
+	}
+
+	yamlConfig["default"].(map[interface{}]interface{})["mysql"] = mysqlConnection[0] + "/" + newDBName
+
+	connectionString, has := configService.String("orm.log_db_pool.mysql")
+	if has {
+		mysqlLogConnection := strings.Split(connectionString, "/")
+
+		dbLog, err := sql.Open("mysql", mysqlLogConnection[0]+"/?multiStatements=true")
+		if err != nil {
+			panic(err)
+		}
+
+		defer dbLog.Close()
+
+		newDBLogName := newDBName + "_log"
+
+		_, err = db.Exec("CREATE DATABASE IF NOT EXISTS `" + newDBLogName + "`")
+
+		if err != nil {
+			panic(err)
+		}
+
+		yamlConfig["log_db_pool"].(map[interface{}]interface{})["mysql"] = mysqlLogConnection[0] + "/" + newDBLogName
+	}
+
+	for _, value := range yamlConfig {
+		if _, ok := value.(map[interface{}]interface{})["sentinel"]; ok {
+			for masterConf := range value.(map[interface{}]interface{})["sentinel"].(map[interface{}]interface{}) {
+				settings := strings.Split(fmt.Sprint(masterConf), ":")
+
+				_, has = os.LookupEnv("REDIS_TEST")
+				if !has {
+					panic("Please set `REDIS_TEST` ENV variable")
+				}
+
+				sequence++
+				//host:dbIndex:namespace
+				value.(map[interface{}]interface{})["redis"] = os.Getenv("REDIS_TEST") + ":" + settings[1] + ":" + newDBName + fmt.Sprint(sequence)
+				delete(value.(map[interface{}]interface{}), "sentinel")
 			}
-
-			return ormEngine, nil
-		},
+		}
 	}
 }

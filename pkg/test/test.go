@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix"
 	"github.com/coretrix/hitrix/service"
@@ -53,7 +53,7 @@ func CreateContext(
 	).Build()
 	defer deferFunc()
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 
 	executeAlters(ormService)
 
@@ -94,7 +94,7 @@ func CreateAPIContext(
 
 	ginTestInstance := hitrix.InitGin(ginInitHandler)
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 
 	executeAlters(ormService)
 
@@ -104,7 +104,7 @@ func CreateAPIContext(
 	return &Environment{t: t, Hitrix: testSpringInstance, GinEngine: ginTestInstance, Cxt: c, ResponseRecorder: resp}
 }
 
-func executeAlters(ormService *beeorm.Engine) {
+func executeAlters(ormService fluxaorm.Context) {
 	if dbAlters == "" {
 		dropTables(ormService.GetMysql())
 

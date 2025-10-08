@@ -30,7 +30,7 @@ func main() {
 		registry.ServiceProviderErrorLogger(),
 		registry.ServiceProviderConfigDirectory("config"),
 		registry.ServiceProviderOrmRegistry(entity.Init),
-		registry.ServiceProviderOrmEngine(),
+		registry.ServiceProviderOrm(),
 		registry.ServiceProviderClock(),
 		registry.ServiceProviderOSS(oss.NewAmazonOSS, exampleOSS.Namespaces),
 		registry.ServiceProviderJWT(),
@@ -38,7 +38,7 @@ func main() {
 		registry.ServiceProviderSocketRegistry(eventHandlersMap),
 		registry.ServiceProviderOTP(nil),
 	).RegisterDIRequestService(
-		registry.ServiceProviderOrmEngineForContext(),
+		registry.ServiceProviderOrmForContext(),
 	).RegisterRedisPools(
 		&app.RedisPools{
 			Persistent: "default",

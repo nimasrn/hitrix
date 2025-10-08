@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/helper"
@@ -65,7 +65,7 @@ type ExportConfig struct {
 	Permissions      []string
 }
 
-type ExportHandler func(entity.TranslationTextLang, *beeorm.Engine, *ListRequest, uint64, map[string]string) ([]string, [][]interface{}, error)
+type ExportHandler func(entity.TranslationTextLang, fluxaorm.Context, *ListRequest, uint64, map[string]string) ([]string, [][]interface{}, error)
 
 type StringKeyStringValue struct {
 	Key   string
@@ -107,7 +107,7 @@ type Crud struct {
 	cols               map[string]Column
 }
 
-func (c *Crud) TranslateColumns(ormService *beeorm.Engine, lang entity.TranslationTextLang, cols []*Column) []*Column {
+func (c *Crud) TranslateColumns(ormService fluxaorm.Context, lang entity.TranslationTextLang, cols []*Column) []*Column {
 	for _, col := range cols {
 		col.Label = c.TranslationService.GetText(ormService, lang, entity.TranslationTextKey(col.Label))
 
@@ -605,8 +605,8 @@ func (c *Crud) GenerateListRedisSearchQuery(params SearchParams) *beeorm.RedisSe
 	return query
 }
 
-func (c *Crud) GenerateListMysqlQuery(params SearchParams) *beeorm.Where {
-	where := beeorm.NewWhere("1")
+func (c *Crud) GenerateListMysqlQuery(params SearchParams) *fluxaorm.BaseWhere {
+	where := fluxaorm.NewWhere("1")
 	for field, value := range params.NumberFilters {
 		where.Append("AND `"+field+"` = ?", value)
 	}

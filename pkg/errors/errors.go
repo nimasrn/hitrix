@@ -4,7 +4,7 @@ import (
 	goErrors "errors"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 )
 
 type FieldErrors map[string]string

@@ -17,7 +17,7 @@ import (
 )
 
 func CreateFile(ctx context.Context, newFile *file.RequestDTOUploadImage) (*file.File, error) {
-	ormService := service.DI().OrmEngineForContext(ctx)
+	ormService := service.DI().OrmForContext(ctx)
 
 	now := service.DI().Clock().Now()
 

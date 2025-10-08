@@ -11,7 +11,7 @@ import (
 )
 
 func Update(ctx context.Context, request *translation.RequestUpdateTranslation, id uint64) (*translation.ResponseTranslation, error) {
-	ormService := service.DI().OrmEngineForContext(ctx)
+	ormService := service.DI().OrmForContext(ctx)
 
 	translationTextEntity := &entity.TranslationTextEntity{}
 	found := ormService.LoadByID(id, translationTextEntity)

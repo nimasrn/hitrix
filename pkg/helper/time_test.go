@@ -67,7 +67,7 @@ func TestTruncateTime(t *testing.T) {
 func TestGetWeekDay(t *testing.T) {
 	location := time.Now().Location()
 
-	//Use 2020-06-01 as base because Monday is first day of the month
+	//Using 2020-06-01 as base because Monday is first day of the month
 	for day := 1; day <= 7; day++ {
 		weekDay := helper.GetWeekDay(time.Date(2020, 6, day, 0, 0, 0, 0, location))
 		assert.Equal(t, uint8(day), weekDay)

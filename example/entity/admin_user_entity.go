@@ -1,17 +1,15 @@
 package entity
 
 import (
-	"github.com/latolukasz/beeorm"
-
 	hitrixEntity "github.com/coretrix/hitrix/pkg/entity"
+	"github.com/latolukasz/fluxaorm"
 )
 
 type AdminUserEntity struct {
-	beeorm.ORM `orm:"table=admin_users;log=log_db_pool;redisCache;redisSearch=search_pool"`
-	ID         uint64
-	RoleID     *hitrixEntity.RoleEntity `orm:"required"`
+	ID     uint64                                      `orm:"table=admin_users;log=log_db_pool;redisCache;redisSearch=search_pool"`
+	RoleID fluxaorm.Reference[hitrixEntity.RoleEntity] `orm:"required;cached"`
 }
 
 func (u *AdminUserEntity) SetRole(roleEntity *hitrixEntity.RoleEntity) {
-	u.RoleID = roleEntity
+	u.RoleID = fluxaorm.Reference[hitrixEntity.RoleEntity](roleEntity.ID)
 }

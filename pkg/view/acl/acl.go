@@ -1,12 +1,12 @@
 package acl
 
 import (
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 )
 
-func ACL(ormService *beeorm.Engine, roleEntity *entity.RoleEntity, resource string, permissions ...string) bool {
+func ACL(ormService fluxaorm.Context, roleEntity *entity.RoleEntity, resource string, permissions ...string) bool {
 	resourceEntity := &entity.ResourceEntity{}
 	if !ormService.CachedSearchOne(resourceEntity, "CachedQueryName", resource) {
 		return false

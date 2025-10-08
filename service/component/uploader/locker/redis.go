@@ -4,12 +4,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	tusd "github.com/tus/tusd/pkg/handler"
 )
 
 type RedisLocker struct {
-	ormService *beeorm.Engine
+	ormService fluxaorm.Context
 }
 
 func (locker *RedisLocker) NewLock(id string) (tusd.Lock, error) {

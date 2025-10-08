@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service"
@@ -16,7 +16,7 @@ type DBSeedScript struct {
 	SeedsPerProject map[string][]Seed
 }
 
-func (script *DBSeedScript) Run(_ context.Context, _ app.IExit, ormService *beeorm.Engine) {
+func (script *DBSeedScript) Run(_ context.Context, _ app.IExit, ormService fluxaorm.Context) {
 	appService := service.DI().App()
 	Seeder(script.SeedsPerProject, ormService, appService)
 }
@@ -34,12 +34,12 @@ func (script *DBSeedScript) Description() string {
 }
 
 type Seed interface {
-	Execute(*beeorm.Engine)
+	Execute(fluxaorm.Context)
 	Environments() []string
 	Name() string
 }
 
-func Seeder(seedsPerProject map[string][]Seed, ormService *beeorm.Engine, appService *app.App) {
+func Seeder(seedsPerProject map[string][]Seed, ormService fluxaorm.Context, appService *app.App) {
 	for project, seeds := range seedsPerProject {
 		if project != os.Getenv("PROJECT_NAME") {
 			continue

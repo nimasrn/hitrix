@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/helper"
@@ -14,9 +14,9 @@ import (
 )
 
 type ITranslationService interface {
-	GetText(ormService *beeorm.Engine, lang entity.TranslationTextLang, key entity.TranslationTextKey) string
+	GetText(ormService fluxaorm.Context, lang entity.TranslationTextLang, key entity.TranslationTextKey) string
 	GetTextWithVars(
-		ormService *beeorm.Engine,
+		ormService fluxaorm.Context,
 		lang entity.TranslationTextLang,
 		key entity.TranslationTextKey,
 		variables map[string]interface{},
@@ -31,7 +31,7 @@ func NewTranslationService(errorLoggerService errorlogger.ErrorLogger) ITranslat
 	return &translationService{errorLoggerService}
 }
 
-func (u *translationService) GetText(ormService *beeorm.Engine, lang entity.TranslationTextLang, key entity.TranslationTextKey) string {
+func (u *translationService) GetText(ormService fluxaorm.Context, lang entity.TranslationTextLang, key entity.TranslationTextKey) string {
 	translationTextEntity := &entity.TranslationTextEntity{}
 
 	found := ormService.CachedSearchOne(
@@ -71,7 +71,7 @@ func (u *translationService) GetText(ormService *beeorm.Engine, lang entity.Tran
 }
 
 func (u *translationService) GetTextWithVars(
-	ormService *beeorm.Engine,
+	ormService fluxaorm.Context,
 	lang entity.TranslationTextLang,
 	key entity.TranslationTextKey,
 	variables map[string]interface{},

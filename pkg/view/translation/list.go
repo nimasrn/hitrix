@@ -3,7 +3,7 @@ package translation
 import (
 	"context"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	listDto "github.com/coretrix/hitrix/pkg/dto/list"
 	"github.com/coretrix/hitrix/pkg/dto/translation"
@@ -77,20 +77,18 @@ func List(ctx context.Context, userListRequest listDto.RequestDTOList) (*transla
 	crudService := service.DI().Crud()
 
 	searchParams := crudService.ExtractListParams(cols, request)
-	query := crudService.GenerateListMysqlQuery(searchParams)
+	where := crudService.GenerateListMysqlQuery(searchParams)
 
 	if len(searchParams.Sort) == 0 {
-		query.Append("ORDER BY ID DESC")
+		where.Append("ORDER BY ID DESC")
 	}
 
-	ormService := service.DI().OrmEngineForContext(ctx)
-	var translationTextEntities []*entity.TranslationTextEntity
+	ormService := service.DI().OrmForContext(ctx)
 
-	total := ormService.SearchWithCount(query, beeorm.NewPager(searchParams.Page, searchParams.PageSize), &translationTextEntities)
+	entityIterator, total := fluxaorm.SearchWithCount[entity.TranslationTextEntity](ormService, where, fluxaorm.NewPager(searchParams.Page, searchParams.PageSize))
+	rows := make([]*translation.ListRow, entityIterator.Len())
 
-	rows := make([]*translation.ListRow, len(translationTextEntities))
-
-	for i, translationTextEntity := range translationTextEntities {
+	for i, translationTextEntity := range entityIterator.All() {
 		rows[i] = &translation.ListRow{
 			ID:     translationTextEntity.ID,
 			Status: translationTextEntity.Status,

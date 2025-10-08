@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/dto/acl"
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -18,7 +18,7 @@ type UserRoleSetter interface {
 }
 
 func CreateRole(c *gin.Context, request *acl.CreateOrUpdateRoleRequestDTO) error {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	resourcesMapping, permissionsMapping, err := validateResourcesAndPermissions(ormService, request.Resources)
 	if err != nil {
@@ -51,7 +51,7 @@ func CreateRole(c *gin.Context, request *acl.CreateOrUpdateRoleRequestDTO) error
 }
 
 func UpdateRole(c *gin.Context, roleID *acl.RoleRequestDTO, request *acl.CreateOrUpdateRoleRequestDTO) error {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	roleEntity := &entity.RoleEntity{}
 	if !ormService.LoadByID(roleID.ID, roleEntity) {
@@ -103,7 +103,7 @@ func UpdateRole(c *gin.Context, roleID *acl.RoleRequestDTO, request *acl.CreateO
 }
 
 func DeleteRole(c *gin.Context, roleID *acl.RoleRequestDTO) error {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	roleEntity := &entity.RoleEntity{}
 	if !ormService.LoadByID(roleID.ID, roleEntity) {
@@ -136,7 +136,7 @@ func DeleteRole(c *gin.Context, roleID *acl.RoleRequestDTO) error {
 }
 
 func PostAssignRoleToUserAction(c *gin.Context, getUserFunc func() beeorm.Entity, request *acl.AssignRoleToUserRequestDTO) error {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	roleEntity := &entity.RoleEntity{}
 	if !ormService.LoadByID(request.RoleID, roleEntity) {
@@ -166,7 +166,7 @@ type resourceMapping map[uint64]*entity.ResourceEntity
 
 type permissionMapping map[uint64]*entity.PermissionEntity
 
-func validateResourcesAndPermissions(ormService *beeorm.Engine, resources []*acl.RoleResourceRequestDTO) (resourceMapping, permissionMapping, error) {
+func validateResourcesAndPermissions(ormService fluxaorm.Context, resources []*acl.RoleResourceRequestDTO) (resourceMapping, permissionMapping, error) {
 	resourceIDs := make([]uint64, len(resources))
 	permissionIDs := make([]uint64, 0)
 
@@ -219,7 +219,7 @@ func validateResourcesAndPermissions(ormService *beeorm.Engine, resources []*acl
 }
 
 func createPrivileges(
-	flusher beeorm.Flusher,
+	ormService fluxaorm.Context,
 	roleEntity *entity.RoleEntity,
 	resources []*acl.RoleResourceRequestDTO,
 	resourcesMapping resourceMapping,

@@ -3,7 +3,7 @@ package registry
 import (
 	"errors"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/service"
@@ -15,10 +15,8 @@ func ServiceProviderTranslation() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.TranslationService,
 		Build: func(ctn di.Container) (interface{}, error) {
-			ormConfig := ctn.Get(service.ORMConfigService).(beeorm.ValidatedRegistry)
-			entities := ormConfig.GetEntities()
-
-			if _, ok := entities["entity.TranslationTextEntity"]; !ok {
+			ormEngine := ctn.Get(service.ORMEngineService).(fluxaorm.Engine)
+			if ormEngine.Registry().EntitySchema("entity.TranslationTextEntity") == nil {
 				return nil, errors.New("you should register TranslationTextEntity")
 			}
 

@@ -2,13 +2,10 @@ package entity
 
 import (
 	"time"
-
-	"github.com/latolukasz/beeorm"
 )
 
 type RequestLoggerEntity struct {
-	beeorm.ORM      `orm:"table=request_logger"`
-	ID              uint64
+	ID              uint64 `orm:"table=request_logger"`
 	URL             string `orm:"length=500;index=URL"`
 	UserID          uint64 `orm:"index=UserID"`
 	AppName         string `orm:"required;index=AppName"`

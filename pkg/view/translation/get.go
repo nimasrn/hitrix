@@ -9,15 +9,13 @@ import (
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/errors"
 	"github.com/coretrix/hitrix/service"
+	"github.com/latolukasz/fluxaorm"
 )
 
 func Get(ctx context.Context, id uint64) (*translation.ResponseTranslation, error) {
-	ormService := service.DI().OrmEngineForContext(ctx)
+	ormService := service.DI().OrmForContext(ctx)
 
-	translationEntity := &entity.TranslationTextEntity{}
-
-	found := ormService.LoadByID(id, translationEntity)
-
+	translationEntity, found := fluxaorm.GetByID[entity.TranslationTextEntity](ormService, id)
 	if !found {
 		return nil, errors.HandleCustomErrors(map[string]string{
 			"ID": fmt.Sprintf("%d does not exists", id),

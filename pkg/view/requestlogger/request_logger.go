@@ -3,7 +3,7 @@ package requestlogger
 import (
 	"context"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/xorcare/pointer"
 
 	listDto "github.com/coretrix/hitrix/pkg/dto/list"
@@ -115,24 +115,19 @@ func RequestsLogger(ctx context.Context, userListRequest listDto.RequestDTOList)
 	crudService := service.DI().Crud()
 
 	searchParams := crudService.ExtractListParams(cols, request)
-	query := crudService.GenerateListMysqlQuery(searchParams)
+	where := crudService.GenerateListMysqlQuery(searchParams)
 
 	if len(searchParams.Sort) == 0 {
-		query.Append("ORDER BY ID DESC")
+		where.Append("ORDER BY ID DESC")
 	}
 
-	ormService := service.DI().OrmEngineForContext(ctx)
-	var requestLoggerEntities []*entity.RequestLoggerEntity
+	ormService := service.DI().OrmForContext(ctx)
 
-	total := ormService.SearchWithCount(
-		query,
-		beeorm.NewPager(searchParams.Page, searchParams.PageSize),
-		&requestLoggerEntities,
-	)
+	entityIterator, total := fluxaorm.SearchWithCount[entity.RequestLoggerEntity](ormService, where, fluxaorm.NewPager(searchParams.Page, searchParams.PageSize))
 
-	requestLoggerEntityList := make([]*requestlogger.ResponseDTORequestLogger, len(requestLoggerEntities))
+	requestLoggerEntityList := make([]*requestlogger.ResponseDTORequestLogger, entityIterator.Len())
 
-	for i, requestLoggerEntity := range requestLoggerEntities {
+	for i, requestLoggerEntity := range entityIterator.All() {
 		requestLoggerEntityList[i] = &requestlogger.ResponseDTORequestLogger{
 			ID:              requestLoggerEntity.ID,
 			UserID:          requestLoggerEntity.UserID,

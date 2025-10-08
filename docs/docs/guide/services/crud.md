@@ -183,10 +183,10 @@ type ListRow struct {
 
 func ListRequest(ctx context.Context, request *hitrixCrud.ListRequest) (*city.ResponseDTOList, error) {
 	// You should pass this function to the gin router
-	return list(service.DI().OrmEngineForContext(ctx), request)
+	return list(service.DI().OrmForContext(ctx), request)
 }
 
-func list(ormService *beeorm.Engine, request *hitrixCrud.ListRequest) (*city.ResponseDTOList, error) {
+func list(ormService fluxaorm.Context, request *hitrixCrud.ListRequest) (*city.ResponseDTOList, error) {
 	
 	// this is the function that handles the getting and making the payload fot the crud that is going to be used
 	// for both list (endpoint) and exporting
@@ -217,7 +217,7 @@ func list(ormService *beeorm.Engine, request *hitrixCrud.ListRequest) (*city.Res
 **2 - Creating a new handler for exporting the data obtained from "list" function**
 
 ```go
-func ListExport(ormService *beeorm.Engine, request *hitrixCrud.ListRequest, _ uint64, _ map[string]string) (error, []string, [][]interface{}) {
+func ListExport(ormService fluxaorm.Context, request *hitrixCrud.ListRequest, _ uint64, _ map[string]string) (error, []string, [][]interface{}) {
 	
 	// This function handles the data for exporting
 	

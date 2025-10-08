@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service/component/clock"
@@ -72,11 +72,11 @@ type IProvider interface {
 	GetObjectSignedURL(namespace Namespace, object *entity.FileObject, expires time.Time) (string, error)
 	GetObjectBase64Content(namespace Namespace, object *entity.FileObject) (string, error)
 	GetNamespaceBucketConfig(namespace Namespace) (*BucketConfig, error)
-	UploadObjectFromFile(ormService *beeorm.Engine, namespace Namespace, localFile string) (entity.FileObject, error)
-	UploadObjectFromBase64(ormService *beeorm.Engine, namespace Namespace, content, extension string) (entity.FileObject, error)
-	UploadObjectFromByte(ormService *beeorm.Engine, namespace Namespace, content []byte, extension string) (entity.FileObject, error)
-	UploadImageFromFile(ormService *beeorm.Engine, namespace Namespace, localFile string) (entity.FileObject, error)
-	UploadImageFromBase64(ormService *beeorm.Engine, namespace Namespace, image, extension string) (entity.FileObject, error)
+	UploadObjectFromFile(ormService fluxaorm.Context, namespace Namespace, localFile string) (entity.FileObject, error)
+	UploadObjectFromBase64(ormService fluxaorm.Context, namespace Namespace, content, extension string) (entity.FileObject, error)
+	UploadObjectFromByte(ormService fluxaorm.Context, namespace Namespace, content []byte, extension string) (entity.FileObject, error)
+	UploadImageFromFile(ormService fluxaorm.Context, namespace Namespace, localFile string) (entity.FileObject, error)
+	UploadImageFromBase64(ormService fluxaorm.Context, namespace Namespace, image, extension string) (entity.FileObject, error)
 	DeleteObject(namespace Namespace, object *entity.FileObject) error
 }
 
@@ -174,7 +174,7 @@ func getObjectCDNURL(bucketConfig *BucketConfig, storageKey string) string {
 	return replacer.Replace(bucketConfig.CDNURL)
 }
 
-func getStorageCounter(ormService *beeorm.Engine, bucketConfig *BucketConfig) uint64 {
+func getStorageCounter(ormService fluxaorm.Context, bucketConfig *BucketConfig) uint64 {
 	bucketID := bucketConfig.StorageCounterDatabaseID
 
 	ossBucketCounterEntity := &entity.OSSBucketCounterEntity{}

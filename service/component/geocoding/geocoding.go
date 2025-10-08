@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service/component/clock"
@@ -23,8 +23,8 @@ import (
 
 type IGeocoding interface {
 	SnapToRoad(ctx context.Context, dto *maps.SnapToRoadRequest) (*maps.SnapToRoadResponse, error)
-	Geocode(ctx context.Context, ormService *beeorm.Engine, address string, language string) (*Address, error)
-	ReverseGeocode(ctx context.Context, ormService *beeorm.Engine, latLng *LatLng, language string) (*Address, error)
+	Geocode(ctx context.Context, ormService fluxaorm.Context, address string, language string) (*Address, error)
+	ReverseGeocode(ctx context.Context, ormService fluxaorm.Context, latLng *LatLng, language string) (*Address, error)
 	CutCoordinates(float float64, precision int) (float64, error)
 }
 
@@ -71,7 +71,7 @@ func (g *Geocoding) SnapToRoad(ctx context.Context, dto *maps.SnapToRoadRequest)
 	return g.provider.SnapToRoad(ctx, dto)
 }
 
-func (g *Geocoding) Geocode(ctx context.Context, ormService *beeorm.Engine, address string, language string) (*Address, error) {
+func (g *Geocoding) Geocode(ctx context.Context, ormService fluxaorm.Context, address string, language string) (*Address, error) {
 	address = strings.TrimSpace(address)
 
 	if g.useCaching {
@@ -117,7 +117,7 @@ func (g *Geocoding) Geocode(ctx context.Context, ormService *beeorm.Engine, addr
 	return geocodedAddress, nil
 }
 
-func (g *Geocoding) ReverseGeocode(ctx context.Context, ormService *beeorm.Engine, latLng *LatLng, language string) (*Address, error) {
+func (g *Geocoding) ReverseGeocode(ctx context.Context, ormService fluxaorm.Context, latLng *LatLng, language string) (*Address, error) {
 	cacheLat := latLng.Lat
 	cacheLng := latLng.Lng
 

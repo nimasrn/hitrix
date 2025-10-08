@@ -2,6 +2,9 @@ package errorlogger
 
 import (
 	"bytes"
+	"strconv"
+	"strings"
+
 	//nolint //G501: Blocklisted import crypto/md5: weak cryptographic primitive
 	"crypto/md5"
 	"encoding/hex"
@@ -16,7 +19,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	slackgo "github.com/slack-go/slack"
 
 	"github.com/coretrix/hitrix/service/component/app"
@@ -26,6 +29,36 @@ import (
 )
 
 const GroupError = "error"
+const GroupWarning = "warning"
+
+type eventConfig struct {
+	redisKey     string
+	title        string
+	anchor       string
+	slackChannel string
+}
+
+type EventRow struct {
+	ID      string
+	Type    string
+	File    string
+	Line    int
+	AppName string
+	Request string
+	Message string
+	Stack   string
+	Counter int
+	Time    string
+}
+
+type event struct {
+	File    string
+	Line    int
+	AppName string
+	Request []byte
+	Message string
+	Stack   []byte
+}
 
 var (
 	dunno     = []byte("???")
@@ -35,22 +68,19 @@ var (
 )
 
 type ErrorLogger interface {
-	LogError(dataFromRecover interface{})
+	LogError(errData interface{})
 	LogErrorWithRequest(c *gin.Context, errData interface{})
+	LogWarning(errData interface{})
+	LogWarningWithRequest(c *gin.Context, errData interface{})
 	LogPanicWithRequest(c *gin.Context, errData interface{})
-}
-
-type ErrorMessage struct {
-	File    string
-	Line    int
-	AppName string
-	Request []byte
-	Message string
-	Stack   []byte
+	GetErrors() []*EventRow
+	DeleteError(id string)
+	GetWarnings() []*EventRow
+	DeleteWarning(id string)
 }
 
 type RedisErrorLogger struct {
-	redisStorage   *beeorm.RedisCache
+	redisStorage   fluxaorm.RedisCache
 	sentryService  sentry.ISentry
 	slackService   slack.Slack
 	appService     *app.App
@@ -59,13 +89,13 @@ type RedisErrorLogger struct {
 
 func NewRedisErrorLogger(
 	appService *app.App,
-	ormService *beeorm.Engine,
+	ormService fluxaorm.Context,
 	slackService slack.Slack,
 	sentryService sentry.ISentry,
 	requestBodyKey interface{},
 ) ErrorLogger {
 	return &RedisErrorLogger{
-		redisStorage:   ormService.GetRedis(),
+		redisStorage:   ormService.Redis(),
 		slackService:   slackService,
 		appService:     appService,
 		sentryService:  sentryService,
@@ -74,18 +104,46 @@ func NewRedisErrorLogger(
 }
 
 func (e *RedisErrorLogger) LogError(errData interface{}) {
-	e.log(errData, 2, nil)
+	e.log(errData, 2, nil, false)
 }
 
 func (e *RedisErrorLogger) LogErrorWithRequest(c *gin.Context, errData interface{}) {
-	e.log(errData, 2, c)
+	e.log(errData, 2, c, false)
+}
+
+func (e *RedisErrorLogger) LogWarning(errData interface{}) {
+	e.log(errData, 2, nil, false)
+}
+
+func (e *RedisErrorLogger) LogWarningWithRequest(c *gin.Context, errData interface{}) {
+	e.log(errData, 2, c, false)
 }
 
 func (e *RedisErrorLogger) LogPanicWithRequest(c *gin.Context, errData interface{}) {
-	e.log(errData, 4, c)
+	e.log(errData, 4, c, false)
 }
 
-func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Context) {
+func (e *RedisErrorLogger) GetErrors() map[string]*EventRow {
+	return e.get(GroupError)
+}
+
+func (e *RedisErrorLogger) DeleteError(id string) {
+	e.redisStorage.HDel(GroupError, id)
+	e.redisStorage.HDel(GroupError, id+":time")
+	e.redisStorage.HDel(GroupError, id+":counter")
+}
+
+func (e *RedisErrorLogger) GetWarnings() map[string]*EventRow {
+	return e.get(GroupWarning)
+}
+
+func (e *RedisErrorLogger) DeleteWarning(id string) {
+	e.redisStorage.HDel(GroupWarning, id)
+	e.redisStorage.HDel(GroupWarning, id+":time")
+	e.redisStorage.HDel(GroupWarning, id+":counter")
+}
+
+func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Context, warning bool) {
 	var msg string
 
 	err, ok := errData.(error)
@@ -104,7 +162,7 @@ func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Conte
 	//nolint //G401: Use of weak cryptographic primitive
 	errorKeyBinary := md5.Sum([]byte(e.appService.Name + ":" + file + ":" + fmt.Sprint(line)))
 	errorKey := hex.EncodeToString(errorKeyBinary[:])
-	value := &ErrorMessage{
+	value := &event{
 		File:    file,
 		Line:    line,
 		AppName: e.appService.Name,
@@ -134,31 +192,111 @@ func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Conte
 		panic(err)
 	}
 
-	e.redisStorage.HSet(GroupError, errorKey, marshalValue)
-	e.redisStorage.HSet(GroupError, errorKey+":time", time.Now().Unix())
-	counter := e.redisStorage.HIncrBy(GroupError, errorKey+":counter", 1)
+	config := e.getEventConfig(warning)
+
+	e.redisStorage.HSet(fluxaorm.Context(), config.redisKey, errorKey, marshalValue)
+	e.redisStorage.HSet(config.redisKey, errorKey+":time", time.Now().Unix())
+	counter := e.redisStorage.HIncrBy(config.redisKey, errorKey+":counter", 1)
 
 	logg := math.Log10(float64(counter))
 
 	if (e.slackService != nil && !e.appService.IsInLocalMode() && !e.appService.IsInTestMode()) && logg == float64(int64(logg)) {
 		_ = e.slackService.SendToChannel(
 			"errors",
-			e.slackService.GetErrorChannel(),
+			config.slackChannel,
 			value.Message,
 			slackgo.MsgOptionAttachments(
 				slackgo.Attachment{
 					AuthorName: e.appService.Name,
-					Title:      "Error link",
-					TitleLink:  e.slackService.GetDevPanelURL() + "#err-" + errorKey,
+					Title:      config.title,
+					TitleLink:  e.slackService.GetDevPanelURL() + "#" + config.anchor + "-" + errorKey,
 					Text:       "Counter: " + fmt.Sprint(counter) + " ENV: " + e.appService.Mode,
 				},
 			),
 		)
 	}
 
-	if (e.sentryService != nil && !e.appService.IsInLocalMode() && !e.appService.IsInTestMode() && !e.appService.IsInQAMode()) &&
+	if (e.sentryService != nil && !e.appService.IsInLocalMode() && !e.appService.IsInTestMode()) &&
 		logg == float64(int64(logg)) {
 		e.sentryService.CaptureException(fmt.Errorf(value.Message))
+	}
+}
+
+func (e *RedisErrorLogger) get(group string) map[string]*EventRow {
+	eventsData := e.redisStorage.HGetAll(group)
+
+	eventsList := map[string]*EventRow{}
+
+	for key, value := range eventsData {
+		// TODO: fix this hack
+		if len(value) == 0 {
+			continue
+		}
+
+		splitKeys := strings.Split(key, ":")
+
+		if _, ok := eventsList[splitKeys[0]]; !ok {
+			eventsList[splitKeys[0]] = &EventRow{
+				ID: splitKeys[0],
+			}
+		}
+
+		if len(splitKeys) == 1 {
+			eventData := &event{}
+
+			err := json.Unmarshal([]byte(value), eventData)
+			if err != nil {
+				eventsList[splitKeys[0]].Request = ""
+				eventsList[splitKeys[0]].Stack = "unmarshal panic"
+				eventsList[splitKeys[0]].File = "error_logger.go"
+				eventsList[splitKeys[0]].Message = err.Error()
+				eventsList[splitKeys[0]].Line = 0
+				eventsList[splitKeys[0]].AppName = "ErrorLogger"
+
+				continue
+			}
+
+			eventsList[splitKeys[0]].Request = string(eventData.Request)
+			eventsList[splitKeys[0]].Stack = string(eventData.Stack)
+			eventsList[splitKeys[0]].File = eventData.File
+			eventsList[splitKeys[0]].Message = eventData.Message
+			eventsList[splitKeys[0]].Line = eventData.Line
+			eventsList[splitKeys[0]].AppName = eventData.AppName
+		} else if len(splitKeys) == 2 {
+			if splitKeys[1] == "time" {
+				i, err := strconv.ParseInt(value, 10, 64)
+				if err != nil {
+					i = 0
+				}
+				eventsList[splitKeys[0]].Time = time.Unix(i, 0).String()
+			} else if splitKeys[1] == "counter" {
+				counter, err := strconv.Atoi(value)
+				if err != nil {
+					counter = 0
+				}
+				eventsList[splitKeys[0]].Counter = counter
+			}
+		}
+	}
+
+	return eventsList
+}
+
+func (e *RedisErrorLogger) getEventConfig(warning bool) eventConfig {
+	if warning {
+		return eventConfig{
+			redisKey:     GroupWarning,
+			title:        "Warning Link",
+			anchor:       "#warn",
+			slackChannel: e.slackService.GetErrorChannel(),
+		}
+	}
+
+	return eventConfig{
+		redisKey:     GroupError,
+		title:        "Error Link",
+		anchor:       "#err",
+		slackChannel: e.slackService.GetErrorChannel(),
 	}
 }
 

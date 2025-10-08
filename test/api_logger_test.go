@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/latolukasz/fluxaorm"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/coretrix/hitrix/example/entity"
@@ -20,16 +21,18 @@ func TestApiLogger(t *testing.T) {
 
 	apiLoggerService := service.DI().APILogger()
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 	apiLoggerService.LogStart(ormService, entity.APILogTypeApple, nil)
 	apiLoggerService.LogSuccess(ormService, nil)
 
 	apiLoggerService.LogStart(ormService, entity.APILogTypeApple, nil)
 	apiLoggerService.LogError(ormService, "Error appear", nil)
 
-	var apiLogEntities []*entity.APILogEntity
-	ormService.LoadByIDs([]uint64{1, 2}, &apiLogEntities)
-	assert.Len(t, apiLogEntities, 2)
+	entityIterator := fluxaorm.GetByIDs[entity.APILogEntity](ormService, 1, 2)
+
+	assert.Len(t, entityIterator.Len(), 2)
+	apiLogEntities := entityIterator.All()
+
 	assert.Equal(t, apiLogEntities[0].Status, entity.APILogStatusCompleted)
 	assert.Equal(t, apiLogEntities[1].Status, entity.APILogStatusFailed)
 }

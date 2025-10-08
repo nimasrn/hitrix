@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix"
 	"github.com/coretrix/hitrix/service"
@@ -19,36 +19,36 @@ const (
 
 type ConsumerOneByModulo interface {
 	GetMaxModulo() int
-	Consume(ormService *beeorm.Engine, event beeorm.Event) error
+	Consume(ormService fluxaorm.Context, event beeorm.Event) error
 	GetQueueName(moduloID int) string
 	GetGroupName(moduloID int, suffix *string) string
 }
 
 type ConsumerManyByModulo interface {
 	GetMaxModulo() int
-	Consume(ormService *beeorm.Engine, events []beeorm.Event) error
+	Consume(ormService fluxaorm.Context, events []beeorm.Event) error
 	GetQueueName(moduloID int) string
 	GetGroupName(moduloID int, suffix *string) string
 }
 
 type ConsumerOne interface {
-	Consume(ormService *beeorm.Engine, event beeorm.Event) error
+	Consume(ormService fluxaorm.Context, event beeorm.Event) error
 	GetQueueName() string
 	GetGroupName(suffix *string) string
 }
 
 type ConsumerMany interface {
-	Consume(ormService *beeorm.Engine, events []beeorm.Event) error
+	Consume(ormService fluxaorm.Context, events []beeorm.Event) error
 	GetQueueName() string
 	GetGroupName(suffix *string) string
 }
 
 type ConsumerRunner struct {
 	ctx        context.Context
-	ormService *beeorm.Engine
+	ormService fluxaorm.Context
 }
 
-func NewConsumerRunner(ctx context.Context, ormService *beeorm.Engine) *ConsumerRunner {
+func NewConsumerRunner(ctx context.Context, ormService fluxaorm.Context) *ConsumerRunner {
 	return &ConsumerRunner{ctx: ctx, ormService: ormService}
 }
 
@@ -257,11 +257,11 @@ func (r *ConsumerRunner) RunConsumerManyByModulo(consumer ConsumerManyByModulo, 
 
 type ScalableConsumerRunner struct {
 	ctx        context.Context
-	ormService *beeorm.Engine
+	ormService fluxaorm.Context
 	redisPool  string
 }
 
-func NewScalableConsumerRunner(ctx context.Context, ormService *beeorm.Engine, redisPool string) *ScalableConsumerRunner {
+func NewScalableConsumerRunner(ctx context.Context, ormService fluxaorm.Context, redisPool string) *ScalableConsumerRunner {
 	return &ScalableConsumerRunner{ctx: ctx, ormService: ormService, redisPool: redisPool}
 }
 

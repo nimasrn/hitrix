@@ -2,8 +2,6 @@ package entity
 
 import (
 	"time"
-
-	"github.com/latolukasz/beeorm"
 )
 
 const (
@@ -64,8 +62,7 @@ var OTPTrackerGatewayVerifyStatusAll = OTPTrackerGatewayVerifyStatus{
 }
 
 type OTPTrackerEntity struct {
-	beeorm.ORM            `orm:"table=otp_tracker"`
-	ID                    uint64
+	ID                    uint64 `orm:"table=otp_tracker"`
 	Type                  string `orm:"enum=entity.OTPTrackerTypeAll;required"`
 	To                    string `orm:"length=50"`
 	Code                  string

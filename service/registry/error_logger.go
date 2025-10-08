@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/service"
@@ -30,7 +30,7 @@ func ServiceProviderErrorLogger() *service.DefinitionGlobal {
 
 			return errorlogger.NewRedisErrorLogger(
 				ctn.Get(service.AppService).(*app.App),
-				ctn.Get(service.ORMEngineGlobalService).(*beeorm.Engine),
+				ctn.Get(service.ORMGlobalService).(fluxaorm.Context),
 				slackAPIService,
 				sentryService,
 				service.RequestBodyKey,

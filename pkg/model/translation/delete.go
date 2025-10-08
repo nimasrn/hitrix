@@ -9,7 +9,7 @@ import (
 )
 
 func Delete(ctx context.Context, id uint64) error {
-	ormService := service.DI().OrmEngineForContext(ctx)
+	ormService := service.DI().OrmForContext(ctx)
 
 	translationTextEntity := &entity.TranslationTextEntity{}
 	found := ormService.LoadByID(id, translationTextEntity)

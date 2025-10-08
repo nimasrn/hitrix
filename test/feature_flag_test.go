@@ -47,7 +47,7 @@ func TestFeatureFlag(t *testing.T) {
 	featureFlagService := service.DI().FeatureFlag()
 	featureFlagService.Register(&ProductCollection{})
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 	clockService := service.DI().Clock()
 
 	featureFlagService.Sync(ormService, clockService)
@@ -73,7 +73,7 @@ func TestFeatureFlagWithCache(t *testing.T) {
 	featureFlagService := service.DI().FeatureFlag()
 	featureFlagService.Register(&ProductCollection{})
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 	clockService := service.DI().Clock()
 
 	featureFlagService.Sync(ormService, clockService)

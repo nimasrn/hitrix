@@ -80,7 +80,7 @@ func ACL(resource string, permissions ...string) gin.HandlerFunc {
 			return
 		}
 
-		ormService := service.DI().OrmEngineForContext(c.Request.Context())
+		ormService := service.DI().OrmForContext(c.Request.Context())
 
 		if !acl.ACL(ormService, adminUserEntity.User.RoleID, resource, permissions...) {
 			c.AbortWithStatus(http.StatusUnauthorized)

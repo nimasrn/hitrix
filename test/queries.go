@@ -3,31 +3,31 @@ package main
 import (
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/example/entity"
 	entityHitrix "github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service"
 )
 
-func CreateAdminUser(flusher beeorm.Flusher, row map[string]interface{}) *entity.AdminUserEntity {
-	userEntity := &entity.AdminUserEntity{}
+func CreateAdminUser(ormService fluxaorm.Context, row map[string]interface{}) *entity.AdminUserEntity {
+	adminUserEntity := &entity.AdminUserEntity{}
 
 	if len(row) != 0 {
 		for field, value := range row {
 			switch field {
 			case "RoleID":
-				userEntity.RoleID = value.(*entityHitrix.RoleEntity)
+				adminUserEntity.RoleID = value.(*entityHitrix.RoleEntity)
 			}
 		}
 	}
 
-	flusher.Track(userEntity)
+	fluxaorm.NewEntityFromSource(ormService, adminUserEntity)
 
-	return userEntity
+	return adminUserEntity
 }
 
-func CreateRole(flusher beeorm.Flusher, row map[string]interface{}) *entityHitrix.RoleEntity {
+func CreateRole(ormService fluxaorm.Context, row map[string]interface{}) *entityHitrix.RoleEntity {
 	roleEntity := &entityHitrix.RoleEntity{
 		Name:      "admin",
 		CreatedAt: service.DI().Clock().Now(),
@@ -44,12 +44,12 @@ func CreateRole(flusher beeorm.Flusher, row map[string]interface{}) *entityHitri
 		}
 	}
 
-	flusher.Track(roleEntity)
+	fluxaorm.NewEntityFromSource(ormService, roleEntity)
 
 	return roleEntity
 }
 
-func CreateResource(flusher beeorm.Flusher, row map[string]interface{}) *entityHitrix.ResourceEntity {
+func CreateResource(ormService fluxaorm.Context, row map[string]interface{}) *entityHitrix.ResourceEntity {
 	resourceEntity := &entityHitrix.ResourceEntity{
 		Name:      "user",
 		CreatedAt: service.DI().Clock().Now(),
@@ -66,12 +66,12 @@ func CreateResource(flusher beeorm.Flusher, row map[string]interface{}) *entityH
 		}
 	}
 
-	flusher.Track(resourceEntity)
+	fluxaorm.NewEntityFromSource(ormService, resourceEntity)
 
 	return resourceEntity
 }
 
-func CreatePermission(flusher beeorm.Flusher, row map[string]interface{}) *entityHitrix.PermissionEntity {
+func CreatePermission(ormService fluxaorm.Context, row map[string]interface{}) *entityHitrix.PermissionEntity {
 	permissionEntity := &entityHitrix.PermissionEntity{
 		ResourceID: nil,
 		Name:       "view",
@@ -91,13 +91,13 @@ func CreatePermission(flusher beeorm.Flusher, row map[string]interface{}) *entit
 		}
 	}
 
-	flusher.Track(permissionEntity)
+	fluxaorm.NewEntityFromSource(ormService, permissionEntity)
 
 	return permissionEntity
 }
 
-func CreatePrivilege(flusher beeorm.Flusher, row map[string]interface{}) {
-	permissionEntity := &entityHitrix.PrivilegeEntity{
+func CreatePrivilege(ormService fluxaorm.Context, row map[string]interface{}) *entityHitrix.PrivilegeEntity {
+	privilegeEntity := &entityHitrix.PrivilegeEntity{
 		RoleID:        nil,
 		ResourceID:    nil,
 		PermissionIDs: nil,
@@ -108,16 +108,18 @@ func CreatePrivilege(flusher beeorm.Flusher, row map[string]interface{}) {
 		for field, value := range row {
 			switch field {
 			case "RoleID":
-				permissionEntity.RoleID = value.(*entityHitrix.RoleEntity)
+				privilegeEntity.RoleID = value.(*entityHitrix.RoleEntity)
 			case "ResourceID":
-				permissionEntity.ResourceID = value.(*entityHitrix.ResourceEntity)
+				privilegeEntity.ResourceID = value.(*entityHitrix.ResourceEntity)
 			case "PermissionIDs":
-				permissionEntity.PermissionIDs = value.([]*entityHitrix.PermissionEntity)
+				privilegeEntity.PermissionIDs = value.([]*entityHitrix.PermissionEntity)
 			case "CreatedAt":
-				permissionEntity.CreatedAt = value.(time.Time)
+				privilegeEntity.CreatedAt = value.(time.Time)
 			}
 		}
 	}
 
-	flusher.Track(permissionEntity)
+	fluxaorm.NewEntityFromSource(ormService, privilegeEntity)
+
+	return privilegeEntity
 }

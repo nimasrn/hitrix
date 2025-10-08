@@ -1,6 +1,6 @@
 module github.com/coretrix/hitrix
 
-go 1.19
+go 1.24.7
 
 require (
 	cloud.google.com/go/storage v1.40.0
@@ -30,16 +30,17 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/kavenegar/kavenegar-go v0.0.0-20200629080648-6e28263b7162
 	github.com/kevinburke/twilio-go v0.0.0-20210327194925-1623146bcf73
-	github.com/latolukasz/beeorm v1.5.11
+	github.com/latolukasz/fluxaorm v1.8.1
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 	github.com/mailjet/mailjet-apiv3-go/v3 v3.1.1
 	github.com/mattbaird/gochimp v0.0.0-20200820164431-f1082bcdf63f
 	github.com/pariz/gountries v0.0.0-20200430155801-1c6a393df9c7
 	github.com/pkg/errors v0.9.1
+	github.com/redis/go-redis/v9 v9.12.0
 	github.com/ryanuber/columnize v2.1.2+incompatible
 	github.com/sarulabs/di v2.0.0+incompatible
 	github.com/slack-go/slack v0.9.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.10.0
 	github.com/stripe/stripe-go/v72 v72.91.0
 	github.com/tealeg/xlsx v1.0.5
 	github.com/tus/tusd v1.6.0
@@ -60,11 +61,12 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.7 // indirect
 	cloud.google.com/go/longrunning v0.5.5 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/MicahParks/keyfunc v1.9.0 // indirect
 	github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40 // indirect
-	github.com/bsm/redislock v0.7.2 // indirect
+	github.com/bsm/redislock v0.9.4 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cockroachdb/apd/v3 v3.1.0 // indirect
@@ -81,8 +83,7 @@ require (
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
 	github.com/go-redis/redis/v7 v7.4.1 // indirect
-	github.com/go-redis/redis_rate/v9 v9.1.2 // indirect
-	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.1.0 // indirect
@@ -115,11 +116,11 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/segmentio/fasthash v1.0.3 // indirect
+	github.com/puzpuzpuz/xsync/v2 v2.5.1 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shamaton/msgpack v1.2.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tideland/golib v4.24.2+incompatible // indirect
 	github.com/tideland/gorest v2.15.5+incompatible // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

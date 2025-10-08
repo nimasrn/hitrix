@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/dto/metrics"
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -20,21 +20,19 @@ func Get(ctx context.Context) map[string]metrics.Series {
 		panic("Metrics xAxisTitle are required")
 	}
 
-	ormService := service.DI().OrmEngineForContext(ctx)
+	ormService := service.DI().OrmForContext(ctx)
 
-	query := beeorm.NewWhere("1 ORDER BY ID DESC")
-	pager := beeorm.NewPager(1, 10000)
+	query := fluxaorm.NewWhere("1 ORDER BY ID DESC")
+	pager := fluxaorm.NewPager(1, 10000)
 
 	var allMetricsEntities []*entity.MetricsEntity
 
 	for {
-		var metricsEntities []*entity.MetricsEntity
+		entityIterator := fluxaorm.Search[entity.MetricsEntity](ormService, query, pager)
 
-		ormService.Search(query, pager, &metricsEntities)
+		allMetricsEntities = append(allMetricsEntities, entityIterator.All()...)
 
-		allMetricsEntities = append(allMetricsEntities, metricsEntities...)
-
-		if len(metricsEntities) < pager.PageSize {
+		if entityIterator.Len() < pager.PageSize {
 			break
 		}
 

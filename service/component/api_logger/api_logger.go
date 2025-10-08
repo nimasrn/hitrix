@@ -3,13 +3,13 @@ package apilogger
 import (
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 )
 
 type IAPILogger interface {
-	LogStart(ormService *beeorm.Engine, logType string, request interface{})
-	LogError(ormService *beeorm.Engine, message string, response interface{})
-	LogSuccess(ormService *beeorm.Engine, response interface{})
+	LogStart(ormService fluxaorm.Context, logType string, request interface{})
+	LogError(ormService fluxaorm.Context, message string, response interface{})
+	LogSuccess(ormService fluxaorm.Context, response interface{})
 }
 
 type ILogEntity interface {

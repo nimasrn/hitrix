@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/service"
 )
@@ -21,7 +21,7 @@ const LoggedDevPanelUserEntity = "logged_dev_panel_user_entity"
 const expireTimeToken = 3600
 const expireTimeRefreshToken = 7200
 
-func GenerateDevTokenAndRefreshToken(ormService *beeorm.Engine, userID uint64) (string, string, error) {
+func GenerateDevTokenAndRefreshToken(ormService fluxaorm.Context, userID uint64) (string, string, error) {
 	appService := service.DI().App()
 
 	token, err := generateTokenValue(appService.Secret, userID, time.Now().Unix()+expireTimeToken)
@@ -99,7 +99,7 @@ func IsValidDevToken(c *gin.Context, token string) error {
 }
 
 func verifyDevUser(c *gin.Context, userID uint64, token string) error {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	redisService := ormService.GetRedis()
 	// #nosec

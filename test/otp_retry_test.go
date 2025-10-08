@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/latolukasz/fluxaorm"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -26,7 +27,7 @@ func TestOTPRetry(t *testing.T) {
 		},
 		nil)
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 	clockService := service.DI().Clock()
 
 	code := "code"
@@ -47,7 +48,10 @@ func TestOTPRetry(t *testing.T) {
 		SentAt:              clockService.Now(),
 	}
 
-	ormService.Flush(otpTrackerEntity)
+	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
 	gateway := &mocks.FakeGateway{}
 	gateway.On("SendOTP", phone, code).Return("request1", "response1", nil)
@@ -65,9 +69,9 @@ func TestOTPRetry(t *testing.T) {
 
 	consumers.RetryOTP(ormService, registry, dto, otpTrackerEntity, 10)
 
-	otpTrackerEntity = &entity.OTPTrackerEntity{}
-	ormService.LoadByID(1, otpTrackerEntity)
+	otpTrackerEntity, found := fluxaorm.GetByID[entity.OTPTrackerEntity](ormService, 1)
 
+	assert.True(t, found)
 	assert.Equal(t, entity.OTPTrackerGatewaySendStatusSent, otpTrackerEntity.GatewaySendStatus)
 	assert.Equal(t, "request1", otpTrackerEntity.GatewaySendRequest)
 	assert.Equal(t, "response1", otpTrackerEntity.GatewaySendResponse)
@@ -88,7 +92,7 @@ func TestOTPWithMultipleRetry(t *testing.T) {
 		},
 		nil)
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 	clockService := service.DI().Clock()
 
 	code := "code"
@@ -109,7 +113,10 @@ func TestOTPWithMultipleRetry(t *testing.T) {
 		SentAt:              clockService.Now(),
 	}
 
-	ormService.Flush(otpTrackerEntity)
+	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
 	gateway := &mocks.FakeGateway{}
 	gateway.On("SendOTP", phone, code).Return("request1", "response1", errors.New("error")).Once()
@@ -130,9 +137,9 @@ func TestOTPWithMultipleRetry(t *testing.T) {
 
 	consumers.RetryOTP(ormService, registry, dto, otpTrackerEntity, 10)
 
-	otpTrackerEntity = &entity.OTPTrackerEntity{}
-	ormService.LoadByID(1, otpTrackerEntity)
+	otpTrackerEntity, found := fluxaorm.GetByID[entity.OTPTrackerEntity](ormService, 1)
 
+	assert.True(t, found)
 	assert.Equal(t, entity.OTPTrackerGatewaySendStatusSent, otpTrackerEntity.GatewaySendStatus)
 	assert.Equal(t, "request4", otpTrackerEntity.GatewaySendRequest)
 	assert.Equal(t, "response4", otpTrackerEntity.GatewaySendResponse)
@@ -153,7 +160,7 @@ func TestOTPRetryWithMaxReached(t *testing.T) {
 		},
 		nil)
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 	clockService := service.DI().Clock()
 
 	code := "code"
@@ -174,7 +181,10 @@ func TestOTPRetryWithMaxReached(t *testing.T) {
 		SentAt:              clockService.Now(),
 	}
 
-	ormService.Flush(otpTrackerEntity)
+	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+
+	err := ormService.Flush()
+	assert.Nil(t, err)
 
 	gateway := &mocks.FakeGateway{}
 	gateway.On("SendOTP", phone, code).Return("request1", "response1", errors.New("error")).Once()
@@ -194,9 +204,9 @@ func TestOTPRetryWithMaxReached(t *testing.T) {
 
 	consumers.RetryOTP(ormService, registry, dto, otpTrackerEntity, 3)
 
-	otpTrackerEntity = &entity.OTPTrackerEntity{}
-	ormService.LoadByID(1, otpTrackerEntity)
+	otpTrackerEntity, found := fluxaorm.GetByID[entity.OTPTrackerEntity](ormService, 1)
 
+	assert.True(t, found)
 	assert.Equal(t, entity.OTPTrackerGatewaySendStatusGatewayError, otpTrackerEntity.GatewaySendStatus)
 	assert.Equal(t, "request3", otpTrackerEntity.GatewaySendRequest)
 	assert.Equal(t, "response3", otpTrackerEntity.GatewaySendResponse)

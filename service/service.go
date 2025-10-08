@@ -4,9 +4,8 @@ import (
 	"context"
 
 	"github.com/coretrix/clockwork"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
-	s3 "github.com/coretrix/hitrix/service/component/amazon/storage"
 	apilogger "github.com/coretrix/hitrix/service/component/api_logger"
 	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/authentication"
@@ -17,7 +16,6 @@ import (
 	"github.com/coretrix/hitrix/service/component/crud"
 	"github.com/coretrix/hitrix/service/component/ddos"
 	dynamiclink "github.com/coretrix/hitrix/service/component/dynamic_link"
-	"github.com/coretrix/hitrix/service/component/elorus"
 	errorlogger "github.com/coretrix/hitrix/service/component/error_logger"
 	"github.com/coretrix/hitrix/service/component/exporter"
 	"github.com/coretrix/hitrix/service/component/fcm"
@@ -27,7 +25,6 @@ import (
 	"github.com/coretrix/hitrix/service/component/geocoding"
 	googleanalytics "github.com/coretrix/hitrix/service/component/google_analytics"
 	"github.com/coretrix/hitrix/service/component/html2pdf"
-	"github.com/coretrix/hitrix/service/component/instagram"
 	"github.com/coretrix/hitrix/service/component/jwt"
 	"github.com/coretrix/hitrix/service/component/kubernetes"
 	licenseplaterecognizer "github.com/coretrix/hitrix/service/component/license_plate_recognizer"
@@ -60,15 +57,14 @@ const (
 	JWTService                    = "jwt"
 	DDOSService                   = "ddos"
 	FCMService                    = "fcm"
-	ORMConfigService              = "orm_config"
-	ORMEngineGlobalService        = "orm_engine_global"
-	ORMEngineRequestService       = "orm_engine_request"
+	ORMEngineService              = "orm_engine"
+	ORMGlobalService              = "orm_global"
+	ORMRequestService             = "orm_request"
 	ClockWorkRequestService       = "clockwork_request"
 	CalendarService               = "calendar"
 	OSService                     = "oss"
 	PasswordService               = "password"
 	SlackService                  = "slack"
-	AmazonS3Service               = "amazon_s3"
 	UploaderService               = "uploader"
 	StripeService                 = "stripe"
 	CheckoutService               = "checkout"
@@ -92,8 +88,6 @@ const (
 	FeatureFlagService            = "feature_flag"
 	TemplateService               = "template"
 	TranslationService            = "translation"
-	ElorusService                 = "elorus"
-	InstagramService              = "instagram"
 	GoogleAnalyticsService        = "google_analytics"
 	KubernetesService             = "kubernetes"
 	SentryService                 = "sentry"
@@ -119,10 +113,6 @@ func (d *DIContainer) Exporter() exporter.IExporter {
 	return GetServiceRequired(ExporterService).(exporter.IExporter)
 }
 
-func (d *DIContainer) AmazonS3() s3.Client {
-	return GetServiceRequired(AmazonS3Service).(s3.Client)
-}
-
 func (d *DIContainer) Stripe() stripe.IStripe {
 	return GetServiceRequired(StripeService).(stripe.IStripe)
 }
@@ -135,16 +125,12 @@ func (d *DIContainer) Config() config.IConfig {
 	return GetServiceRequired(ConfigService).(config.IConfig)
 }
 
-func (d *DIContainer) OrmConfig() beeorm.ValidatedRegistry {
-	return GetServiceRequired(ORMConfigService).(beeorm.ValidatedRegistry)
+func (d *DIContainer) Orm() fluxaorm.Context {
+	return GetServiceRequired(ORMGlobalService).(fluxaorm.Context)
 }
 
-func (d *DIContainer) OrmEngine() *beeorm.Engine {
-	return GetServiceRequired(ORMEngineGlobalService).(*beeorm.Engine)
-}
-
-func (d *DIContainer) OrmEngineForContext(ctx context.Context) *beeorm.Engine {
-	return GetServiceForRequestRequired(ctx, ORMEngineRequestService).(*beeorm.Engine)
+func (d *DIContainer) OrmForContext(ctx context.Context) fluxaorm.Context {
+	return GetServiceForRequestRequired(ctx, ORMRequestService).(fluxaorm.Context)
 }
 
 func (d *DIContainer) ClockWorkForContext(ctx context.Context) *clockwork.Clockwork {
@@ -257,14 +243,6 @@ func (d *DIContainer) Template() template.ITemplateInterface {
 
 func (d *DIContainer) Calendar() calendar.ICalendar {
 	return GetServiceRequired(CalendarService).(calendar.ICalendar)
-}
-
-func (d *DIContainer) Elorus() elorus.IProvider {
-	return GetServiceRequired(ElorusService).(elorus.IProvider)
-}
-
-func (d *DIContainer) Instagram() instagram.IAPIManager {
-	return GetServiceRequired(InstagramService).(instagram.IAPIManager)
 }
 
 func (d *DIContainer) GoogleAnalytics() googleanalytics.IAPIManager {

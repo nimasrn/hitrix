@@ -21,7 +21,7 @@ func TestJWTCreation(t *testing.T) {
 
 	payload := map[string]string{
 		"exp": "1579514400",
-		"iss": "bluelog",
+		"iss": "ctrix",
 		"sub": "User",
 	}
 
@@ -40,7 +40,7 @@ func TestVerifyJWT(t *testing.T) {
 
 	payload := map[string]string{
 		"exp": fmt.Sprintf("%v", time.Now().Unix()),
-		"iss": "bluelog",
+		"iss": "ctrix",
 		"sub": "User",
 	}
 
@@ -67,7 +67,7 @@ func TestVerifyJWTExpired(t *testing.T) {
 
 	payload := map[string]string{
 		"exp": fmt.Sprintf("%v", time.Now().Unix()-1000),
-		"iss": "bluelog",
+		"iss": "ctrix",
 		"sub": "User",
 	}
 
@@ -88,7 +88,7 @@ func TestExtractPayload(t *testing.T) {
 
 	payload := map[string]string{
 		"exp": fmt.Sprintf("%v", time.Now().Unix()),
-		"iss": "bluelog",
+		"iss": "ctrix",
 		"sub": expectedTokenSubject,
 	}
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/service"
 	"github.com/coretrix/hitrix/service/component/app"
@@ -79,7 +80,7 @@ func (h *Hitrix) runDynamicScrips(ctx context.Context, code string) {
 			}
 
 			defScript := def.(app.IScript)
-			defScript.Run(ctx, &exit{s: h}, service.DI().OrmEngine().Clone())
+			defScript.Run(ctx, &exit{s: h}, service.DI().Orm().Clone())
 
 			return
 		}
@@ -90,11 +91,11 @@ func (h *Hitrix) runDynamicScrips(ctx context.Context, code string) {
 
 func (h *Hitrix) startup() {
 	if service.HasService(service.FeatureFlagService) {
-		ormService := service.DI().OrmEngine()
-		clockService := service.DI().Clock()
-
 		featureFlagService := service.DI().FeatureFlag()
-		featureFlagService.Sync(ormService, clockService)
+		featureFlagService.Sync(
+			service.DI().Orm(),
+			service.DI().Clock(),
+		)
 	}
 }
 
@@ -111,9 +112,9 @@ func (h *Hitrix) preDeploy() {
 		return
 	}
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
 
-	alters := ormService.GetAlters()
+	alters := fluxaorm.GetAlters(ormService)
 
 	hasAlters := false
 
@@ -137,7 +138,7 @@ func (h *Hitrix) preDeploy() {
 func (h *Hitrix) forceAlters() {
 	appService := service.DI().App()
 
-	if !appService.IsInLocalMode() && !appService.IsInQAMode() {
+	if !appService.IsInLocalMode() {
 		return
 	}
 
@@ -147,32 +148,33 @@ func (h *Hitrix) forceAlters() {
 		return
 	}
 
-	ormService := service.DI().OrmEngine()
+	ormService := service.DI().Orm()
+	alters := fluxaorm.GetAlters(ormService)
 
-	dbService := ormService.GetMysql()
+	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
+	dbPools := ormEngine.Registry().DBPools()
 
-	alters := ormService.GetAlters()
-	var queries string
+	for pool, db := range dbPools {
+		queries := ""
+		for _, alter := range alters {
+			if alter.Pool == pool {
+				queries += alter.SQL
+			}
+		}
 
-	for _, alter := range alters {
-		queries += alter.SQL
+		if queries == "" {
+			continue
+		}
+
+		db.Exec(ormService, queries)
 	}
 
-	if queries != "" {
-		_, def := dbService.Query(queries)
-		defer def()
-	}
-
-	altersSearch := ormService.GetRedisSearchIndexAlters()
-	for _, alter := range altersSearch {
-		alter.Execute()
+	redisSearchAlters := fluxaorm.GetRedisSearchAlters(ormService)
+	for _, alter := range redisSearchAlters {
+		alter.Exec(ormService)
 	}
 
 	log.Println("FORCE ALTERS executed")
-
-	if appService.IsInQAMode() {
-		os.Exit(0)
-	}
 }
 
 func (h *Hitrix) await() {

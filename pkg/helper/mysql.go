@@ -3,12 +3,12 @@ package helper
 import (
 	"fmt"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 )
 
 type transaction func() error
 
-func DBTransaction(ormService *beeorm.Engine, callback transaction) error {
+func DBTransaction(ormService fluxaorm.Context, callback transaction) error {
 	dbService := ormService.GetMysql()
 
 	dbService.Begin()

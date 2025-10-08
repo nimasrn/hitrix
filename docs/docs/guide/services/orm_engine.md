@@ -8,7 +8,7 @@ registry.ServiceProviderOrmEngine()
 
 Access the service:
 ```go
-service.DI().ORMEngine()
+service.DI().Orm()
 ```
 
 Never use that service in API. It is not thread safe!

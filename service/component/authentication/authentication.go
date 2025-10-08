@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/clock"
@@ -126,7 +126,7 @@ func (t *Authentication) VerifySocialLogin(ctx context.Context, source, token st
 }
 
 func (t *Authentication) AuthenticateOTP(
-	ormService *beeorm.Engine,
+	ormService fluxaorm.Context,
 	phone string,
 	entity OTPProviderEntity,
 ) (accessToken string, refreshToken string, err error) {
@@ -146,7 +146,7 @@ func (t *Authentication) AuthenticateOTP(
 }
 
 func (t *Authentication) AuthenticateOTPEmail(
-	ormService *beeorm.Engine,
+	ormService fluxaorm.Context,
 	email string,
 	entity OTPProviderEntity,
 	useRedisSearch bool,
@@ -174,7 +174,7 @@ func (t *Authentication) AuthenticateOTPEmail(
 }
 
 func (t *Authentication) Authenticate(
-	ormService *beeorm.Engine,
+	ormService fluxaorm.Context,
 	uniqueValue string,
 	password string,
 	entity AuthProviderEntity,
@@ -199,7 +199,7 @@ func (t *Authentication) Authenticate(
 }
 
 func (t *Authentication) AuthenticateEmail(
-	ormService *beeorm.Engine,
+	ormService fluxaorm.Context,
 	email string,
 	password string,
 	entity EmailAuthEntity,
@@ -221,7 +221,7 @@ func (t *Authentication) AuthenticateEmail(
 }
 
 func (t *Authentication) AuthenticateByID(
-	ormService *beeorm.Engine,
+	ormService fluxaorm.Context,
 	id uint64,
 	entity AuthProviderEntity,
 ) (accessToken string, refreshToken string, err error) {
@@ -238,7 +238,7 @@ func (t *Authentication) AuthenticateByID(
 	return t.generateUserTokens(ormService, entity.GetID())
 }
 
-func (t *Authentication) generateUserTokens(ormService *beeorm.Engine, ID uint64) (accessToken string, refreshToken string, err error) {
+func (t *Authentication) generateUserTokens(ormService fluxaorm.Context, ID uint64) (accessToken string, refreshToken string, err error) {
 	accessKey := t.generateAndStoreAccessKey(ormService, ID, t.refreshTokenTTL)
 
 	accessToken, err = t.GenerateTokenPair(ID, accessKey, t.accessTokenTTL)
@@ -256,7 +256,7 @@ func (t *Authentication) generateUserTokens(ormService *beeorm.Engine, ID uint64
 	return accessToken, refreshToken, nil
 }
 
-func (t *Authentication) VerifyAccessToken(ormService *beeorm.Engine, accessToken string, entity beeorm.Entity) (map[string]string, error) {
+func (t *Authentication) VerifyAccessToken(ormService fluxaorm.Context, accessToken string, entity beeorm.Entity) (map[string]string, error) {
 	payload, err := t.jwtService.VerifyJWTAndGetPayload(t.secret, accessToken, t.clockService.Now().Unix())
 	if err != nil {
 		return nil, err
@@ -282,7 +282,7 @@ func (t *Authentication) VerifyAccessToken(ormService *beeorm.Engine, accessToke
 	return payload, nil
 }
 
-func (t *Authentication) VerifyAccessTokenTemporary(ormService *beeorm.Engine, accessToken string, entity beeorm.Entity) (map[string]string, error) {
+func (t *Authentication) VerifyAccessTokenTemporary(ormService fluxaorm.Context, accessToken string, entity beeorm.Entity) (map[string]string, error) {
 	payload, err := t.jwtService.VerifyJWTAndGetPayload(t.secret, accessToken, t.clockService.Now().Unix())
 	if payload == nil && err != nil {
 		return nil, err
@@ -308,7 +308,7 @@ func (t *Authentication) VerifyAccessTokenTemporary(ormService *beeorm.Engine, a
 	return payload, nil
 }
 
-func (t *Authentication) RefreshToken(ormService *beeorm.Engine, refreshToken string) (newAccessToken string, newRefreshToken string, err error) {
+func (t *Authentication) RefreshToken(ormService fluxaorm.Context, refreshToken string) (newAccessToken string, newRefreshToken string, err error) {
 	payload, err := t.jwtService.VerifyJWTAndGetPayload(t.secret, refreshToken, t.clockService.Now().Unix())
 	if err != nil {
 		return "", "", err
@@ -372,7 +372,7 @@ func (t *Authentication) RefreshTokenTemporary(refreshToken string) (newAccessTo
 	return newAccessToken, newRefreshToken, err
 }
 
-func (t *Authentication) LogoutCurrentSession(ormService *beeorm.Engine, accessKey string) {
+func (t *Authentication) LogoutCurrentSession(ormService fluxaorm.Context, accessKey string) {
 	cacheService := ormService.GetRedis(t.appService.RedisPools.Persistent)
 
 	cacheService.Del(accessKey)
@@ -398,7 +398,7 @@ func (t *Authentication) LogoutCurrentSession(ormService *beeorm.Engine, accessK
 	}
 }
 
-func (t *Authentication) LogoutAllSessions(ormService *beeorm.Engine, id uint64) {
+func (t *Authentication) LogoutAllSessions(ormService fluxaorm.Context, id uint64) {
 	tokenListKey := generateUserTokenListKey(id)
 	cacheService := ormService.GetRedis(t.appService.RedisPools.Persistent)
 
@@ -431,14 +431,14 @@ func (t *Authentication) GenerateTokenPair(id uint64, accessKey string, ttl int)
 	return t.jwtService.EncodeJWT(t.secret, headers, payload)
 }
 
-func (t *Authentication) generateAndStoreAccessKey(ormService *beeorm.Engine, id uint64, ttl int) string {
+func (t *Authentication) generateAndStoreAccessKey(ormService fluxaorm.Context, id uint64, ttl int) string {
 	key := generateAccessKey(id, t.uuidService.Generate())
 	ormService.GetRedis(t.appService.RedisPools.Persistent).Set(key, "", ttl)
 
 	return key
 }
 
-func (t *Authentication) addUserAccessKeyList(ormService *beeorm.Engine, id uint64, accessKey, oldAccessKey string, ttl int) {
+func (t *Authentication) addUserAccessKeyList(ormService fluxaorm.Context, id uint64, accessKey, oldAccessKey string, ttl int) {
 	key := generateUserTokenListKey(id)
 	cacheService := ormService.GetRedis(t.appService.RedisPools.Persistent)
 

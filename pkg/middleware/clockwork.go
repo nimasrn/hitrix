@@ -11,14 +11,14 @@ import (
 	"github.com/coretrix/clockwork"
 	dataSource "github.com/coretrix/clockwork/datasource"
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/response"
 	"github.com/coretrix/hitrix/service"
 )
 
 type clockWorkHandler struct {
-	ormService           *beeorm.Engine
+	ormService           fluxaorm.Context
 	DatabaseDataSource   dataSource.QueryLoggerDataSourceInterface
 	RedisDataSource      dataSource.CacheLoggerDataSourceInterface
 	LocalCacheDataSource dataSource.UserDataSourceInterface
@@ -150,7 +150,7 @@ func Clockwork(ginEngine *gin.Engine) {
 		if !ok {
 			return
 		}
-		ormService := service.DI().OrmEngineForContext(c.Request.Context())
+		ormService := service.DI().OrmForContext(c.Request.Context())
 
 		redisDataProvider := &ormDataProvider{RedisStorageProvider: ormService.GetRedis()}
 		profilerService := service.DI().ClockWorkForContext(c.Request.Context())

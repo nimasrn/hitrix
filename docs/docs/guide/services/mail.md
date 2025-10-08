@@ -40,7 +40,7 @@ service.DI().Mail()
 Some functions this service provide are:
 ```go
     GetTemplateKeyFromConfig(templateName string) (string, error)
-    SendTemplate(ormService *beeorm.Engine, message *Message) error
-    SendTemplateWithAttachments(ormService *beeorm.Engine, message *MessageAttachment) error
+    SendTemplate(ormService fluxaorm.Context, message *Message) error
+    SendTemplateWithAttachments(ormService fluxaorm.Context, message *MessageAttachment) error
     GetTemplateHTMLCode(templateName string) (string, error)
 ```

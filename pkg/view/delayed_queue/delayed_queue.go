@@ -3,7 +3,7 @@ package delayedqueue
 import (
 	"context"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/xorcare/pointer"
 
 	"github.com/coretrix/hitrix/pkg/dto/delayedqueue"
@@ -12,13 +12,13 @@ import (
 
 func Get(ctx context.Context) *delayedqueue.List {
 	appService := service.DI().App()
-	ormService := service.DI().OrmEngineForContext(ctx)
+	ormService := service.DI().OrmForContext(ctx)
 
 	result := &delayedqueue.List{Rows: make([]delayedqueue.Row, len(appService.RedisDelayedQueues))}
 	for i, queue := range appService.RedisDelayedQueues {
 		result.Rows[i].Queue = queue
-		result.Rows[i].Total = ormService.GetRedis(appService.RedisPools.Stream).ZCount(queue, "-inf", "+inf")
-		values := ormService.GetRedis(appService.RedisPools.Stream).ZRangeArgsWithScores(redis.ZRangeArgs{
+		result.Rows[i].Total = ormService.Engine().Redis(appService.RedisPools.Stream).ZCount(ormService, queue, "-inf", "+inf")
+		values := ormService.Engine().Redis(appService.RedisPools.Stream).ZRangeArgsWithScores(ormService, redis.ZRangeArgs{
 			Key:     queue,
 			Start:   0,
 			Stop:    "+inf",

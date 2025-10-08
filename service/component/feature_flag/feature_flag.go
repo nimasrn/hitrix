@@ -1,19 +1,19 @@
 package featureflag
 
 import (
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/clock"
 )
 
 type ServiceFeatureFlagInterface interface {
-	IsActive(ormService *beeorm.Engine, name string) bool
-	FailIfIsNotActive(ormService *beeorm.Engine, name string) error
-	Enable(ormService *beeorm.Engine, name string) error
-	Disable(ormService *beeorm.Engine, name string) error
-	GetScriptsSingleInstance(ormService *beeorm.Engine) []app.IScript
-	GetScriptsMultiInstance(ormService *beeorm.Engine) []app.IScript
+	IsActive(ormService fluxaorm.Context, name string) bool
+	FailIfIsNotActive(ormService fluxaorm.Context, name string) error
+	Enable(ormService fluxaorm.Context, name string) error
+	Disable(ormService fluxaorm.Context, name string) error
+	GetScriptsSingleInstance(ormService fluxaorm.Context) []app.IScript
+	GetScriptsMultiInstance(ormService fluxaorm.Context) []app.IScript
 	Register(featureFlags ...IFeatureFlag)
-	Sync(ormService *beeorm.Engine, clockService clock.IClock)
+	Sync(ormService fluxaorm.Context, clockService clock.IClock)
 }

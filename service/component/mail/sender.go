@@ -2,9 +2,8 @@ package mail
 
 import (
 	"encoding/json"
-	"errors"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service/component/clock"
@@ -14,8 +13,8 @@ import (
 
 type ISender interface {
 	GetTemplateKeyFromConfig(templateName string) (string, error)
-	SendTemplate(ormService *beeorm.Engine, message *Message) error
-	SendTemplateWithAttachments(ormService *beeorm.Engine, message *MessageAttachment) error
+	SendTemplate(ormService fluxaorm.Context, message *Message) error
+	SendTemplateWithAttachments(ormService fluxaorm.Context, message *MessageAttachment) error
 	GetTemplateHTMLCode(templateName string) (string, error)
 }
 
@@ -48,17 +47,11 @@ type Sender struct {
 }
 
 func NewSender(
-	ormConfig beeorm.ValidatedRegistry,
 	configService config.IConfig,
 	clockService clock.IClock,
 	errorLogger errorlogger.ErrorLogger,
 	newFunc NewSenderFunc,
 ) (*Sender, error) {
-	entities := ormConfig.GetEntities()
-	if _, ok := entities["entity.MailTrackerEntity"]; !ok {
-		return nil, errors.New("you should register MailTrackerEntity")
-	}
-
 	provider, err := newFunc(configService)
 	if err != nil {
 		return nil, err
@@ -76,7 +69,7 @@ func (s *Sender) GetTemplateKeyFromConfig(templateName string) (string, error) {
 	return s.Provider.GetTemplateKeyFromConfig(s.ConfigService, templateName)
 }
 
-func (s *Sender) SendTemplate(ormService *beeorm.Engine, message *Message) error {
+func (s *Sender) SendTemplate(ormService fluxaorm.Context, message *Message) error {
 	if message.From == "" {
 		message.From = s.Provider.GetDefaultFromEmail()
 	}
@@ -111,7 +104,7 @@ func (s *Sender) SendTemplate(ormService *beeorm.Engine, message *Message) error
 	return nil
 }
 
-func (s *Sender) SendTemplateWithAttachments(ormService *beeorm.Engine, message *MessageAttachment) error {
+func (s *Sender) SendTemplateWithAttachments(ormService fluxaorm.Context, message *MessageAttachment) error {
 	mailTrackerEntity, err := s.createTrackingEntity(ormService, &Message{
 		From:         message.From,
 		FromName:     message.FromName,
@@ -150,8 +143,8 @@ func (s *Sender) GetTemplateHTMLCode(templateName string) (string, error) {
 	return s.Provider.GetTemplateHTMLCode(templateName)
 }
 
-func (s *Sender) createTrackingEntity(ormService *beeorm.Engine, message *Message) (*entity.MailTrackerEntity, error) {
-	mailTrackerEntity := &entity.MailTrackerEntity{
+func (s *Sender) createTrackingEntity(ormService fluxaorm.Context, message *Message) (entity.MailTrackerEntity, error) {
+	mailTrackerEntity := entity.MailTrackerEntity{
 		Status:       entity.MailTrackerStatusNew,
 		From:         message.From,
 		To:           message.To,
@@ -160,12 +153,17 @@ func (s *Sender) createTrackingEntity(ormService *beeorm.Engine, message *Messag
 		CreatedAt:    s.ClockService.Now(),
 	}
 
+	fluxaorm.NewEntityFromSource(ormService, mailTrackerEntity)
+
 	templateDataAsByte, err := json.Marshal(message.TemplateData)
 	if err != nil {
 		mailTrackerEntity.SenderError = err.Error()
 		mailTrackerEntity.Status = entity.MailTrackerStatusError
 
-		ormService.Flush(mailTrackerEntity)
+		err := ormService.Flush()
+		if err != nil {
+			panic(err)
+		}
 
 		s.ErrorLoggerService.LogError(err)
 

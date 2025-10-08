@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -42,10 +42,10 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 					providers = append(providers, provider)
 				}
 			} else {
-				ormService := ctn.Get(service.ORMEngineGlobalService).(*beeorm.Engine)
+				ormService := ctn.Get(service.ORMGlobalService).(fluxaorm.Context)
 
 				settingsEntity := &entity.SettingsEntity{}
-				if has := ormService.CachedSearchOne(settingsEntity, "Key", "otp_sms_provider"); !has {
+				if _, found := fluxaorm.GetByUniqueIndex[settingsEntity](ormService, "Key", "otp_sms_provider"); !found {
 					return nil, errors.New("otp_sms_provider not found in settings")
 				}
 
@@ -84,9 +84,13 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 
 			var emailSender *mail.Sender
 			if emailSenderFunc != nil {
+				ormEngine := ctn.Get(service.ORMEngineService).(fluxaorm.Engine)
+				if ormEngine.Registry().EntitySchema("entity.MailTrackerEntity") == nil {
+					return nil, errors.New("you should register MailTrackerEntity")
+				}
+
 				var err error
 				emailSender, err = mail.NewSender(
-					ctn.Get(service.ORMConfigService).(beeorm.ValidatedRegistry),
 					ctn.Get(service.ConfigService).(config.IConfig),
 					ctn.Get(service.ClockService).(clock.IClock),
 					ctn.Get(service.ErrorLoggerService).(errorlogger.ErrorLogger),

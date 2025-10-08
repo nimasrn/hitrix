@@ -2,8 +2,6 @@ package entity
 
 import (
 	"time"
-
-	"github.com/latolukasz/beeorm"
 )
 
 type FileStatus string
@@ -34,10 +32,9 @@ type FileObject struct {
 }
 
 type FileEntity struct {
-	beeorm.ORM `orm:"table=files;redisSearch=search_pool"`
-	ID         uint64 `orm:"searchable;sortable"`
-	File       *FileObject
-	Status     string    `orm:"required;enum=entity.FileStatusAll"`
-	Namespace  string    `orm:"required;searchable"`
-	CreatedAt  time.Time `orm:"time=true"`
+	ID        uint64 `orm:"table=files;redisSearch=search_pool;searchable;sortable"`
+	File      *FileObject
+	Status    string    `orm:"required;enum=entity.FileStatusAll"`
+	Namespace string    `orm:"required;searchable"`
+	CreatedAt time.Time `orm:"time=true"`
 }

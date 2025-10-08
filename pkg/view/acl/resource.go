@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/dto/acl"
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -12,7 +12,7 @@ import (
 )
 
 func ListResources(c *gin.Context) *acl.ResourcesResponseDTO {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	allPermissionEntities := make([]*entity.PermissionEntity, 0)
 
@@ -62,7 +62,7 @@ type UserRoleGetter interface {
 }
 
 func ListUserResources(c *gin.Context, getUserFunc func(c *gin.Context) beeorm.Entity) *acl.ResourcesResponseDTO {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	userEntity := getUserFunc(c)
 

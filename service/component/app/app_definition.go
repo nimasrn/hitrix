@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
 )
 
 const ModeLocal = "local"
@@ -16,7 +15,6 @@ const ModeProd = "prod"
 const ModeQA = "qa"
 
 type IDevPanelUserEntity interface {
-	beeorm.Entity
 	GetUsername() string
 	GetPassword() string
 }
@@ -66,10 +64,6 @@ func (app *App) IsInDevMode() bool {
 
 func (app *App) IsInDemoMode() bool {
 	return app.Mode == ModeDemo
-}
-
-func (app *App) IsInQAMode() bool {
-	return app.Mode == ModeQA
 }
 
 func (app *App) IsInMode(mode string) bool {

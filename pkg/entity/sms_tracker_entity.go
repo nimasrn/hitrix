@@ -2,8 +2,6 @@ package entity
 
 import (
 	"time"
-
-	"github.com/latolukasz/beeorm"
 )
 
 const (
@@ -22,8 +20,7 @@ var SMSTrackerTypeAll = smsTrackerTypeAll{
 }
 
 type SmsTrackerEntity struct {
-	beeorm.ORM            `orm:"table=sms_tracker"`
-	ID                    uint64
+	ID                    uint64 `orm:"table=sms_tracker"`
 	Status                string
 	To                    string `orm:"length=15"`
 	Text                  string `orm:"length=max"`

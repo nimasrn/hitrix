@@ -59,10 +59,6 @@ module.exports = [
                         link: '/guide/services/dynamic_link',
                     },
                     {
-                        text: 'Elorus - Invoice manager',
-                        link: '/guide/services/elorus',
-                    },
-                    {
                         text: 'Error logger',
                         link: '/guide/services/error_logger',
                     },

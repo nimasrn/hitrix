@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -11,7 +11,7 @@ type FakeTranslationService struct {
 	mock.Mock
 }
 
-func (f *FakeTranslationService) GetText(_ *beeorm.Engine, _ entity.TranslationTextLang, key entity.TranslationTextKey) (string, bool) {
+func (f *FakeTranslationService) GetText(_ fluxaorm.Context, _ entity.TranslationTextLang, key entity.TranslationTextKey) (string, bool) {
 	args := f.Called()
 	if args.Get(0) == nil || args.Get(1) == nil {
 		return string(key), false
@@ -20,8 +20,8 @@ func (f *FakeTranslationService) GetText(_ *beeorm.Engine, _ entity.TranslationT
 	return args.Get(0).(string), args.Bool(1)
 }
 
-func (f *FakeTranslationService) GetTextWithVars(_ *beeorm.Engine,
-	_ *beeorm.Engine,
+func (f *FakeTranslationService) GetTextWithVars(_ fluxaorm.Context,
+	_ fluxaorm.Context,
 	_ entity.TranslationTextLang,
 	key entity.TranslationTextKey,
 	_ map[string]interface{},

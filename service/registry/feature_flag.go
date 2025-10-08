@@ -3,7 +3,7 @@ package registry
 import (
 	"errors"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/service"
@@ -18,14 +18,12 @@ func ServiceProviderFeatureFlag(registry FeatureFlagRegistryInitFunc) *service.D
 	return &service.DefinitionGlobal{
 		Name: service.FeatureFlagService,
 		Build: func(ctn di.Container) (interface{}, error) {
-			ormConfig := ctn.Get(service.ORMConfigService).(beeorm.ValidatedRegistry)
-			entities := ormConfig.GetEntities()
-			if _, ok := entities["entity.FeatureFlagEntity"]; !ok {
+			ormEngine := ctn.Get(service.ORMEngineService).(fluxaorm.Engine)
+			if ormEngine.Registry().EntitySchema("entity.FeatureFlagEntity") == nil {
 				return nil, errors.New("you should register FeatureFlagEntity")
 			}
 
-			errorLoggerService := ctn.Get(service.ErrorLoggerService).(errorlogger.ErrorLogger)
-			featureFlagService := featureflag.NewFeatureFlagService(errorLoggerService)
+			featureFlagService := featureflag.NewFeatureFlagService(ctn.Get(service.ErrorLoggerService).(errorlogger.ErrorLogger))
 			registry(featureFlagService)
 
 			return featureFlagService, nil
@@ -36,16 +34,16 @@ func ServiceProviderFeatureFlagWithCache(registry FeatureFlagRegistryInitFunc) *
 	return &service.DefinitionGlobal{
 		Name: service.FeatureFlagService,
 		Build: func(ctn di.Container) (interface{}, error) {
-			ormConfig := ctn.Get(service.ORMConfigService).(beeorm.ValidatedRegistry)
-			entities := ormConfig.GetEntities()
-			if _, ok := entities["entity.FeatureFlagEntity"]; !ok {
+			ormEngine := ctn.Get(service.ORMEngineService).(fluxaorm.Engine)
+			if ormEngine.Registry().EntitySchema("entity.FeatureFlagEntity") == nil {
 				return nil, errors.New("you should register FeatureFlagEntity")
 			}
 
-			errorLoggerService := ctn.Get(service.ErrorLoggerService).(errorlogger.ErrorLogger)
-			clockService := ctn.Get(service.ClockService).(clock.IClock)
+			featureFlagService := featureflag.NewFeatureFlagWithCacheService(
+				ctn.Get(service.ErrorLoggerService).(errorlogger.ErrorLogger),
+				ctn.Get(service.ClockService).(clock.IClock),
+			)
 
-			featureFlagService := featureflag.NewFeatureFlagWithCacheService(errorLoggerService, clockService)
 			registry(featureFlagService)
 
 			return featureFlagService, nil

@@ -3,7 +3,7 @@ package ddos
 import (
 	"strconv"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 )
 
 type IDDOS interface {

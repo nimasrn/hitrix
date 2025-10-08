@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/latolukasz/fluxaorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/xorcare/pointer"
 
@@ -30,7 +31,7 @@ func TestListResourcesAction(t *testing.T) {
 
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
-	ormService := service.DI().OrmEngine().Clone()
+	ormService := service.DI().Orm().Clone()
 	flusher := ormService.NewFlusher()
 
 	resource1 := CreateResource(flusher, map[string]interface{}{})
@@ -105,7 +106,7 @@ func TestListRolesAction(t *testing.T) {
 
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
-	ormService := service.DI().OrmEngine().Clone()
+	ormService := service.DI().Orm().Clone()
 	flusher := ormService.NewFlusher()
 
 	resource1 := CreateResource(flusher, map[string]interface{}{})
@@ -179,7 +180,7 @@ func TestGetRoleAction(t *testing.T) {
 
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
-	ormService := service.DI().OrmEngine().Clone()
+	ormService := service.DI().Orm().Clone()
 	flusher := ormService.NewFlusher()
 
 	role := CreateRole(flusher, map[string]interface{}{})
@@ -239,7 +240,7 @@ func TestCreateRoleAction(t *testing.T) {
 
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
-	ormService := service.DI().OrmEngine().Clone()
+	ormService := service.DI().Orm().Clone()
 	flusher := ormService.NewFlusher()
 
 	resource := CreateResource(flusher, map[string]interface{}{})
@@ -285,7 +286,7 @@ func TestUpdateRoleAction(t *testing.T) {
 
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
-	ormService := service.DI().OrmEngine().Clone()
+	ormService := service.DI().Orm().Clone()
 	flusher := ormService.NewFlusher()
 
 	role := CreateRole(flusher, map[string]interface{}{})
@@ -341,7 +342,7 @@ func TestDeleteRoleAction(t *testing.T) {
 
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
-	ormService := service.DI().OrmEngine().Clone()
+	ormService := service.DI().Orm().Clone()
 	flusher := ormService.NewFlusher()
 
 	role := CreateRole(flusher, map[string]interface{}{})
@@ -384,26 +385,27 @@ func TestPostAssignRoleToUserAction(t *testing.T) {
 
 	ctx := createContextMyApp(t, "my-app", mockServices, nil)
 
-	ormService := service.DI().OrmEngine().Clone()
-	flusher := ormService.NewFlusher()
+	ormService := service.DI().Orm().Clone()
 
-	role1 := CreateRole(flusher, map[string]interface{}{})
-	role2 := CreateRole(flusher, map[string]interface{}{"Name": "super-admin"})
+	role1 := CreateRole(ormService, map[string]interface{}{})
+	role2 := CreateRole(ormService, map[string]interface{}{"Name": "super-admin"})
 
-	user := CreateAdminUser(flusher, map[string]interface{}{"RoleID": role1})
+	user := CreateAdminUser(ormService, map[string]interface{}{"RoleID": role1})
 
-	flusher.Flush()
+	err := ormService.Flush()
+	assert.Nil(t, user)
 
 	request := &acl.AssignRoleToUserRequestDTO{
 		UserID: user.ID,
 		RoleID: role2.ID,
 	}
 
-	err := SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/assign-role/", request, false, nil)
+	err = SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/assign-role/", request, false, nil)
 	assert.Nil(t, err)
 
-	userEntity := &entityExample.AdminUserEntity{}
-	assert.True(t, ormService.LoadByID(1, userEntity, "RoleID"))
+	userEntity, found := fluxaorm.GetByID[entityExample.AdminUserEntity](ormService, 1)
+	assert.True(t, found)
+
 	assert.Equal(t, userEntity.RoleID.ID, role2.ID)
 	assert.Equal(t, userEntity.RoleID.Name, role2.Name)
 

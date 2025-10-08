@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
+	beeorm "github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/dto/acl"
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -42,7 +42,7 @@ func ListRoles(c *gin.Context, request *crud.ListRequest) *acl.RolesResponseDTO 
 		query.Sort("ID", false)
 	}
 
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	allRoleEntities := make([]*entity.RoleEntity, 0)
 	total := ormService.RedisSearch(&allRoleEntities, query, beeorm.NewPager(searchParams.Page, searchParams.PageSize))
@@ -64,7 +64,7 @@ func ListRoles(c *gin.Context, request *crud.ListRequest) *acl.RolesResponseDTO 
 }
 
 func GetRole(c *gin.Context, request *acl.RoleRequestDTO) (*acl.RoleResponseDTO, error) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	allPrivilegeEntities := make([]*entity.PrivilegeEntity, 0)
 

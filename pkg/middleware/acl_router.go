@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/beeorm"
 
 	"github.com/coretrix/hitrix/example/entity"
 	"github.com/coretrix/hitrix/pkg/controller"

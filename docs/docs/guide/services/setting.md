@@ -22,7 +22,7 @@ import (
 )
 
 func SaveConfig(){
-    ormService := service.DI().ORMEngine()
+    ormService := service.DI().Orm()
 	ormService.Flush(&entity.SettingsEntity{
 		Key:       "user.login.threshold",
 		Value:     "3",
@@ -41,7 +41,7 @@ import (
 )
 
 func Login(currentCount uint64) error {
-    ormService := service.DI().ORMEngine()
+    ormService := service.DI().Orm()
     allowed, found := service.DI().Setting().GetUint64(ormService, "user.login.threshold")
     if found && currentCount> allowed{
         return errors.New("too many login attempt")

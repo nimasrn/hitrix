@@ -41,7 +41,7 @@ func RequestLogger(ginEngine *gin.Engine, extender func(context *gin.Context, re
 	ginEngine.Use(func(context *gin.Context) {
 		requestStart := time.Now()
 
-		ormService := service.DI().OrmEngineForContext(context.Request.Context())
+		ormService := service.DI().OrmForContext(context.Request.Context())
 		requestLoggerService := service.DI().RequestLogger()
 
 		requestLoggerEntity := requestLoggerService.LogRequest(

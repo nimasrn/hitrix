@@ -1,7 +1,9 @@
 package registry
 
 import (
-	"github.com/latolukasz/beeorm"
+	"errors"
+
+	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/service"
@@ -11,13 +13,16 @@ import (
 	"github.com/coretrix/hitrix/service/component/mail"
 )
 
-// ServiceProviderMail Be sure that you registered entity MailTrackerEntity
 func ServiceProviderMail(newFunc mail.NewSenderFunc) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.MailService,
 		Build: func(ctn di.Container) (interface{}, error) {
+			ormEngine := ctn.Get(service.ORMEngineService).(fluxaorm.Engine)
+			if ormEngine.Registry().EntitySchema("entity.MailTrackerEntity") == nil {
+				return nil, errors.New("you should register MailTrackerEntity")
+			}
+
 			return mail.NewSender(
-				ctn.Get(service.ORMConfigService).(beeorm.ValidatedRegistry),
 				ctn.Get(service.ConfigService).(config.IConfig),
 				ctn.Get(service.ClockService).(clock.IClock),
 				ctn.Get(service.ErrorLoggerService).(errorlogger.ErrorLogger),

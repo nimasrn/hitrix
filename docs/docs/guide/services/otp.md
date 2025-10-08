@@ -56,7 +56,7 @@ import (
 )
 
 func SendOTP(){
-    ormService := service.DI().OrmEngineForContext(context.Background())
+    ormService := service.DI().OrmForContext(context.Background())
     OTPService := service.DI().OTP()
 
     // add this if you want to use send OTP retry feature
@@ -86,7 +86,7 @@ import (
 )
 
 func Verify(){
-    ormService := service.DI().OrmEngineForContext(context.Background())
+    ormService := service.DI().OrmForContext(context.Background())
     OTPService := service.DI().OTP()
     code:="1234" //the code user entered
 

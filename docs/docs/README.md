@@ -13,7 +13,7 @@ The only thing you need to do is to use Hitrix and deliver fast to the business
 Built-in features:
 
 * It supports all features of [Gin Framework](https://github.com/gin-gonic/gin)
-* Integrated with [ORM](https://github.com/latolukasz/beeorm)
+* Integrated with [ORM](https://github.com/latolukasz/fluxaorm)
 * Follows [Dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern
 * Provides many DI services that makes your life easier. You can read more about them in our documentation
 * Provides [Dev panel](https://github.com/coretrix/dev-frontend) where you can monitor and manage your application(monitoring, error log, db alters redis status and so on)
@@ -81,7 +81,7 @@ func main() {
 		registry.ServiceProviderJWT(), //register JWT DI service
 		registry.ServiceProviderPassword(password.NewSimpleManager), //register pasword DI service
 	).RegisterDIRequestService(
-		registry.ServiceProviderOrmEngineForContext(), //register our ORM engine per context used in foreground processes 
+		registry.ServiceProviderOrmForContext(), //register our ORM engine per context used in foreground processes 
 	).RegisterRedisPools(&app.RedisPools{Persistent: "your pool here"}).
     Build()
     defer deferFunc()
@@ -123,7 +123,7 @@ If you want to use our dev panel and to be able to manage alters, error log, red
 package entity
 
 import (
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 )
 
 type DevPanelUserEntity struct {
@@ -149,7 +149,7 @@ After that you should register it to the `entity.Init` function
 ```go
 package entity
 
-import "github.com/latolukasz/beeorm"
+import "github.com/latolukasz/fluxaorm"
 
 func Init(registry *beeorm.Registry) {
 	registry.RegisterEntity(
@@ -200,8 +200,8 @@ If you want to access the registered DI services you can do in in that way:
 ```go
 service.DI().App() //access the app
 service.DI().Config() //access config
-service.DI().OrmEngine() //access global orm engine
-service.DI().OrmEngineForContext() //access reqeust orm engine
+service.DI().Orm() //access global orm engine
+service.DI().OrmForContext() //access reqeust orm engine
 service.DI().JWT() //access JWT
 service.DI().Password() //access JWT
 //...and so on

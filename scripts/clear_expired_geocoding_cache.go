@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service"
@@ -14,7 +14,7 @@ import (
 type ClearExpiredGeocodingCache struct {
 }
 
-func (script *ClearExpiredGeocodingCache) Run(_ context.Context, _ app.IExit, ormService *beeorm.Engine) {
+func (script *ClearExpiredGeocodingCache) Run(_ context.Context, _ app.IExit, ormService fluxaorm.Context) {
 	now := service.DI().Clock().Now()
 
 	fiveAM := time.Date(now.Year(), now.Month(), now.Day(), 5, 0, 0, 0, now.Location())

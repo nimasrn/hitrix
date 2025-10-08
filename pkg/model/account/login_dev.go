@@ -21,7 +21,7 @@ func (l *LoginDevForm) Login(c *gin.Context) (string, string, error) {
 		return "", "", err
 	}
 
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	passwordService := service.DI().Password()
 

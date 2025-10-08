@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/fatih/color"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/service"
@@ -39,7 +39,7 @@ func (script *ORMAltersScript) Description() string {
 	return "show all MySQL schema changes"
 }
 
-func (script *ORMAltersScript) Run(_ context.Context, exit app.IExit, ormService *beeorm.Engine) {
+func (script *ORMAltersScript) Run(_ context.Context, exit app.IExit, ormService fluxaorm.Context) {
 	alters := ormService.GetAlters()
 
 	for _, alter := range alters {

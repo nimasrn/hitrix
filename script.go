@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/TwiN/go-color"
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 	"github.com/ryanuber/columnize"
 
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -200,8 +200,8 @@ func (processor *BackgroundProcessor) runScript(s app.IScript) bool {
 
 		appService := service.DI().App()
 
-		ormService := service.DI().OrmEngine().Clone()
-		ormService.SetLogMetaData("Script", s.Description())
+		ormService := service.DI().Orm().Clone()
+		ormService.SetMetaData("Script", s.Description())
 
 		s.Run(appService.GlobalContext, &exit{s: processor.Server}, ormService)
 
@@ -210,26 +210,27 @@ func (processor *BackgroundProcessor) runScript(s app.IScript) bool {
 }
 
 func (processor *BackgroundProcessor) RunAsyncOrmConsumer() {
-	ormService := service.DI().OrmEngine().Clone()
-	appService := service.DI().App()
-
-	GoroutineWithRestart(func() {
-		log.Println("starting orm background consumer")
-
-		asyncConsumer := beeorm.NewBackgroundConsumer(ormService)
-		for {
-			if asyncConsumer.Digest(appService.GlobalContext) {
-				log.Println("orm background consumer exited successfully")
-
-				time.Sleep(time.Second * 30)
-
-				continue
-			}
-
-			log.Println("orm background consumer can not obtain lock, sleeping for 30 seconds")
-			time.Sleep(time.Second * 30)
-		}
-	})
+	//TODO Anton ORM: check
+	//ormService := service.DI().Orm().Clone()
+	//appService := service.DI().App()
+	//
+	//GoroutineWithRestart(func() {
+	//	log.Println("starting orm background consumer")
+	//
+	//	asyncConsumer := beeorm.NewBackgroundConsumer(ormService)
+	//	for {
+	//		if asyncConsumer.Digest(appService.GlobalContext) {
+	//			log.Println("orm background consumer exited successfully")
+	//
+	//			time.Sleep(time.Second * 30)
+	//
+	//			continue
+	//		}
+	//
+	//		log.Println("orm background consumer can not obtain lock, sleeping for 30 seconds")
+	//		time.Sleep(time.Second * 30)
+	//	}
+	//})
 }
 
 type FieldProcessor map[string]func(value interface{}) float64
@@ -243,10 +244,8 @@ func NanoToMilli(value interface{}) float64 {
 }
 
 func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor FieldProcessor) {
-	ormConfig := service.DI().OrmConfig()
-	entities := ormConfig.GetEntities()
-
-	if _, ok := entities["entity.MetricsEntity"]; !ok {
+	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
+	if ormEngine.Registry().EntitySchema("entity.MetricsEntity") == nil {
 		panic("you should register MetricsEntity")
 	}
 
@@ -281,8 +280,7 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor Fi
 	counter := 0
 
 	GoroutineWithRestart(func() {
-		ormService := service.DI().OrmEngine().Clone()
-		flusher := ormService.NewFlusher()
+		ormService := service.DI().Orm().Clone()
 
 		log.Println("starting metrics collector")
 
@@ -364,7 +362,7 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor Fi
 
 			data += "}"
 
-			flusher.Track(&entity.MetricsEntity{
+			fluxaorm.NewEntityFromSource(ormService, &entity.MetricsEntity{
 				AppName:   appName,
 				Metrics:   data,
 				CreatedAt: clockService.Now(),
@@ -373,7 +371,11 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor Fi
 			counter++
 
 			if counter == countFlusher {
-				flusher.Flush()
+				err := ormService.Flush()
+				if err != nil {
+					panic(err)
+				}
+
 				counter = 0
 			}
 		}
@@ -381,10 +383,8 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor Fi
 }
 
 func (processor *BackgroundProcessor) RunAsyncRequestLoggerCleaner() {
-	ormConfig := service.DI().OrmConfig()
-	entities := ormConfig.GetEntities()
-
-	if _, ok := entities["entity.RequestLoggerEntity"]; !ok {
+	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
+	if ormEngine.Registry().EntitySchema("entity.RequestLoggerEntity") == nil {
 		panic("you should register RequestLoggerEntity")
 	}
 
@@ -396,7 +396,7 @@ func (processor *BackgroundProcessor) RunAsyncRequestLoggerCleaner() {
 	}
 
 	GoroutineWithRestart(func() {
-		ormService := service.DI().OrmEngine().Clone()
+		ormService := service.DI().Orm().Clone()
 
 		log.Println("starting request logger cleaner")
 
@@ -409,36 +409,34 @@ func (processor *BackgroundProcessor) RunAsyncRequestLoggerCleaner() {
 	})
 }
 
-func removeAllOldRequestLoggerRows(ormService *beeorm.Engine, ttlInDays int) {
-	pager := beeorm.NewPager(1, 1000)
+func removeAllOldRequestLoggerRows(ormService fluxaorm.Context, ttlInDays int) {
+	pager := fluxaorm.NewPager(1, 1000)
 
 	for {
-		where := beeorm.NewWhere("CreatedAt < ?", service.DI().Clock().Now().AddDate(0, 0, -ttlInDays).Format(helper.TimeLayoutYMDHMS))
+		where := fluxaorm.NewWhere("CreatedAt < ?", service.DI().Clock().Now().AddDate(0, 0, -ttlInDays).Format(helper.TimeLayoutYMDHMS))
 
-		var requestLoggerEntities []*entity.RequestLoggerEntity
-		ormService.Search(where, pager, &requestLoggerEntities)
-
-		flusher := ormService.NewFlusher()
-
-		for _, requestLoggerEntity := range requestLoggerEntities {
-			flusher.Delete(requestLoggerEntity)
+		entityIterator := fluxaorm.Search[entity.RequestLoggerEntity](ormService, where, pager)
+		for entityIterator.Next() {
+			requestLoggerEntity := entityIterator.Entity()
+			fluxaorm.DeleteEntity(ormService, requestLoggerEntity)
 		}
 
-		flusher.Flush()
+		err := ormService.Flush()
+		if err != nil {
+			panic(err)
+		}
 
-		log.Printf("%d rows was removed", len(requestLoggerEntities))
+		log.Printf("%d rows was removed", entityIterator.Len())
 
-		if len(requestLoggerEntities) < pager.PageSize {
+		if entityIterator.Len() < pager.PageSize {
 			break
 		}
 	}
 }
 
 func (processor *BackgroundProcessor) RunAsyncMetricsCleaner() {
-	ormConfig := service.DI().OrmConfig()
-	entities := ormConfig.GetEntities()
-
-	if _, ok := entities["entity.MetricsEntity"]; !ok {
+	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
+	if ormEngine.Registry().EntitySchema("entity.MetricsEntity") == nil {
 		panic("you should register MetricsEntity")
 	}
 
@@ -450,7 +448,7 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCleaner() {
 	}
 
 	GoroutineWithRestart(func() {
-		ormService := service.DI().OrmEngine().Clone()
+		ormService := service.DI().Orm().Clone()
 
 		log.Println("starting metrics cleaner")
 
@@ -463,26 +461,26 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCleaner() {
 	})
 }
 
-func removeAllOldMetricsRows(ormService *beeorm.Engine, ttlInDays int) {
-	pager := beeorm.NewPager(1, 1000)
+func removeAllOldMetricsRows(ormService fluxaorm.Context, ttlInDays int) {
+	pager := fluxaorm.NewPager(1, 1000)
 
 	for {
-		where := beeorm.NewWhere("CreatedAt < ?", service.DI().Clock().Now().AddDate(0, 0, -ttlInDays).Format(helper.TimeLayoutYMDHMS))
+		where := fluxaorm.NewWhere("CreatedAt < ?", service.DI().Clock().Now().AddDate(0, 0, -ttlInDays).Format(helper.TimeLayoutYMDHMS))
 
-		var metricsEntities []*entity.MetricsEntity
-		ormService.Search(where, pager, &metricsEntities)
-
-		flusher := ormService.NewFlusher()
-
-		for _, requestLoggerEntity := range metricsEntities {
-			flusher.Delete(requestLoggerEntity)
+		entityIterator := fluxaorm.Search[entity.MetricsEntity](ormService, where, pager)
+		for entityIterator.Next() {
+			metricsEntity := entityIterator.Entity()
+			fluxaorm.DeleteEntity(ormService, metricsEntity)
 		}
 
-		flusher.Flush()
+		err := ormService.Flush()
+		if err != nil {
+			panic(err)
+		}
 
-		log.Printf("%d rows was removed", len(metricsEntities))
+		log.Printf("%d rows was removed", entityIterator.Len())
 
-		if len(metricsEntities) < pager.PageSize {
+		if entityIterator.Len() < pager.PageSize {
 			break
 		}
 	}

@@ -17,7 +17,7 @@ type ErrorLogController struct {
 }
 
 func (controller *ErrorLogController) GetErrors(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	type errorRow struct {
 		File    string
@@ -30,7 +30,7 @@ func (controller *ErrorLogController) GetErrors(c *gin.Context) {
 		Time    string
 	}
 
-	data := ormService.GetRedis().HGetAll(errorlogger.GroupError)
+	data := ormService.Engine().Registry().GetRedis().HGetAll(errorlogger.GroupError)
 
 	errorsList := map[string]*errorRow{}
 
@@ -75,7 +75,7 @@ func (controller *ErrorLogController) GetErrors(c *gin.Context) {
 }
 
 func (controller *ErrorLogController) DeleteError(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 
 	id := c.Param("id")
 	if len(id) <= 0 {
@@ -92,7 +92,7 @@ func (controller *ErrorLogController) DeleteError(c *gin.Context) {
 }
 
 func (controller *ErrorLogController) DeleteAllErrors(c *gin.Context) {
-	ormService := service.DI().OrmEngineForContext(c.Request.Context())
+	ormService := service.DI().OrmForContext(c.Request.Context())
 	ormService.GetRedis().Del(errorlogger.GroupError)
 
 	response.SuccessResponse(c, nil)

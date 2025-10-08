@@ -1,12 +1,12 @@
 package entity
 
 import (
-	"github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 )
 
-func Init(registry *beeorm.Registry) {
+func Init(registry fluxaorm.Registry) {
 	registry.RegisterEntity(
 		&APILogEntity{},
 		&AdminUserEntity{},
@@ -22,12 +22,12 @@ func Init(registry *beeorm.Registry) {
 		&entity.PermissionEntity{},
 	)
 
-	registry.RegisterEnumStruct("entity.FileStatusAll", entity.FileStatusAll)
-	registry.RegisterEnumStruct("entity.APILogTypeAll", APILogTypeAll)
-	registry.RegisterEnumStruct("entity.APILogStatusAll", APILogStatusAll)
-	registry.RegisterEnumStruct("entity.APILogStatusAll", APILogStatusAll)
-	registry.RegisterEnumStruct("entity.SMSTrackerTypeAll", entity.SMSTrackerTypeAll)
-	registry.RegisterEnumStruct("entity.OTPTrackerTypeAll", entity.OTPTrackerTypeAll)
-	registry.RegisterEnumStruct("entity.OTPTrackerGatewaySendStatusAll", entity.OTPTrackerGatewaySendStatusAll)
-	registry.RegisterEnumStruct("entity.OTPTrackerGatewayVerifyStatusAll", entity.OTPTrackerGatewayVerifyStatusAll)
+	//registry.RegisterEnumStruct("entity.FileStatusAll", entity.FileStatusAll)
+	//registry.RegisterEnumStruct("entity.APILogTypeAll", APILogTypeAll)
+	//registry.RegisterEnumStruct("entity.APILogStatusAll", APILogStatusAll)
+	//registry.RegisterEnumStruct("entity.APILogStatusAll", APILogStatusAll)
+	//registry.RegisterEnumStruct("entity.SMSTrackerTypeAll", entity.SMSTrackerTypeAll)
+	//registry.RegisterEnumStruct("entity.OTPTrackerTypeAll", entity.OTPTrackerTypeAll)
+	//registry.RegisterEnumStruct("entity.OTPTrackerGatewaySendStatusAll", entity.OTPTrackerGatewaySendStatusAll)
+	//registry.RegisterEnumStruct("entity.OTPTrackerGatewayVerifyStatusAll", entity.OTPTrackerGatewayVerifyStatusAll)
 }

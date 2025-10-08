@@ -1,10 +1,9 @@
 package redis
 
 import (
-	"sort"
 	"strings"
 
-	orm "github.com/latolukasz/beeorm"
+	"github.com/latolukasz/fluxaorm"
 )
 
 type Statistics struct {
@@ -12,11 +11,11 @@ type Statistics struct {
 	Info      map[string]string
 }
 
-func GetRedisStatistics(engine *orm.Engine, dragonflyDBPools map[string]struct{}) []*Statistics {
-	pools := getRedisPools(engine)
-	results := make([]*Statistics, len(pools))
+func GetRedisStatistics(ormService fluxaorm.Context, dragonflyDBPools map[string]struct{}) []*Statistics {
+	pools := ormService.Engine().Registry().RedisPools()
+	results := make([]*Statistics, 0)
 
-	for i, pool := range pools {
+	for pool, redis := range pools {
 		infoSection := "everything"
 
 		_, has := dragonflyDBPools[pool]
@@ -25,8 +24,8 @@ func GetRedisStatistics(engine *orm.Engine, dragonflyDBPools map[string]struct{}
 		}
 
 		poolStats := &Statistics{RedisPool: pool, Info: make(map[string]string)}
-		r := engine.GetRedis(pool)
-		info := r.Info(infoSection)
+
+		info := redis.Info(ormService, infoSection)
 		lines := strings.Split(info, "\r\n")
 
 		for _, line := range lines {
@@ -44,25 +43,8 @@ func GetRedisStatistics(engine *orm.Engine, dragonflyDBPools map[string]struct{}
 			poolStats.Info[row[0]] = val
 		}
 
-		results[i] = poolStats
+		results = append(results, poolStats)
 	}
 
 	return results
-}
-
-func getRedisPools(engine *orm.Engine) []string {
-	pools := make([]string, 0)
-	groupedByAddress := make(map[string][]string)
-
-	for code, v := range engine.GetRegistry().GetRedisPools() {
-		key := v.GetAddress()
-		groupedByAddress[key] = append(groupedByAddress[key], code)
-	}
-
-	for _, codes := range groupedByAddress {
-		sort.Strings(codes)
-		pools = append(pools, codes[0])
-	}
-
-	return pools
 }

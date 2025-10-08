@@ -2,13 +2,10 @@ package entity
 
 import (
 	"time"
-
-	"github.com/latolukasz/beeorm"
 )
 
 type RoleEntity struct {
-	beeorm.ORM   `orm:"table=roles;redisCache;redisSearch=search_pool"`
-	ID           uint64    `orm:"sortable"`
+	ID           uint64    `orm:"table=roles;redisCache;redisSearch=search_pool;sortable"`
 	Name         string    `orm:"required;searchable;unique=Name_FakeDelete:1"`
 	IsPredefined bool      `orm:"searchable"`
 	CreatedAt    time.Time `orm:"time=true"`

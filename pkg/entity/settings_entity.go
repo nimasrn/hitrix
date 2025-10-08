@@ -1,9 +1,5 @@
 package entity
 
-import (
-	"github.com/latolukasz/beeorm"
-)
-
 const (
 	SettingsValueTypeText     = "text"
 	SettingsValueTypeNumber   = "number"
@@ -38,14 +34,13 @@ var SettingsValueTypeAll = settingsValueType{
 }
 
 type SettingsEntity struct {
-	beeorm.ORM `orm:"table=settings;redisCache"`
-	ID         uint64
-	Key        string `orm:"required;unique=SettingsKey"`
-	Value      string `orm:"required;length=max"`
-	ValueType  string `orm:"enum=entity.SettingsValueTypeAll"`
-	Editable   bool
-	Deletable  bool
-	Hidden     bool
+	ID        uint64 `orm:"table=settings;redisCache"`
+	Key       string `orm:"required;unique=SettingsKey"`
+	Value     string `orm:"required;length=max"`
+	ValueType string `orm:"enum=entity.SettingsValueTypeAll"`
+	Editable  bool
+	Deletable bool
+	Hidden    bool
 
-	CachedQuerySettingsKey *beeorm.CachedQuery `queryOne:":Key = ?"`
+	//CachedQuerySettingsKey *beeorm.CachedQuery `queryOne:":Key = ?"`
 }
