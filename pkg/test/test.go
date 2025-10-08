@@ -16,7 +16,7 @@ import (
 	"github.com/coretrix/hitrix/service/component/app"
 )
 
-var dbAlters string
+var createTableExecuted bool = false
 var parallelTestID string
 
 type Environment struct {
@@ -105,35 +105,43 @@ func CreateAPIContext(
 }
 
 func executeAlters(ormService fluxaorm.Context) {
-	if dbAlters == "" {
-		dropTables(ormService.GetMysql())
+	if !createTableExecuted {
+		createTableExecuted = true
 
-		for _, alter := range ormService.GetAlters() {
-			dbAlters += alter.SQL
+		alters := fluxaorm.GetAlters(ormService)
+
+		for pool, db := range ormService.Engine().Registry().DBPools() {
+			dbAlters := ""
+			dropTables(ormService, db)
+			for _, alter := range alters {
+				if alter.Pool == pool {
+					dbAlters += alter.SQL
+				}
+			}
+
+			if dbAlters != "" {
+				db.Exec(ormService, dbAlters)
+			}
 		}
-
-		_, def := ormService.GetMysql().Query(dbAlters)
-		defer def()
 	} else {
-		truncateTables(ormService.GetMysql())
+		for _, db := range ormService.Engine().Registry().DBPools() {
+			truncateTables(ormService, db)
+		}
 	}
 
 	if os.Getenv("PARALLEL_TESTS") == "" || os.Getenv("PARALLEL_TESTS") == "false" {
-		ormService.GetLocalCache().Clear()
+		for _, localCache := range ormService.Engine().Registry().LocalCachePools() {
+			localCache.Clear(ormService)
+		}
 
-		pools := service.DI().App().RedisPools
-		ormService.GetRedis(pools.Stream).FlushDB()
-		ormService.GetRedis(pools.Persistent).FlushDB()
-		ormService.GetRedis(pools.Cache).FlushDB()
-
-		for _, pool := range pools.Search {
-			ormService.GetRedis(pool).FlushDB()
+		for _, redisCache := range ormService.Engine().Registry().RedisPools() {
+			redisCache.FlushAll(ormService)
 		}
 	}
 
-	altersSearch := ormService.GetRedisSearchIndexAlters()
+	altersSearch := fluxaorm.GetRedisSearchAlters(ormService)
 	for _, alter := range altersSearch {
-		alter.Execute()
+		alter.Exec(ormService)
 	}
 }
 
@@ -160,11 +168,11 @@ func getParallelID() string {
 	return parallelTestID
 }
 
-func dropTables(dbService *beeorm.DB) {
+func dropTables(ormService fluxaorm.Context, db fluxaorm.DB) {
 	var query string
-	rows, deferF := dbService.Query(
-		"SELECT CONCAT('DROP TABLE IF EXISTS ',table_schema,'.',table_name,';') AS query " +
-			"FROM information_schema.tables WHERE table_schema IN ('" + dbService.GetPoolConfig().GetDatabase() + "')",
+	rows, deferF := db.Query(ormService,
+		"SELECT CONCAT('DROP TABLE IF EXISTS ',table_schema,'.',table_name,';') AS query "+
+			"FROM information_schema.tables WHERE table_schema IN ('"+db.GetConfig().GetDatabaseName()+"')",
 	)
 
 	defer deferF()
@@ -177,17 +185,18 @@ func dropTables(dbService *beeorm.DB) {
 			queries += query
 		}
 
-		_, def := dbService.Query("SET FOREIGN_KEY_CHECKS=0;" + queries + "SET FOREIGN_KEY_CHECKS=1")
+		_, def := db.Query(ormService, "SET FOREIGN_KEY_CHECKS=0;"+queries+"SET FOREIGN_KEY_CHECKS=1")
 
 		defer def()
 	}
 }
 
-func truncateTables(dbService *beeorm.DB) {
+// TODO Krasi ORM: delete -> truncate
+func truncateTables(ormService fluxaorm.Context, db fluxaorm.DB) {
 	var query string
-	rows, deferF := dbService.Query(
-		"SELECT CONCAT('delete from  ',table_schema,'.',table_name,';' , 'ALTER TABLE ', table_schema,'.',table_name , ' AUTO_INCREMENT = 1;') AS query " +
-			"FROM information_schema.tables WHERE table_schema IN ('" + dbService.GetPoolConfig().GetDatabase() + "');",
+	rows, deferF := db.Query(ormService,
+		"SELECT CONCAT('delete from  ',table_schema,'.',table_name,';' , 'ALTER TABLE ', table_schema,'.',table_name , ' AUTO_INCREMENT = 1;') AS query "+
+			"FROM information_schema.tables WHERE table_schema IN ('"+db.GetConfig().GetDatabaseName()+"');",
 	)
 
 	defer deferF()
@@ -200,7 +209,7 @@ func truncateTables(dbService *beeorm.DB) {
 			queries += query
 		}
 
-		_, def := dbService.Query("SET FOREIGN_KEY_CHECKS=0;" + queries + "SET FOREIGN_KEY_CHECKS=1")
+		_, def := db.Query(ormService, "SET FOREIGN_KEY_CHECKS=0;"+queries+"SET FOREIGN_KEY_CHECKS=1")
 		defer def()
 	}
 }

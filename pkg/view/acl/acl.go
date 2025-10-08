@@ -7,22 +7,16 @@ import (
 )
 
 func ACL(ormService fluxaorm.Context, roleEntity *entity.RoleEntity, resource string, permissions ...string) bool {
-	resourceEntity := &entity.ResourceEntity{}
-	if !ormService.CachedSearchOne(resourceEntity, "CachedQueryName", resource) {
+	resourceEntity, found := fluxaorm.GetByUniqueIndex[entity.ResourceEntity](ormService, "Name", resource)
+	if !found {
 		return false
 	}
 
-	allPermissionEntities := make([]*entity.PermissionEntity, 0)
-	ormService.CachedSearch(
-		&allPermissionEntities,
-		"CachedQueryResourceID",
-		beeorm.NewPager(1, 1000),
-		resourceEntity.ID,
-	)
+	allPermissionEntitiesIterator := fluxaorm.GetByIndex[entity.PermissionEntity](ormService, "ResourceID", resourceEntity.ID)
 
 	permissionEntities := make([]*entity.PermissionEntity, 0)
 
-	for _, permissionEntity := range allPermissionEntities {
+	for _, permissionEntity := range allPermissionEntitiesIterator.All() {
 		for _, permission := range permissions {
 			if permissionEntity.Name == permission {
 				permissionEntities = append(permissionEntities, permissionEntity)
@@ -40,13 +34,16 @@ func ACL(ormService fluxaorm.Context, roleEntity *entity.RoleEntity, resource st
 		permissionIDs[i] = permissionEntity.ID
 	}
 
-	privilegeEntity := &entity.PrivilegeEntity{}
-	ormService.CachedSearchOne(
-		privilegeEntity,
-		"CachedQueryPrivilegeRoleIDResourceID",
+	privilegeEntity, found := fluxaorm.GetByUniqueIndex[entity.PrivilegeEntity](
+		ormService,
+		"RoleID_ResourceID_FakeDelete",
 		roleEntity.ID,
 		resourceEntity.ID,
+		0,
 	)
+	if !found {
+		return false
+	}
 
 	hasPrivilege := false
 

@@ -15,6 +15,7 @@ const ModeProd = "prod"
 const ModeQA = "qa"
 
 type IDevPanelUserEntity interface {
+	GetID() uint64
 	GetUsername() string
 	GetPassword() string
 }

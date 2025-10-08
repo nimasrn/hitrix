@@ -73,31 +73,36 @@ type ErrorLogger interface {
 	LogWarning(errData interface{})
 	LogWarningWithRequest(c *gin.Context, errData interface{})
 	LogPanicWithRequest(c *gin.Context, errData interface{})
-	GetErrors() []*EventRow
+	GetErrors() []EventRow
 	DeleteError(id string)
-	GetWarnings() []*EventRow
+	DeleteAllErrors()
+	GetWarnings() []EventRow
 	DeleteWarning(id string)
+	DeleteAllWarnings()
 }
 
 type RedisErrorLogger struct {
-	redisStorage   fluxaorm.RedisCache
+	redis          fluxaorm.RedisCache
 	sentryService  sentry.ISentry
 	slackService   slack.Slack
 	appService     *app.App
+	ormService     fluxaorm.Context
 	requestBodyKey interface{}
 }
 
 func NewRedisErrorLogger(
 	appService *app.App,
 	ormService fluxaorm.Context,
+	redis fluxaorm.RedisCache,
 	slackService slack.Slack,
 	sentryService sentry.ISentry,
 	requestBodyKey interface{},
 ) ErrorLogger {
 	return &RedisErrorLogger{
-		redisStorage:   ormService.Redis(),
-		slackService:   slackService,
 		appService:     appService,
+		ormService:     ormService,
+		redis:          redis,
+		slackService:   slackService,
 		sentryService:  sentryService,
 		requestBodyKey: requestBodyKey,
 	}
@@ -123,24 +128,32 @@ func (e *RedisErrorLogger) LogPanicWithRequest(c *gin.Context, errData interface
 	e.log(errData, 4, c, false)
 }
 
-func (e *RedisErrorLogger) GetErrors() map[string]*EventRow {
+func (e *RedisErrorLogger) GetErrors() []EventRow {
 	return e.get(GroupError)
 }
 
 func (e *RedisErrorLogger) DeleteError(id string) {
-	e.redisStorage.HDel(GroupError, id)
-	e.redisStorage.HDel(GroupError, id+":time")
-	e.redisStorage.HDel(GroupError, id+":counter")
+	e.redis.HDel(e.ormService, GroupError, id)
+	e.redis.HDel(e.ormService, GroupError, id+":time")
+	e.redis.HDel(e.ormService, GroupError, id+":counter")
 }
 
-func (e *RedisErrorLogger) GetWarnings() map[string]*EventRow {
+func (e *RedisErrorLogger) DeleteAllErrors() {
+	e.redis.Del(e.ormService, GroupError)
+}
+
+func (e *RedisErrorLogger) GetWarnings() []EventRow {
 	return e.get(GroupWarning)
 }
 
 func (e *RedisErrorLogger) DeleteWarning(id string) {
-	e.redisStorage.HDel(GroupWarning, id)
-	e.redisStorage.HDel(GroupWarning, id+":time")
-	e.redisStorage.HDel(GroupWarning, id+":counter")
+	e.redis.HDel(e.ormService, GroupWarning, id)
+	e.redis.HDel(e.ormService, GroupWarning, id+":time")
+	e.redis.HDel(e.ormService, GroupWarning, id+":counter")
+}
+
+func (e *RedisErrorLogger) DeleteAllWarnings() {
+	e.redis.Del(e.ormService, GroupWarning)
 }
 
 func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Context, warning bool) {
@@ -194,9 +207,9 @@ func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Conte
 
 	config := e.getEventConfig(warning)
 
-	e.redisStorage.HSet(fluxaorm.Context(), config.redisKey, errorKey, marshalValue)
-	e.redisStorage.HSet(config.redisKey, errorKey+":time", time.Now().Unix())
-	counter := e.redisStorage.HIncrBy(config.redisKey, errorKey+":counter", 1)
+	e.redis.HSet(e.ormService, config.redisKey, errorKey, marshalValue)
+	e.redis.HSet(e.ormService, config.redisKey, errorKey+":time", time.Now().Unix())
+	counter := e.redis.HIncrBy(e.ormService, config.redisKey, errorKey+":counter", 1)
 
 	logg := math.Log10(float64(counter))
 
@@ -222,8 +235,8 @@ func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Conte
 	}
 }
 
-func (e *RedisErrorLogger) get(group string) map[string]*EventRow {
-	eventsData := e.redisStorage.HGetAll(group)
+func (e *RedisErrorLogger) get(group string) []EventRow {
+	eventsData := e.redis.HGetAll(e.ormService, group)
 
 	eventsList := map[string]*EventRow{}
 
@@ -246,6 +259,7 @@ func (e *RedisErrorLogger) get(group string) map[string]*EventRow {
 
 			err := json.Unmarshal([]byte(value), eventData)
 			if err != nil {
+				eventsList[splitKeys[0]].Type = group
 				eventsList[splitKeys[0]].Request = ""
 				eventsList[splitKeys[0]].Stack = "unmarshal panic"
 				eventsList[splitKeys[0]].File = "error_logger.go"
@@ -256,6 +270,7 @@ func (e *RedisErrorLogger) get(group string) map[string]*EventRow {
 				continue
 			}
 
+			eventsList[splitKeys[0]].Type = group
 			eventsList[splitKeys[0]].Request = string(eventData.Request)
 			eventsList[splitKeys[0]].Stack = string(eventData.Stack)
 			eventsList[splitKeys[0]].File = eventData.File
@@ -279,7 +294,12 @@ func (e *RedisErrorLogger) get(group string) map[string]*EventRow {
 		}
 	}
 
-	return eventsList
+	list := make([]EventRow, len(eventsList))
+	for _, value := range eventsList {
+		list = append(list, *value)
+	}
+
+	return list
 }
 
 func (e *RedisErrorLogger) getEventConfig(warning bool) eventConfig {

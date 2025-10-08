@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	beeorm "github.com/latolukasz/fluxaorm"
+	"github.com/latolukasz/fluxaorm"
 
 	//"github.com/latolukasz/fluxaorm"
 	//"github.com/latolukasz/fluxaorm/tools"
@@ -172,22 +171,26 @@ func (controller *DevPanelController) DeleteRedisStreamAction(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetAlters(c *gin.Context) {
-	ormService := service.DI().OrmForContext(c.Request.Context())
-
-	alters := ormService.GetAlters()
-	result := make([]string, len(alters))
-
 	force := c.Query("force")
+
+	ormService := service.DI().OrmForContext(c.Request.Context())
+	dbPools := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine).Registry().DBPools()
+
 	if force != "" {
-		redisService := ormService.GetRedis()
-		redisService.FlushDB()
+		ormService.Engine().Redis(service.DI().App().RedisPools.Cache).FlushDB(ormService)
 	}
 
-	for i, alter := range alters {
-		if force != "" {
-			alter.Exec()
-		} else {
-			result[i] = alter.SQL
+	result := make([]string, 0)
+
+	for pool := range dbPools {
+		for _, alter := range fluxaorm.GetAlters(ormService) {
+			if alter.Pool == pool {
+				if force != "" {
+					alter.Exec(ormService)
+				} else {
+					result = append(result, alter.SQL)
+				}
+			}
 		}
 	}
 
@@ -232,19 +235,24 @@ func (controller *DevPanelController) GetRedisSearchStatistics(c *gin.Context) {
 func (controller *DevPanelController) GetRedisSearchAlters(c *gin.Context) {
 	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	altersSearch := ormService.GetRedisSearchIndexAlters()
+	altersSearch := fluxaorm.GetRedisSearchAlters(ormService)
 	result := make([]map[string]string, len(altersSearch))
 
 	force := c.Query("force")
 	for i, alter := range altersSearch {
 		if force != "" {
-			alter.Execute()
+			alter.Exec(ormService)
 		} else {
 			result[i] = map[string]string{
-				"Query":   alter.Query,
-				"Changes": strings.Join(alter.Changes, " | "),
+				"Query": alter.IndexDefinition,
+				//"Changes": strings.Join(alter.Changes, " | "), TODO Krasi ORM: check changes?
 			}
 		}
+	}
+
+	redisSearchAlters := fluxaorm.GetRedisSearchAlters(ormService)
+	for _, alter := range redisSearchAlters {
+		alter.Exec(ormService)
 	}
 
 	response.SuccessResponse(c, result)
@@ -271,7 +279,7 @@ func (controller *DevPanelController) GetRedisSearchIndexes(c *gin.Context) {
 
 	for searchPool, poolIndices := range indices {
 		for _, indexName := range poolIndices {
-			info := ormService.Engine().Redis(searchPool).Info(ormService, indexName)
+			info, _ := ormService.Engine().Redis(searchPool).FTInfo(ormService, indexName)
 
 			indexList = append(
 				indexList,
@@ -352,7 +360,7 @@ func (controller *DevPanelController) PostRedisSearchForceReindexAll(c *gin.Cont
 						}
 					}()
 
-					ormService.GetRedisSearch(pool).ForceReindex(index)
+					ormService.Engine().Redis(pool).ForceReindex(index)
 					wg.Done()
 				}(searchPool, index)
 			}
@@ -362,7 +370,7 @@ func (controller *DevPanelController) PostRedisSearchForceReindexAll(c *gin.Cont
 	} else {
 		for searchPool, poolIndices := range indices {
 			for _, index := range poolIndices {
-				ormService.GetRedisSearch(searchPool).ForceReindex(index)
+				ormService.Engine().Redis(searchPool).ForceReindex(index)
 			}
 		}
 	}
@@ -385,27 +393,22 @@ func (controller *DevPanelController) PostRedisSearchIndexInfo(c *gin.Context) {
 		panic("stream pool is not defined")
 	}
 
-	var info *beeorm.RedisSearchIndexInfo
-
 	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.GetRedisSearch(searchPool).ListIndices()
+		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
 		for _, poolIndexName := range poolIndices {
 			if poolIndexName == indexName {
-				info = ormService.GetRedisSearch(searchPool).Info(indexName)
+				info, _ := ormService.Engine().Redis(searchPool).FTInfo(ormService, indexName)
+
+				response.SuccessResponse(c, info)
 
 				break
 			}
 		}
 	}
-
-	response.SuccessResponse(c, info)
 }
 
 func (controller *DevPanelController) GetFeatureFlags(c *gin.Context) {
 	ormService := service.DI().OrmForContext(c.Request.Context())
-
-	var featureFlagEntities []*entity.FeatureFlagEntity
-	ormService.CachedSearch(&featureFlagEntities, "CachedQueryAll", beeorm.NewPager(1, 1000))
 
 	type feature struct {
 		Name       string
@@ -413,10 +416,12 @@ func (controller *DevPanelController) GetFeatureFlags(c *gin.Context) {
 		Enabled    bool
 	}
 
-	result := make([]*feature, len(featureFlagEntities))
+	entityIterator := fluxaorm.GetAll[entity.FeatureFlagEntity](ormService)
 
-	for i, featureFlagEntity := range featureFlagEntities {
-		result[i] = &feature{
+	result := make([]feature, entityIterator.Len())
+
+	for i, featureFlagEntity := range entityIterator.All() {
+		result[i] = feature{
 			Name:       featureFlagEntity.Name,
 			Registered: featureFlagEntity.Registered,
 			Enabled:    featureFlagEntity.Enabled,
@@ -436,20 +441,20 @@ func (controller *DevPanelController) PostEnableFeatureFlag(c *gin.Context) {
 
 	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	query := beeorm.NewRedisSearchQuery()
-	query.FilterString("Name", name)
-
-	featureFlagEntity := &entity.FeatureFlagEntity{}
-	found := ormService.RedisSearchOne(featureFlagEntity, query)
-
+	featureFlagEntity, found := fluxaorm.GetByUniqueIndex[entity.FeatureFlagEntity](ormService, "Name", name)
 	if !found {
 		response.ErrorResponseGlobal(c, "feature is missing", nil)
 
 		return
 	}
 
+	featureFlagEntity = fluxaorm.EditEntity(ormService, featureFlagEntity)
 	featureFlagEntity.Enabled = true
-	ormService.Flush(featureFlagEntity)
+
+	err := ormService.Flush()
+	if err != nil {
+		panic(err)
+	}
 
 	response.SuccessResponse(c, nil)
 }
@@ -464,20 +469,20 @@ func (controller *DevPanelController) PostDisableFeatureFlag(c *gin.Context) {
 
 	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	query := beeorm.NewRedisSearchQuery()
-	query.FilterString("Name", name)
-
-	featureFlagEntity := &entity.FeatureFlagEntity{}
-	found := ormService.RedisSearchOne(featureFlagEntity, query)
-
+	featureFlagEntity, found := fluxaorm.GetByUniqueIndex[entity.FeatureFlagEntity](ormService, "Name", name)
 	if !found {
 		response.ErrorResponseGlobal(c, "feature is missing", nil)
 
 		return
 	}
 
+	featureFlagEntity = fluxaorm.EditEntity(ormService, featureFlagEntity)
 	featureFlagEntity.Enabled = false
-	ormService.Flush(featureFlagEntity)
+
+	err := ormService.Flush()
+	if err != nil {
+		panic(err)
+	}
 
 	response.SuccessResponse(c, nil)
 }

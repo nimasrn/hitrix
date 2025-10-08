@@ -3,7 +3,9 @@ package account
 import (
 	"errors"
 
+	"github.com/coretrix/hitrix/example/entity"
 	"github.com/gin-gonic/gin"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/binding"
 	"github.com/coretrix/hitrix/pkg/view/account"
@@ -23,16 +25,13 @@ func (l *LoginDevForm) Login(c *gin.Context) (string, string, error) {
 
 	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	passwordService := service.DI().Password()
-
-	devPanelUserEntity := service.DI().App().DevPanel.UserEntity
-	ok := ormService.CachedSearchOne(devPanelUserEntity, "UserEmailIndex", l.Username)
-
-	if !ok {
+	devPanelUserEntity, found := fluxaorm.GetByUniqueIndex[entity.DevPanelUserEntity](ormService, "Username", l.Username)
+	if !found {
 		return "", "", errors.New("invalid username or password")
 	}
 
-	if !passwordService.VerifyPassword(l.Password, devPanelUserEntity.GetPassword()) {
+	//TODO Krasi ORM: check possible null
+	if !service.DI().Password().VerifyPassword(l.Password, devPanelUserEntity.Password) {
 		return "", "", errors.New("invalid username or password")
 	}
 

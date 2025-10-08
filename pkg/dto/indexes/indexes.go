@@ -6,6 +6,6 @@ type ResponseDTOList struct {
 
 type Index struct {
 	Name      string
-	TotalDocs uint64
+	TotalDocs int
 	TotalSize uint64
 }

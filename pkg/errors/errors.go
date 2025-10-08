@@ -1,10 +1,7 @@
 package errors
 
 import (
-	goErrors "errors"
-
 	"github.com/go-playground/validator/v10"
-	"github.com/latolukasz/fluxaorm"
 )
 
 type FieldErrors map[string]string
@@ -72,16 +69,17 @@ func (fe FieldErrors) Error() string {
 	return result
 }
 
-func HandleFlushWithCheckError(err, duplicatedKeyError error) error {
-	_, ok := err.(*beeorm.DuplicatedKeyError)
-	if ok {
-		return duplicatedKeyError
-	}
-
-	foreignKeyErr, ok := err.(*beeorm.ForeignKeyError)
-	if ok {
-		return foreignKeyErr
-	}
-
-	return goErrors.New("unexpected error happened")
-}
+//TODO Krasi ORM: check
+//func HandleFlushWithCheckError(err, duplicatedKeyError error) error {
+//	_, ok := err.(*fluxaorm.DuplicatedKeyError)
+//	if ok {
+//		return duplicatedKeyError
+//	}
+//
+//	foreignKeyErr, ok := err.(*fluxaorm.ForeignKeyError)
+//	if ok {
+//		return foreignKeyErr
+//	}
+//
+//	return goErrors.New("unexpected error happened")
+//}

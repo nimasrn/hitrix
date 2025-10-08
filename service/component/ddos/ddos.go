@@ -2,19 +2,22 @@ package ddos
 
 import (
 	"strconv"
+	"time"
 
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
 )
 
 type IDDOS interface {
-	ProtectManyAttempts(redis *beeorm.RedisCache, protectCriterion string, maxAttempts int, ttl int) bool
+	ProtectManyAttempts(appService *app.App, ormService fluxaorm.Context, protectCriterion string, maxAttempts int, ttl int) bool
 }
 
 type DDOS struct {
 }
 
-func (t *DDOS) ProtectManyAttempts(redis *beeorm.RedisCache, protectCriterion string, maxAttempts int, ttl int) bool {
-	attempts, has := redis.Get("ddos_" + protectCriterion)
+func (t *DDOS) ProtectManyAttempts(appService *app.App, ormService fluxaorm.Context, protectCriterion string, maxAttempts int, ttl int) bool {
+	redis := ormService.Engine().Redis(appService.RedisPools.Cache)
+	attempts, has := redis.Get(ormService, "ddos_"+protectCriterion)
 	count := 0
 
 	if len(attempts) > 0 {
@@ -30,7 +33,7 @@ func (t *DDOS) ProtectManyAttempts(redis *beeorm.RedisCache, protectCriterion st
 		return false
 	}
 
-	redis.Set("ddos_"+protectCriterion, count+1, ttl)
+	redis.Set(ormService, "ddos_"+protectCriterion, count+1, time.Duration(ttl)*time.Second)
 
 	return true
 }

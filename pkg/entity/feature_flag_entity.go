@@ -5,8 +5,8 @@ import (
 )
 
 type FeatureFlagEntity struct {
-	ID         uint64     `orm:"table=feature_flags;localCache"`
-	Name       string     `orm:"length=100;required;unique=Name"`
+	ID         uint64     `orm:"table=feature_flags;localCache;cached"`
+	Name       string     `orm:"length=100;required;unique=Name;cached"`
 	Registered bool       `orm:"index=Registered_Enabled:1"`
 	Enabled    bool       `orm:"index=Registered_Enabled:2"`
 	UpdatedAt  *time.Time `orm:"time=true"`

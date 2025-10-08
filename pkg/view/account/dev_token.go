@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/coretrix/hitrix/example/entity"
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
 
@@ -34,9 +35,10 @@ func GenerateDevTokenAndRefreshToken(ormService fluxaorm.Context, userID uint64)
 		return "", "", err
 	}
 
-	redisService := ormService.GetRedis()
+	redisService := ormService.Engine().Redis(appService.RedisPools.Cache)
 	// #nosec
 	redisService.Set(
+		ormService,
 		fmt.Sprintf(
 			"%x",
 			md5.Sum([]byte(token)),
@@ -46,6 +48,7 @@ func GenerateDevTokenAndRefreshToken(ormService fluxaorm.Context, userID uint64)
 	)
 	// #nosec
 	redisService.Set(
+		ormService,
 		fmt.Sprintf(
 			"%x",
 			md5.Sum([]byte(refreshToken)),
@@ -101,18 +104,17 @@ func IsValidDevToken(c *gin.Context, token string) error {
 func verifyDevUser(c *gin.Context, userID uint64, token string) error {
 	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	redisService := ormService.GetRedis()
 	// #nosec
-	v, has := redisService.Get(fmt.Sprintf("%x", md5.Sum([]byte(token))))
-
+	v, has := ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Get(
+		ormService,
+		fmt.Sprintf("%x", md5.Sum([]byte(token))),
+	)
 	if !has || strings.Compare(v, token) != 0 {
 		return fmt.Errorf("token doesnt match")
 	}
 
-	userEntity := service.DI().App().DevPanel.UserEntity
-	has = ormService.LoadByID(userID, userEntity)
-
-	if !has {
+	userEntity, found := fluxaorm.GetByID[entity.DevPanelUserEntity](ormService, userID)
+	if !found {
 		return errors.New("invalid user")
 	}
 
