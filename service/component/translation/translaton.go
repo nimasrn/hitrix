@@ -116,8 +116,15 @@ func (u *translationService) GetTextWithVars(
 	}
 
 	if !helper.EqualString(translationTextEntity.Vars, keys) {
-		translationTextEntity.Vars = keys
-		ormService.FlushLazy(translationTextEntity)
+		err := fluxaorm.EditEntityField(ormService, translationTextEntity, "Vars", keys)
+		if err != nil {
+			panic(err)
+		}
+
+		err = ormService.Flush()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if translationTextEntity.Status == entity.TranslationStatusNew.String() {
