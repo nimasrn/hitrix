@@ -71,7 +71,7 @@ func (fe FieldErrors) Error() string {
 
 //TODO Krasi ORM: check
 //func HandleFlushWithCheckError(err, duplicatedKeyError error) error {
-//	_, ok := err.(*fluxaorm.DuplicatedKeyError)
+//	_, ok := err.(fluxaorm.DuplicatedKeyError)
 //	if ok {
 //		return duplicatedKeyError
 //	}

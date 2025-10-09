@@ -2,7 +2,6 @@ package translation
 
 import (
 	"context"
-	"errors"
 
 	"github.com/coretrix/hitrix/pkg/dto/translation"
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -23,9 +22,9 @@ func Create(ctx context.Context, request *translation.RequestCreateTranslation) 
 	fluxaorm.NewEntityFromSource(ormService, newTranslationEntity)
 
 	//TODO Krasi ORM: check for error
-	err := ormService.Flush()
+	err := ormService.FlushWithCheck()
 	if err != nil {
-		return nil, errors.New("text with this lang and key already exists")
+		return nil, err
 		//return nil, errors.HandleFlushWithCheckError(
 		//	err,
 		//	errors.HandleCustomErrors(map[string]string{"Lang": "translation text with this lang and key already exists"}),
