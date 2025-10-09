@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/latolukasz/fluxaorm"
 
-	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/helper"
 	errorlogger "github.com/coretrix/hitrix/service/component/error_logger"
 )
@@ -32,20 +32,26 @@ func NewTranslationService(errorLoggerService errorlogger.ErrorLogger) ITranslat
 }
 
 func (u *translationService) GetText(ormService fluxaorm.Context, lang entity.TranslationTextLang, key entity.TranslationTextKey) string {
-	translationTextEntity := &entity.TranslationTextEntity{}
-
-	found := ormService.CachedSearchOne(
-		translationTextEntity,
-		"CachedQueryLangKey",
+	translationTextEntity, found := fluxaorm.GetByUniqueIndex[entity.TranslationTextEntity](
+		ormService,
+		"Lang_Key",
 		lang.String(),
-		key.String())
+		key.String(),
+	)
 
 	if !found {
-		translationTextEntity.Status = entity.TranslationStatusNew.String()
-		translationTextEntity.Lang = lang.String()
-		translationTextEntity.Key = key.String()
+		newTranslationTextEntity := entity.TranslationTextEntity{
+			Lang:   lang.String(),
+			Key:    key.String(),
+			Status: entity.TranslationStatusNew.String(),
+		}
 
-		ormService.Flush(translationTextEntity)
+		fluxaorm.NewEntityFromSource(ormService, newTranslationTextEntity)
+
+		err := ormService.Flush()
+		if err != nil {
+			panic(err)
+		}
 
 		return key.String()
 	}
@@ -84,21 +90,27 @@ func (u *translationService) GetTextWithVars(
 
 	sort.Strings(keys)
 
-	translationTextEntity := &entity.TranslationTextEntity{}
-
-	found := ormService.CachedSearchOne(
-		translationTextEntity,
-		"CachedQueryLangKey",
+	translationTextEntity, found := fluxaorm.GetByUniqueIndex[entity.TranslationTextEntity](
+		ormService,
+		"Lang_Key",
 		lang.String(),
-		key.String())
+		key.String(),
+	)
 
 	if !found {
-		translationTextEntity.Status = entity.TranslationStatusNew.String()
-		translationTextEntity.Lang = lang.String()
-		translationTextEntity.Key = key.String()
-		translationTextEntity.Vars = keys
+		newTranslationTextEntity := entity.TranslationTextEntity{
+			Lang:   lang.String(),
+			Key:    key.String(),
+			Status: entity.TranslationStatusNew.String(),
+			Vars:   keys,
+		}
 
-		ormService.Flush(translationTextEntity)
+		fluxaorm.NewEntityFromSource(ormService, newTranslationTextEntity)
+
+		err := ormService.Flush()
+		if err != nil {
+			panic(err)
+		}
 
 		return key.String()
 	}

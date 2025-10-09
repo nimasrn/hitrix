@@ -35,8 +35,8 @@ var TranslationStatusAll = translationStatus{
 
 type TranslationTextEntity struct {
 	ID     uint64 `orm:"table=translation_texts;log=log_db_pool;localCache;redisCache"`
-	Lang   string `orm:"required;unique=Lang_Key:1"`
-	Key    string `orm:"required;unique=Lang_Key:2"`
+	Lang   string `orm:"required;unique=Lang_Key:1;cached"`
+	Key    string `orm:"required;unique=Lang_Key:2;cached"`
 	Status string `orm:"required;enum=entity.TranslationStatusAll"`
 	Text   string `orm:"length=max"`
 	Vars   []string
