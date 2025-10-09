@@ -58,12 +58,19 @@ func (g *DBLogger) LogRequest(ormService fluxaorm.Context, appName, url string, 
 		}
 	}
 
-	ormService.Flush(requestLoggerEntity)
+	fluxaorm.NewEntityFromSource(ormService, requestLoggerEntity)
+
+	err = ormService.Flush()
+	if err != nil {
+		panic(err)
+	}
 
 	return requestLoggerEntity
 }
 
 func (g *DBLogger) LogResponse(ormService fluxaorm.Context, requestLoggerEntity *entity.RequestLoggerEntity, responseBody []byte, status int) {
+	requestLoggerEntity = fluxaorm.EditEntity(ormService, requestLoggerEntity)
+
 	requestLoggerEntity.Status = status
 
 	if len(responseBody) > 0 {
@@ -81,7 +88,10 @@ func (g *DBLogger) LogResponse(ormService fluxaorm.Context, requestLoggerEntity 
 		requestLoggerEntity.Log = append(requestLoggerEntity.Log, log[0:16000]...)
 	}
 
-	ormService.Flush(requestLoggerEntity)
+	err := ormService.Flush()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func isText(contentType string) bool {
