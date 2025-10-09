@@ -22,9 +22,7 @@ func (s *serviceSetting) Get(ormService fluxaorm.Context, key string) (*entity.S
 		return cachedEntity, true
 	}
 
-	settingEntity := &entity.SettingsEntity{}
-
-	found := ormService.CachedSearchOne(settingEntity, "Key", key)
+	settingEntity, found := fluxaorm.GetByUniqueIndex[entity.SettingsEntity](ormService, "SettingsKey", key)
 	if !found {
 		return nil, false
 	}

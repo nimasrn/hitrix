@@ -35,7 +35,7 @@ var SettingsValueTypeAll = settingsValueType{
 
 type SettingsEntity struct {
 	ID        uint64 `orm:"table=settings;redisCache"`
-	Key       string `orm:"required;unique=SettingsKey"`
+	Key       string `orm:"required;unique=SettingsKey;cached"`
 	Value     string `orm:"required;length=max"`
 	ValueType string `orm:"enum=entity.SettingsValueTypeAll"`
 	Editable  bool
