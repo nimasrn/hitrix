@@ -31,10 +31,7 @@ func createDevPanelUser(input map[string]interface{}) *entity.DevPanelUserEntity
 
 	fluxaorm.NewEntityFromSource(ormService, devPanelUserEntity)
 
-	err := ormService.Flush()
-	if err != nil {
-		panic(err)
-	}
+	ormService.Flush()
 
 	return devPanelUserEntity
 }

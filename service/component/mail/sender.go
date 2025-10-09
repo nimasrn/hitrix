@@ -160,10 +160,7 @@ func (s *Sender) createTrackingEntity(ormService fluxaorm.Context, message *Mess
 		mailTrackerEntity.SenderError = err.Error()
 		mailTrackerEntity.Status = entity.MailTrackerStatusError
 
-		err := ormService.Flush()
-		if err != nil {
-			panic(err)
-		}
+		ormService.Flush()
 
 		s.ErrorLoggerService.LogError(err)
 

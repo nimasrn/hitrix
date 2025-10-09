@@ -75,10 +75,7 @@ func CreateFile(ctx context.Context, newFile *file.RequestDTOUploadImage) (*file
 
 	fluxaorm.NewEntityFromSource(ormService, fileEntity)
 
-	err = ormService.Flush()
-	if err != nil {
-		panic(err)
-	}
+	ormService.Flush()
 
 	bucketConfig, err := service.DI().OSService().GetNamespaceBucketConfig(namespace)
 	if err != nil {

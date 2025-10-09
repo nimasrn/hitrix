@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/dongri/phonenumber"
 	"github.com/latolukasz/fluxaorm"
 
@@ -58,6 +59,7 @@ type Verify struct {
 
 type Config struct {
 	ClockService     clock.IClock
+	AppService       app.App
 	SMSConfig        SMSConfig
 	MailConfig       MailConfig
 	CodeLength       int
@@ -75,6 +77,7 @@ type MailConfig struct {
 
 type OTP struct {
 	ClockService               clock.IClock
+	AppService                 app.App
 	GeneratorService           generator.IGenerator
 	SMSGatewayPriority         []IOTPSMSGateway
 	SMSGatewayName             map[string]IOTPSMSGateway
@@ -93,6 +96,7 @@ func NewOTP(config Config) *OTP {
 		MailSender:                 config.MailConfig.Sender,
 		GeneratorService:           config.GeneratorService,
 		ClockService:               config.ClockService,
+		AppService:                 config.AppService,
 	}
 
 	for _, gateway := range config.SMSConfig.SMSGateways {
@@ -311,7 +315,7 @@ func (o *OTP) verifyEmail(ormService fluxaorm.Context, verify Verify) (bool, boo
 }
 
 func (o *OTP) getOTPTrackerEntity(ormService fluxaorm.Context, verifyKey string) (*entity.OTPTrackerEntity, error) {
-	otpTrackerEntityIDString, has := ormService.GetRedis().Get(o.getRedisKey(verifyKey))
+	otpTrackerEntityIDString, has := ormService.Engine().Redis(o.AppService.RedisPools.Cache).Get(ormService, o.getRedisKey(verifyKey))
 
 	if !has {
 		return nil, errors.New("OTP: redis key expired")
@@ -323,9 +327,7 @@ func (o *OTP) getOTPTrackerEntity(ormService fluxaorm.Context, verifyKey string)
 		return nil, errors.New("OTP: " + err.Error())
 	}
 
-	otpTrackerEntity := &entity.OTPTrackerEntity{}
-
-	found := ormService.LoadByID(otpTrackerEntityID, otpTrackerEntity)
+	otpTrackerEntity, found := fluxaorm.GetByID[entity.OTPTrackerEntity](ormService, otpTrackerEntityID)
 	if !found {
 		return nil, errors.New("OTP tracker not found")
 	}

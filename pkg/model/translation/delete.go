@@ -19,10 +19,7 @@ func Delete(ctx context.Context, id uint64) error {
 
 	fluxaorm.DeleteEntity(ormService, translationTextEntity)
 
-	err := ormService.Flush()
-	if err != nil {
-		panic(err)
-	}
+	ormService.Flush()
 
 	return nil
 }

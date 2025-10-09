@@ -77,10 +77,7 @@ func (s *Sender) SendMessage(ormService fluxaorm.Context, message *Message) erro
 	if s.TrackerEnabled {
 		fluxaorm.NewEntityFromSource(ormService, smsTrackerEntity)
 
-		err := ormService.Flush()
-		if err != nil {
-			panic(err)
-		}
+		ormService.Flush()
 	}
 
 	if status != success {

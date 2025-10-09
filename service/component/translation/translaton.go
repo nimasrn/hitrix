@@ -48,10 +48,7 @@ func (u *translationService) GetText(ormService fluxaorm.Context, lang entity.Tr
 
 		fluxaorm.NewEntityFromSource(ormService, newTranslationTextEntity)
 
-		err := ormService.Flush()
-		if err != nil {
-			panic(err)
-		}
+		ormService.Flush()
 
 		return key.String()
 	}
@@ -107,10 +104,7 @@ func (u *translationService) GetTextWithVars(
 
 		fluxaorm.NewEntityFromSource(ormService, newTranslationTextEntity)
 
-		err := ormService.Flush()
-		if err != nil {
-			panic(err)
-		}
+		ormService.Flush()
 
 		return key.String()
 	}
@@ -121,10 +115,7 @@ func (u *translationService) GetTextWithVars(
 			panic(err)
 		}
 
-		err = ormService.Flush()
-		if err != nil {
-			panic(err)
-		}
+		ormService.Flush()
 	}
 
 	if translationTextEntity.Status == entity.TranslationStatusNew.String() {

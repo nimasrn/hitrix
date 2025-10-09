@@ -50,8 +50,7 @@ func TestOTPRetry(t *testing.T) {
 
 	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	gateway := &mocks.FakeGateway{}
 	gateway.On("SendOTP", phone, code).Return("request1", "response1", nil)
@@ -115,8 +114,7 @@ func TestOTPWithMultipleRetry(t *testing.T) {
 
 	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	gateway := &mocks.FakeGateway{}
 	gateway.On("SendOTP", phone, code).Return("request1", "response1", errors.New("error")).Once()
@@ -183,8 +181,7 @@ func TestOTPRetryWithMaxReached(t *testing.T) {
 
 	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	gateway := &mocks.FakeGateway{}
 	gateway.On("SendOTP", phone, code).Return("request1", "response1", errors.New("error")).Once()

@@ -34,8 +34,8 @@ func TestListResourcesAction(t *testing.T) {
 	ormService := service.DI().Orm().Clone()
 
 	resource1 := CreateResource(ormService, map[string]interface{}{})
-	err := ormService.Flush()
-	assert.Nil(t, err)
+
+	ormService.Flush()
 
 	resource2 := CreateResource(ormService, map[string]interface{}{"Name": "car"})
 
@@ -46,12 +46,11 @@ func TestListResourcesAction(t *testing.T) {
 	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource2, "Name": "lock"})
 	CreatePermission(ormService, map[string]interface{}{"ResourceID": resource2, "Name": "drive"})
 
-	err = ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	got := &acl.ResourcesResponseDTO{}
 
-	err = SendHTTPRequest(ctx, http.MethodGet, "/acl/resources/", false, got)
+	err := SendHTTPRequest(ctx, http.MethodGet, "/acl/resources/", false, got)
 	assert.Nil(t, err)
 
 	want := &acl.ResourcesResponseDTO{
@@ -119,8 +118,7 @@ func TestListRolesAction(t *testing.T) {
 	CreateRole(ormService, map[string]interface{}{"Name": "super-admin"})
 	CreateRole(ormService, map[string]interface{}{"Name": "super-mega-admin"})
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	got := &acl.RolesResponseDTO{}
 
@@ -129,7 +127,7 @@ func TestListRolesAction(t *testing.T) {
 		PageSize: pointer.Int(2),
 	}
 
-	err = SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/roles/", request, false, got)
+	err := SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/roles/", request, false, got)
 	assert.Nil(t, err)
 
 	want := &acl.RolesResponseDTO{
@@ -195,12 +193,11 @@ func TestGetRoleAction(t *testing.T) {
 		permission2,
 	}})
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	got := &acl.RoleResponseDTO{}
 
-	err = SendHTTPRequest(ctx, http.MethodGet, "/acl/role/1/", false, got)
+	err := SendHTTPRequest(ctx, http.MethodGet, "/acl/role/1/", false, got)
 	assert.Nil(t, err)
 
 	want := &acl.RoleResponseDTO{
@@ -248,8 +245,7 @@ func TestCreateRoleAction(t *testing.T) {
 	permission1 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "create"})
 	permission2 := CreatePermission(ormService, map[string]interface{}{"ResourceID": resource, "Name": "view"})
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	request := &acl.CreateOrUpdateRoleRequestDTO{
 		Name: "admin",
@@ -300,8 +296,7 @@ func TestUpdateRoleAction(t *testing.T) {
 		permission2,
 	}})
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
 	request := &acl.CreateOrUpdateRoleRequestDTO{
 		Name: "super-admin",
@@ -356,10 +351,9 @@ func TestDeleteRoleAction(t *testing.T) {
 		permission2,
 	}})
 
-	err := ormService.Flush()
-	assert.Nil(t, err)
+	ormService.Flush()
 
-	err = SendHTTPRequest(ctx, http.MethodDelete, "/acl/role/1/", false, nil)
+	err := SendHTTPRequest(ctx, http.MethodDelete, "/acl/role/1/", false, nil)
 	assert.Nil(t, err)
 
 	roleEntity, found := fluxaorm.GetByID[entity.RoleEntity](ormService, 1)
@@ -392,15 +386,14 @@ func TestPostAssignRoleToUserAction(t *testing.T) {
 
 	user := CreateAdminUser(ormService, map[string]interface{}{"RoleID": role1})
 
-	err := ormService.Flush()
-	assert.Nil(t, user)
+	ormService.Flush()
 
 	request := &acl.AssignRoleToUserRequestDTO{
 		UserID: user.ID,
 		RoleID: role2.ID,
 	}
 
-	err = SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/assign-role/", request, false, nil)
+	err := SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/assign-role/", request, false, nil)
 	assert.Nil(t, err)
 
 	userEntity, found := fluxaorm.GetByID[entityExample.AdminUserEntity](ormService, 1)

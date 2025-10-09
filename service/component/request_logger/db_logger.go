@@ -60,10 +60,7 @@ func (g *DBLogger) LogRequest(ormService fluxaorm.Context, appName, url string, 
 
 	fluxaorm.NewEntityFromSource(ormService, requestLoggerEntity)
 
-	err = ormService.Flush()
-	if err != nil {
-		panic(err)
-	}
+	ormService.Flush()
 
 	return requestLoggerEntity
 }
@@ -88,10 +85,7 @@ func (g *DBLogger) LogResponse(ormService fluxaorm.Context, requestLoggerEntity 
 		requestLoggerEntity.Log = append(requestLoggerEntity.Log, log[0:16000]...)
 	}
 
-	err := ormService.Flush()
-	if err != nil {
-		panic(err)
-	}
+	ormService.Flush()
 }
 
 func isText(contentType string) bool {

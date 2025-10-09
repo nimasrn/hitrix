@@ -371,10 +371,7 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor Fi
 			counter++
 
 			if counter == countFlusher {
-				err := ormService.Flush()
-				if err != nil {
-					panic(err)
-				}
+				ormService.Flush()
 
 				counter = 0
 			}
@@ -421,10 +418,7 @@ func removeAllOldRequestLoggerRows(ormService fluxaorm.Context, ttlInDays int) {
 			fluxaorm.DeleteEntity(ormService, requestLoggerEntity)
 		}
 
-		err := ormService.Flush()
-		if err != nil {
-			panic(err)
-		}
+		ormService.Flush()
 
 		log.Printf("%d rows was removed", entityIterator.Len())
 
@@ -473,10 +467,7 @@ func removeAllOldMetricsRows(ormService fluxaorm.Context, ttlInDays int) {
 			fluxaorm.DeleteEntity(ormService, metricsEntity)
 		}
 
-		err := ormService.Flush()
-		if err != nil {
-			panic(err)
-		}
+		ormService.Flush()
 
 		log.Printf("%d rows was removed", entityIterator.Len())
 

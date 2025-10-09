@@ -451,10 +451,7 @@ func (controller *DevPanelController) PostEnableFeatureFlag(c *gin.Context) {
 	featureFlagEntity = fluxaorm.EditEntity(ormService, featureFlagEntity)
 	featureFlagEntity.Enabled = true
 
-	err := ormService.Flush()
-	if err != nil {
-		panic(err)
-	}
+	ormService.Flush()
 
 	response.SuccessResponse(c, nil)
 }
@@ -479,10 +476,7 @@ func (controller *DevPanelController) PostDisableFeatureFlag(c *gin.Context) {
 	featureFlagEntity = fluxaorm.EditEntity(ormService, featureFlagEntity)
 	featureFlagEntity.Enabled = false
 
-	err := ormService.Flush()
-	if err != nil {
-		panic(err)
-	}
+	ormService.Flush()
 
 	response.SuccessResponse(c, nil)
 }
