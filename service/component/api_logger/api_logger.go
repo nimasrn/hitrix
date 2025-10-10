@@ -13,7 +13,6 @@ type IAPILogger interface {
 }
 
 type ILogEntity interface {
-	beeorm.Entity
 	SetID(value uint64)
 	SetType(value string)
 	SetStatus(value string)

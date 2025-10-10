@@ -206,10 +206,12 @@ func (o *OTP) sendSMS(ormService fluxaorm.Context, send Send) (string, error) {
 			otpTrackerEntity.GatewaySendStatus = entity.OTPTrackerGatewaySendStatusSent
 		}
 
-		ormService.Flush(otpTrackerEntity)
+		fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+
+		ormService.Flush()
 
 		if err == nil {
-			ormService.GetRedis().Set(o.getRedisKey(phone.Number), otpTrackerEntity.ID, helper.Hour)
+			ormService.Engine().Redis(o.AppService.RedisPools.Cache).Set(ormService, o.getRedisKey(phone.Number), otpTrackerEntity.ID, helper.Hour)
 
 			break
 		} else if o.SMSRetryOTP {
@@ -261,7 +263,9 @@ func (o *OTP) sendEmail(ormService fluxaorm.Context, send Send) (string, error) 
 		otpTrackerEntity.GatewaySendStatus = entity.OTPTrackerGatewaySendStatusSent
 	}
 
-	ormService.Flush(otpTrackerEntity)
+	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+
+	ormService.Flush()
 
 	ormService.GetRedis().Set(o.getRedisKey(email), otpTrackerEntity.ID, helper.Hour)
 
