@@ -90,7 +90,7 @@ func (s *Sender) SendTemplate(ormService fluxaorm.Context, message *Message) err
 		mailTrackerEntity.SenderError = err.Error()
 		mailTrackerEntity.Status = entity.MailTrackerStatusError
 
-		ormService.Flush(mailTrackerEntity)
+		ormService.Flush()
 
 		s.ErrorLoggerService.LogError(err)
 
@@ -99,7 +99,7 @@ func (s *Sender) SendTemplate(ormService fluxaorm.Context, message *Message) err
 
 	mailTrackerEntity.Status = entity.MailTrackerStatusSuccess
 
-	ormService.Flush(mailTrackerEntity)
+	ormService.Flush()
 
 	return nil
 }
@@ -125,7 +125,7 @@ func (s *Sender) SendTemplateWithAttachments(ormService fluxaorm.Context, messag
 		mailTrackerEntity.SenderError = err.Error()
 		mailTrackerEntity.Status = entity.MailTrackerStatusError
 
-		ormService.Flush(mailTrackerEntity)
+		ormService.Flush()
 
 		s.ErrorLoggerService.LogError(err)
 
@@ -134,7 +134,7 @@ func (s *Sender) SendTemplateWithAttachments(ormService fluxaorm.Context, messag
 
 	mailTrackerEntity.Status = entity.MailTrackerStatusSuccess
 
-	ormService.Flush(mailTrackerEntity)
+	ormService.Flush()
 
 	return nil
 }

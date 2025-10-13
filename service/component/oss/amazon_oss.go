@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -22,12 +23,13 @@ import (
 type AmazonOSS struct {
 	client       *s3.S3
 	clockService clock.IClock
+	appService   app.App
 	ctx          context.Context
 	buckets      bucketsConfig
 	namespaces   namespacesConfig
 }
 
-func NewAmazonOSS(configService config.IConfig, clockService clock.IClock, namespaces Namespaces) (IProvider, error) {
+func NewAmazonOSS(configService config.IConfig, clockService clock.IClock, appService app.App, namespaces Namespaces) (IProvider, error) {
 	disableSSL := false
 
 	if val, ok := configService.Bool("oss.amazon.disable_ssl"); ok && val {
@@ -71,6 +73,7 @@ func NewAmazonOSS(configService config.IConfig, clockService clock.IClock, names
 	return &AmazonOSS{
 		client:       s3.New(newSession),
 		clockService: clockService,
+		appService:   appService,
 		ctx:          context.Background(),
 		buckets:      bucketsConfiguration,
 		namespaces:   namespacesConfiguration,
@@ -161,7 +164,7 @@ func (ossStorage *AmazonOSS) UploadObjectFromByte(
 		return entity.FileObject{}, err
 	}
 
-	storageCounter := getStorageCounter(ormService, bucketConfig)
+	storageCounter := getStorageCounter(ormService, ossStorage.appService, bucketConfig)
 
 	objectKey := ossStorage.getObjectKey(namespace, storageCounter, extension)
 

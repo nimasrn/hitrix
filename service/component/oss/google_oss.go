@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
@@ -24,6 +25,7 @@ import (
 type GoogleOSS struct {
 	client       *storage.Client
 	clockService clock.IClock
+	appService   app.App
 	ctx          context.Context
 	buckets      bucketsConfig
 	namespaces   namespacesConfig
@@ -31,7 +33,7 @@ type GoogleOSS struct {
 	privateKey   []byte
 }
 
-func NewGoogleOSS(configService config.IConfig, clockService clock.IClock, namespaces Namespaces) (IProvider, error) {
+func NewGoogleOSS(configService config.IConfig, clockService clock.IClock, appService app.App, namespaces Namespaces) (IProvider, error) {
 	ctx := context.Background()
 
 	if !helper.ExistsInDir(".oss.json", configService.GetFolderPath()) {
@@ -57,6 +59,7 @@ func NewGoogleOSS(configService config.IConfig, clockService clock.IClock, names
 	return &GoogleOSS{
 		client:       client,
 		clockService: clockService,
+		appService:   appService,
 		ctx:          ctx,
 		buckets:      bucketsConfiguration,
 		namespaces:   namespacesConfiguration,
@@ -223,14 +226,11 @@ func (ossStorage *GoogleOSS) UploadObjectFromByte(
 		return entity.FileObject{}, err
 	}
 
-	storageCounter := getStorageCounter(ormService, bucketConfig)
+	storageCounter := getStorageCounter(ormService, ossStorage.appService, bucketConfig)
 
 	objectKey := ossStorage.getObjectKey(namespace, storageCounter, extension)
 
 	ossBucketObject := ossStorage.client.Bucket(bucketConfig.Name).Object(objectKey).NewWriter(ossStorage.ctx)
-
-	//TODO Remove
-	ossStorage.setObjectContentType(ossBucketObject, extension)
 
 	_, err = ossBucketObject.Write(objectContent)
 	if err != nil {
@@ -259,15 +259,4 @@ func (ossStorage *GoogleOSS) DeleteObject(namespace Namespace, object *entity.Fi
 
 func (ossStorage *GoogleOSS) getObjectKey(namespace Namespace, storageCounter uint64, fileExtension string) string {
 	return namespace.String() + "/" + strconv.FormatUint(storageCounter, 10) + fileExtension
-}
-
-// TODO Remove
-func (ossStorage *GoogleOSS) setObjectContentType(writer *storage.Writer, extension string) {
-	if writer == nil {
-		return
-	}
-
-	if extension == ".svg" && writer.ObjectAttrs.ContentType == "" {
-		writer.ObjectAttrs.ContentType = "image/svg+xml"
-	}
 }

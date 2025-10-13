@@ -34,7 +34,6 @@ const (
 )
 
 type AuthenticatableEntity interface {
-	beeorm.Entity
 	CanAuthenticate() bool
 }
 
@@ -128,19 +127,24 @@ func (t *Authentication) VerifySocialLogin(ctx context.Context, source, token st
 func (t *Authentication) AuthenticateOTP(
 	ormService fluxaorm.Context,
 	phone string,
-	entity OTPProviderEntity,
+	entity app.IDevPanelUserEntity,
 ) (accessToken string, refreshToken string, err error) {
-	q := &beeorm.RedisSearchQuery{}
-	q.FilterString(entity.GetPhoneFieldName(), phone)
-
-	found := ormService.RedisSearchOne(entity, q)
-	if !found {
-		return "", "", errors.New("invalid credentials")
-	}
-
-	if !entity.CanAuthenticate() {
-		return "", "", errors.New("cannot authenticate this entity")
-	}
+	//ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
+	//entitySchema := ormEngine.Registry().EntitySchema(entity)
+	//spew.Dump(1, entitySchema.GetTableName())
+	//entitySchema.
+	//q := &beeorm.RedisSearchQuery{}
+	//q.FilterString(entity.GetPhoneFieldName(), phone)
+	//
+	//found := ormService.RedisSearchOne(entity, q)
+	//found := entitySchema.
+	//if !found {
+	//	return "", "", errors.New("invalid credentials")
+	//}
+	//
+	//if !entity.CanAuthenticate() {
+	//	return "", "", errors.New("cannot authenticate this entity")
+	//}
 
 	return t.generateUserTokens(ormService, entity.GetID())
 }

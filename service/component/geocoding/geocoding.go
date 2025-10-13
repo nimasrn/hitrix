@@ -2,7 +2,7 @@ package geocoding
 
 import (
 	"context"
-	"errors"
+
 	"googlemaps.github.io/maps"
 
 	//nolint //G501: Blocklisted import crypto/md5: weak cryptographic primitive, but just fine for caching
@@ -75,8 +75,14 @@ func (g *Geocoding) Geocode(ctx context.Context, ormService fluxaorm.Context, ad
 	address = strings.TrimSpace(address)
 
 	if g.useCaching {
-		geocodingEntity := &entity.GeocodingCacheEntity{}
-		if ormService.CachedSearchOne(geocodingEntity, "CachedQueryAddressHashLanguage", g.getAddressHash(address), language) {
+		geocodingEntity, found := fluxaorm.GetByUniqueIndex[entity.GeocodingCacheEntity](
+			ormService,
+			"AddressHash_Language",
+			g.getAddressHash(address),
+			language,
+		)
+
+		if found {
 			return &Address{
 				Found:                    true,
 				FromCache:                true,
@@ -99,7 +105,7 @@ func (g *Geocoding) Geocode(ctx context.Context, ormService fluxaorm.Context, ad
 	if g.useCaching && geocodedAddress.Found {
 		now := g.clock.Now()
 
-		ormService.Flush(&entity.GeocodingCacheEntity{
+		ormService.NewEntity(&entity.GeocodingCacheEntity{
 			Lat:                      geocodedAddress.Location.Lat,
 			Lng:                      geocodedAddress.Location.Lng,
 			AdministrativeAreaLevel1: geocodedAddress.AdministrativeAreaLevel1,
@@ -112,6 +118,8 @@ func (g *Geocoding) Geocode(ctx context.Context, ormService fluxaorm.Context, ad
 			ExpiresAt:                now.Add(time.Duration(g.getCacheTTL(g.cacheTTLMinDays, g.cacheTTLMaxDays)) * time.Hour * 24),
 			CreatedAt:                now,
 		})
+
+		ormService.Flush()
 	}
 
 	return geocodedAddress, nil
@@ -134,9 +142,13 @@ func (g *Geocoding) ReverseGeocode(ctx context.Context, ormService fluxaorm.Cont
 			return nil, err
 		}
 
-		reverseGeocodingCacheEntity := &entity.GeocodingReverseCacheEntity{}
-
-		found := ormService.CachedSearchOne(reverseGeocodingCacheEntity, "CachedQueryLatLngLanguage", cacheLat, cacheLng, language)
+		reverseGeocodingCacheEntity, found := fluxaorm.GetByUniqueIndex[entity.GeocodingReverseCacheEntity](
+			ormService,
+			"Lat_Lng_Language",
+			cacheLng,
+			cacheLng,
+			language,
+		)
 		if found {
 			return &Address{
 				Found:                    true,
@@ -161,7 +173,7 @@ func (g *Geocoding) ReverseGeocode(ctx context.Context, ormService fluxaorm.Cont
 	if g.useCaching && geocodedAddress.Found {
 		now := g.clock.Now()
 
-		err := ormService.FlushWithCheck(&entity.GeocodingReverseCacheEntity{
+		ormService.NewEntity(&entity.GeocodingReverseCacheEntity{
 			Lat:                      cacheLat,
 			Lng:                      cacheLng,
 			AdministrativeAreaLevel1: geocodedAddress.AdministrativeAreaLevel1,
@@ -174,21 +186,7 @@ func (g *Geocoding) ReverseGeocode(ctx context.Context, ormService fluxaorm.Cont
 			CreatedAt:                now,
 		})
 
-		//TODO Krasi: needed due to issue when localCache and redisCache used together
-		if err != nil {
-			var duplicateKeyError *beeorm.DuplicatedKeyError
-			if errors.As(err, &duplicateKeyError) {
-				if duplicateKeyError.Index != "geocoding_reverse_cache.Lat_Lng_Language" {
-					panic(err)
-				}
-
-				geocodedAddress.Found = true
-
-				return geocodedAddress, nil
-			}
-
-			panic(err)
-		}
+		ormService.Flush()
 	}
 
 	return geocodedAddress, nil

@@ -267,7 +267,7 @@ func (o *OTP) sendEmail(ormService fluxaorm.Context, send Send) (string, error) 
 
 	ormService.Flush()
 
-	ormService.GetRedis().Set(o.getRedisKey(email), otpTrackerEntity.ID, helper.Hour)
+	ormService.Engine().Redis(o.AppService.RedisPools.Persistent).Set(ormService, o.getRedisKey(email), otpTrackerEntity.ID, helper.Hour)
 
 	return code, err
 }
@@ -283,6 +283,8 @@ func (o *OTP) verifySMS(ormService fluxaorm.Context, verify Verify) (bool, bool,
 	var otpRequestValid bool
 	var otpCodeValid bool
 
+	ormService.EditEntity(otpTrackerEntity)
+
 	otpTrackerEntity.GatewayVerifyRequest, otpTrackerEntity.GatewayVerifyResponse, otpRequestValid, otpCodeValid, err =
 		gateway.VerifyOTP(verify.Phone, verify.Code, otpTrackerEntity.Code)
 
@@ -296,7 +298,7 @@ func (o *OTP) verifySMS(ormService fluxaorm.Context, verify Verify) (bool, bool,
 		otpTrackerEntity.GatewayVerifyStatus = entity.OTPTrackerGatewayVerifyStatusSuccess
 	}
 
-	ormService.Flush(otpTrackerEntity)
+	ormService.Flush()
 
 	return otpRequestValid, otpCodeValid, err
 }
@@ -307,13 +309,15 @@ func (o *OTP) verifyEmail(ormService fluxaorm.Context, verify Verify) (bool, boo
 		return false, false, err
 	}
 
+	ormService.EditEntity(otpTrackerEntity)
+
 	if otpTrackerEntity.Code == verify.Code {
 		otpTrackerEntity.GatewayVerifyStatus = entity.OTPTrackerGatewayVerifyStatusSuccess
 	} else {
 		otpTrackerEntity.GatewayVerifyStatus = entity.OTPTrackerGatewayVerifyStatusInvalidCode
 	}
 
-	ormService.Flush(otpTrackerEntity)
+	ormService.Flush()
 
 	return true, otpTrackerEntity.Code == verify.Code, nil
 }

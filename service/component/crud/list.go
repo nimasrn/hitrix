@@ -522,8 +522,8 @@ func fetchDependencyValueInt(dependentCol *Column, cols []*Column, request *List
 }
 
 // GenerateListRedisSearchQuery TODO : add full text queries when supported by hitrix
-func (c *Crud) GenerateListRedisSearchQuery(params SearchParams) *beeorm.RedisSearchQuery {
-	query := &beeorm.RedisSearchQuery{}
+func (c *Crud) GenerateListRedisSearchQuery(params SearchParams) *fluxaorm.RedisSearchFilter {
+	query := &fluxaorm.RedisSearchQuery{}
 	for field, value := range params.NumberFilters {
 		query.FilterInt(field, value)
 	}

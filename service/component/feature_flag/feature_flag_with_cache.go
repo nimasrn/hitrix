@@ -49,9 +49,7 @@ func (s *serviceFeatureFlagWithCache) IsActive(ormService fluxaorm.Context, name
 		}
 	}
 
-	featureFlagEntity := &entity.FeatureFlagEntity{}
-
-	found := ormService.CachedSearchOne(featureFlagEntity, "CachedQueryName", name)
+	featureFlagEntity, found := fluxaorm.GetByUniqueIndex[entity.FeatureFlagEntity](ormService, "Name", name)
 	if !found {
 		return false
 	}

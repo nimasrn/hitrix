@@ -23,6 +23,8 @@ func (l *mysqlDBLog) LogStart(ormService fluxaorm.Context, logType string, reque
 		logEntity = l.logEntity
 	} else {
 		logEntity = reflect.New(reflect.ValueOf(l.logEntity).Elem().Type()).Interface().(ILogEntity)
+
+		ormService.NewEntity(logEntity)
 	}
 
 	logEntity.SetType(logType)
@@ -30,7 +32,7 @@ func (l *mysqlDBLog) LogStart(ormService fluxaorm.Context, logType string, reque
 	logEntity.SetStatus("new")
 	logEntity.SetCreatedAt(time.Now())
 
-	ormService.Flush(logEntity)
+	ormService.Flush()
 
 	l.currentLog = logEntity
 }
@@ -41,11 +43,14 @@ func (l *mysqlDBLog) LogError(ormService fluxaorm.Context, message string, respo
 	}
 
 	currentLog := l.currentLog
+
+	ormService.EditEntity(currentLog)
+
 	currentLog.SetMessage(message)
 	currentLog.SetResponse(response)
 	currentLog.SetStatus("failed")
 
-	ormService.Flush(currentLog)
+	ormService.Flush()
 }
 
 func (l *mysqlDBLog) LogSuccess(ormService fluxaorm.Context, response interface{}) {
@@ -55,8 +60,10 @@ func (l *mysqlDBLog) LogSuccess(ormService fluxaorm.Context, response interface{
 
 	currentLog := l.currentLog
 
+	ormService.EditEntity(currentLog)
+
 	currentLog.SetStatus("completed")
 	currentLog.SetResponse(response)
 
-	ormService.Flush(currentLog)
+	ormService.Flush()
 }

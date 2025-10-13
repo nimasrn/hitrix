@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
@@ -174,33 +175,34 @@ func getObjectCDNURL(bucketConfig *BucketConfig, storageKey string) string {
 	return replacer.Replace(bucketConfig.CDNURL)
 }
 
-func getStorageCounter(ormService fluxaorm.Context, bucketConfig *BucketConfig) uint64 {
+func getStorageCounter(ormService fluxaorm.Context, appService app.App, bucketConfig *BucketConfig) uint64 {
 	bucketID := bucketConfig.StorageCounterDatabaseID
 
-	ossBucketCounterEntity := &entity.OSSBucketCounterEntity{}
-
-	locker := ormService.GetRedis().GetLocker()
+	locker := ormService.Engine().Redis(appService.RedisPools.Cache).GetLocker()
 	lockerKey := "locker_oss_counters_bucket_" + strconv.FormatUint(bucketID, 10)
 
-	lock, hasLock := locker.Obtain(lockerKey, 2*time.Second, 5*time.Second)
+	lock, hasLock := locker.Obtain(ormService, lockerKey, 2*time.Second, 5*time.Second)
 	if !hasLock {
 		panic("Failed to obtain lock for :" + lockerKey)
 	}
 
-	defer lock.Release()
+	defer lock.Release(ormService)
 
-	has := ormService.LoadByID(bucketID, ossBucketCounterEntity)
+	ossBucketCounterEntity, has := fluxaorm.GetByID[entity.OSSBucketCounterEntity](ormService, bucketID)
+	if has {
+		ormService.EditEntity(ossBucketCounterEntity)
 
-	if !has {
-		ossBucketCounterEntity.ID = bucketID
-		ossBucketCounterEntity.Counter = 1
-	} else {
 		ossBucketCounterEntity.Counter = ossBucketCounterEntity.Counter + 1
+	} else {
+		ossBucketCounterEntity = fluxaorm.NewEntityWithID[entity.OSSBucketCounterEntity](ormService, bucketID)
+		ossBucketCounterEntity.Counter = 1
+
+		fluxaorm.NewEntityWithID[entity.OSSBucketCounterEntity, uint64](ormService, bucketID)
 	}
 
-	ormService.Flush(ossBucketCounterEntity)
+	ormService.Flush()
 
-	if lock.TTL() == 0 {
+	if lock.TTL(ormService) == 0 {
 		panic("lock lost for :" + lockerKey)
 	}
 
