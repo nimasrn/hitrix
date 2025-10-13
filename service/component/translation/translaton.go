@@ -45,7 +45,7 @@ func (u *translationService) GetText(ormService fluxaorm.Context, lang entity.Tr
 			Status: entity.TranslationStatusNew.String(),
 		}
 
-		fluxaorm.NewEntityFromSource(ormService, newTranslationTextEntity)
+		ormService.NewEntity(newTranslationTextEntity)
 
 		ormService.Flush()
 
@@ -100,7 +100,7 @@ func (u *translationService) GetTextWithVars(
 			Vars:   keys,
 		}
 
-		fluxaorm.NewEntityFromSource(ormService, newTranslationTextEntity)
+		ormService.NewEntity(newTranslationTextEntity)
 
 		ormService.Flush()
 
@@ -108,7 +108,8 @@ func (u *translationService) GetTextWithVars(
 	}
 
 	if !helper.EqualString(translationTextEntity.Vars, keys) {
-		translationTextEntity = fluxaorm.EditEntity(ormService, translationTextEntity)
+		ormService.EditEntity(translationTextEntity)
+
 		translationTextEntity.Vars = keys
 
 		ormService.Flush()

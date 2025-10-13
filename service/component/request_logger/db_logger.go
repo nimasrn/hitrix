@@ -58,7 +58,7 @@ func (g *DBLogger) LogRequest(ormService fluxaorm.Context, appName, url string, 
 		}
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, requestLoggerEntity)
+	ormService.NewEntity(requestLoggerEntity)
 
 	ormService.Flush()
 
@@ -66,7 +66,7 @@ func (g *DBLogger) LogRequest(ormService fluxaorm.Context, appName, url string, 
 }
 
 func (g *DBLogger) LogResponse(ormService fluxaorm.Context, requestLoggerEntity *entity.RequestLoggerEntity, responseBody []byte, status int) {
-	requestLoggerEntity = fluxaorm.EditEntity(ormService, requestLoggerEntity)
+	ormService.EditEntity(requestLoggerEntity)
 
 	requestLoggerEntity.Status = status
 

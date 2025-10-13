@@ -17,7 +17,7 @@ func Delete(ctx context.Context, id uint64) error {
 		return fmt.Errorf("translation text with ID %v not found", id)
 	}
 
-	fluxaorm.DeleteEntity(ormService, translationTextEntity)
+	ormService.DeleteEntity(translationTextEntity)
 
 	ormService.Flush()
 

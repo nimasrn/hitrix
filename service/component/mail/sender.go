@@ -153,7 +153,7 @@ func (s *Sender) createTrackingEntity(ormService fluxaorm.Context, message *Mess
 		CreatedAt:    s.ClockService.Now(),
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, mailTrackerEntity)
+	ormService.NewEntity(mailTrackerEntity)
 
 	templateDataAsByte, err := json.Marshal(message.TemplateData)
 	if err != nil {

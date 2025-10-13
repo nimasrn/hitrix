@@ -24,8 +24,8 @@ func (l *LoginDevForm) Login(c *gin.Context) (string, string, error) {
 	}
 
 	ormService := service.DI().OrmForContext(c.Request.Context())
-
 	devPanelUserEntity, found := fluxaorm.GetByUniqueIndex[entity.DevPanelUserEntity](ormService, "Username", l.Username)
+
 	if !found {
 		return "", "", errors.New("invalid username or password")
 	}

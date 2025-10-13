@@ -48,7 +48,7 @@ func TestOTPRetry(t *testing.T) {
 		SentAt:              clockService.Now(),
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+	ormService.NewEntity(otpTrackerEntity)
 
 	ormService.Flush()
 
@@ -112,7 +112,7 @@ func TestOTPWithMultipleRetry(t *testing.T) {
 		SentAt:              clockService.Now(),
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+	ormService.NewEntity(otpTrackerEntity)
 
 	ormService.Flush()
 
@@ -179,7 +179,7 @@ func TestOTPRetryWithMaxReached(t *testing.T) {
 		SentAt:              clockService.Now(),
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+	ormService.NewEntity(otpTrackerEntity)
 
 	ormService.Flush()
 

@@ -14,7 +14,6 @@ import (
 	"github.com/coretrix/hitrix/pkg/errors"
 	"github.com/coretrix/hitrix/service"
 	"github.com/coretrix/hitrix/service/component/oss"
-	"github.com/latolukasz/fluxaorm"
 )
 
 func CreateFile(ctx context.Context, newFile *file.RequestDTOUploadImage) (*file.File, error) {
@@ -73,7 +72,7 @@ func CreateFile(ctx context.Context, newFile *file.RequestDTOUploadImage) (*file
 		CreatedAt: service.DI().Clock().Now(),
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, fileEntity)
+	ormService.NewEntity(fileEntity)
 
 	ormService.Flush()
 

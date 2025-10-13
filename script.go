@@ -362,7 +362,7 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor Fi
 
 			data += "}"
 
-			fluxaorm.NewEntityFromSource(ormService, &entity.MetricsEntity{
+			ormService.NewEntity(&entity.MetricsEntity{
 				AppName:   appName,
 				Metrics:   data,
 				CreatedAt: clockService.Now(),
@@ -414,8 +414,7 @@ func removeAllOldRequestLoggerRows(ormService fluxaorm.Context, ttlInDays int) {
 
 		entityIterator := fluxaorm.Search[entity.RequestLoggerEntity](ormService, where, pager)
 		for entityIterator.Next() {
-			requestLoggerEntity := entityIterator.Entity()
-			fluxaorm.DeleteEntity(ormService, requestLoggerEntity)
+			ormService.DeleteEntity(entityIterator.Entity())
 		}
 
 		ormService.Flush()
@@ -463,8 +462,7 @@ func removeAllOldMetricsRows(ormService fluxaorm.Context, ttlInDays int) {
 
 		entityIterator := fluxaorm.Search[entity.MetricsEntity](ormService, where, pager)
 		for entityIterator.Next() {
-			metricsEntity := entityIterator.Entity()
-			fluxaorm.DeleteEntity(ormService, metricsEntity)
+			ormService.DeleteEntity(entityIterator.Entity())
 		}
 
 		ormService.Flush()

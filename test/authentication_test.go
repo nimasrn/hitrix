@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/latolukasz/fluxaorm"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/coretrix/hitrix/example/entity"
@@ -29,7 +28,7 @@ func createDevPanelUser(input map[string]interface{}) *entity.DevPanelUserEntity
 		}
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, devPanelUserEntity)
+	ormService.NewEntity(devPanelUserEntity)
 
 	ormService.Flush()
 

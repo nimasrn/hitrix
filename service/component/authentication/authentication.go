@@ -39,22 +39,22 @@ type AuthenticatableEntity interface {
 }
 
 type OTPProviderEntity interface {
-	beeorm.Entity
 	AuthenticatableEntity
+	GetID() uint64
 	GetPhoneFieldName() string
 	GetEmailFieldName() string
 }
 
 type AuthProviderEntity interface {
-	beeorm.Entity
 	AuthenticatableEntity
+	GetID() uint64
 	GetUniqueFieldName() string
 	GetPassword() string
 }
 
 type EmailAuthEntity interface {
-	beeorm.Entity
 	AuthenticatableEntity
+	GetID() uint64
 	GetPassword() string
 	GetEmailFieldName() string
 }

@@ -12,7 +12,6 @@ const ModeTest = "test"
 const ModeDev = "dev"
 const ModeDemo = "demo"
 const ModeProd = "prod"
-const ModeQA = "qa"
 
 type IDevPanelUserEntity interface {
 	GetID() uint64

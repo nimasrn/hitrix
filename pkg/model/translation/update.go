@@ -19,7 +19,7 @@ func Update(ctx context.Context, request *translation.RequestUpdateTranslation, 
 		return nil, fmt.Errorf("translation text with ID %v not found", id)
 	}
 
-	translationTextEntity = fluxaorm.EditEntity(ormService, translationTextEntity)
+	ormService.EditEntity(translationTextEntity)
 
 	translationTextEntity.Lang = request.Lang.String()
 	translationTextEntity.Key = request.Key.String()

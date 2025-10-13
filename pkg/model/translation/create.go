@@ -6,7 +6,6 @@ import (
 	"github.com/coretrix/hitrix/pkg/dto/translation"
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service"
-	"github.com/latolukasz/fluxaorm"
 )
 
 func Create(ctx context.Context, request *translation.RequestCreateTranslation) (*translation.ResponseTranslation, error) {
@@ -19,7 +18,7 @@ func Create(ctx context.Context, request *translation.RequestCreateTranslation) 
 		Text:   request.Text,
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, newTranslationEntity)
+	ormService.NewEntity(newTranslationEntity)
 
 	//TODO Krasi ORM: check for error
 	err := ormService.FlushWithCheck()

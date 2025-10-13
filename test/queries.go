@@ -22,7 +22,7 @@ func CreateAdminUser(ormService fluxaorm.Context, row map[string]interface{}) *e
 		}
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, adminUserEntity)
+	ormService.NewEntity(adminUserEntity)
 
 	return adminUserEntity
 }
@@ -44,7 +44,7 @@ func CreateRole(ormService fluxaorm.Context, row map[string]interface{}) *entity
 		}
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, roleEntity)
+	ormService.NewEntity(roleEntity)
 
 	return roleEntity
 }
@@ -66,7 +66,7 @@ func CreateResource(ormService fluxaorm.Context, row map[string]interface{}) *en
 		}
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, resourceEntity)
+	ormService.NewEntity(resourceEntity)
 
 	return resourceEntity
 }
@@ -90,7 +90,7 @@ func CreatePermission(ormService fluxaorm.Context, row map[string]interface{}) *
 		}
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, permissionEntity)
+	ormService.NewEntity(permissionEntity)
 
 	return permissionEntity
 }
@@ -116,7 +116,7 @@ func CreatePrivilege(ormService fluxaorm.Context, row map[string]interface{}) *e
 		}
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, privilegeEntity)
+	ormService.NewEntity(privilegeEntity)
 
 	return privilegeEntity
 }

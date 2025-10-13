@@ -448,7 +448,8 @@ func (controller *DevPanelController) PostEnableFeatureFlag(c *gin.Context) {
 		return
 	}
 
-	featureFlagEntity = fluxaorm.EditEntity(ormService, featureFlagEntity)
+	ormService.EditEntity(featureFlagEntity)
+
 	featureFlagEntity.Enabled = true
 
 	ormService.Flush()
@@ -473,7 +474,8 @@ func (controller *DevPanelController) PostDisableFeatureFlag(c *gin.Context) {
 		return
 	}
 
-	featureFlagEntity = fluxaorm.EditEntity(ormService, featureFlagEntity)
+	ormService.EditEntity(featureFlagEntity)
+
 	featureFlagEntity.Enabled = false
 
 	ormService.Flush()

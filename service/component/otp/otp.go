@@ -206,7 +206,7 @@ func (o *OTP) sendSMS(ormService fluxaorm.Context, send Send) (string, error) {
 			otpTrackerEntity.GatewaySendStatus = entity.OTPTrackerGatewaySendStatusSent
 		}
 
-		fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+		ormService.NewEntity(otpTrackerEntity)
 
 		ormService.Flush()
 
@@ -263,7 +263,7 @@ func (o *OTP) sendEmail(ormService fluxaorm.Context, send Send) (string, error) 
 		otpTrackerEntity.GatewaySendStatus = entity.OTPTrackerGatewaySendStatusSent
 	}
 
-	fluxaorm.NewEntityFromSource(ormService, otpTrackerEntity)
+	ormService.NewEntity(otpTrackerEntity)
 
 	ormService.Flush()
 
