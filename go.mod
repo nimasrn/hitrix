@@ -14,6 +14,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20210910012206-68626162910d
 	github.com/chromedp/chromedp v0.7.4
 	github.com/coretrix/clockwork v1.1.1
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dongri/phonenumber v0.0.0-20210304071411-690733f34185
 	github.com/fatih/color v1.13.0
 	github.com/gin-contrib/cors v1.7.6
@@ -30,7 +31,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/kavenegar/kavenegar-go v0.0.0-20200629080648-6e28263b7162
 	github.com/kevinburke/twilio-go v0.0.0-20210327194925-1623146bcf73
-	github.com/latolukasz/fluxaorm v1.10.0
+	github.com/latolukasz/fluxaorm v1.10.1
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 	github.com/mailjet/mailjet-apiv3-go/v3 v3.1.1
 	github.com/mattbaird/gochimp v0.0.0-20200820164431-f1082bcdf63f
@@ -70,7 +71,6 @@ require (
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/cockroachdb/apd/v3 v3.1.0 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
