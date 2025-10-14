@@ -7,9 +7,9 @@ import (
 
 const (
 	success = "sent successfully"
-	failure = "sent unsuccessfully"
-
-	timeoutInSeconds = 5
+	//failure = "sent unsuccessfully"
+	//
+	//timeoutInSeconds = 5
 )
 
 type NewProviderFunc func(configService config.IConfig, clockService clock.IClock) (IProvider, error)
