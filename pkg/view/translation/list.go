@@ -85,7 +85,11 @@ func List(ctx context.Context, userListRequest listDto.RequestDTOList) (*transla
 
 	ormService := service.DI().OrmForContext(ctx)
 
-	entityIterator, total := fluxaorm.SearchWithCount[entity.TranslationTextEntity](ormService, where, fluxaorm.NewPager(searchParams.Page, searchParams.PageSize))
+	entityIterator, total := fluxaorm.SearchWithCount[entity.TranslationTextEntity](
+		ormService,
+		where,
+		fluxaorm.NewPager(searchParams.Page, searchParams.PageSize),
+	)
 	rows := make([]*translation.ListRow, entityIterator.Len())
 
 	for i, translationTextEntity := range entityIterator.All() {

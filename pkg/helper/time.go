@@ -59,14 +59,14 @@ func GetTimeDifference(from, to time.Time) time.Duration {
 	return delta
 }
 
-func GetWeekDay(dateTime time.Time) uint8 {
+func GetWeekDay(dateTime time.Time) int {
 	weekday := dateTime.Weekday()
 
 	if weekday == 0 {
 		weekday = 7
 	}
 
-	return uint8(weekday)
+	return int(weekday)
 }
 func TruncateTime(in time.Time) time.Time {
 	return time.Date(in.Year(), in.Month(), in.Day(), 0, 0, 0, 0, in.Location())

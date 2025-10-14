@@ -8,8 +8,8 @@ type FakeGenerator struct {
 	mock.Mock
 }
 
-func (f *FakeGenerator) GenerateRandomRangeNumber(min, max int64) int64 {
-	return int64(f.Called(min, max).Int(0))
+func (f *FakeGenerator) GenerateRandomRangeNumber(minNumber, maxNumber int64) int64 {
+	return int64(f.Called(minNumber, maxNumber).Int(0))
 }
 
 func (f *FakeGenerator) GenerateSha256Hash(input string) string {

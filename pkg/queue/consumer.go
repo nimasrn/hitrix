@@ -394,7 +394,13 @@ func addConsumerGroup(ormService fluxaorm.Context, redis fluxaorm.RedisCache, co
 	return indexerValue.LatestIndex
 }
 
-func removeConsumerGroup(ormService fluxaorm.Context, consumer fluxaorm.EventsConsumer, redis fluxaorm.RedisCache, consumerGroupName string, indexToRemove int) {
+func removeConsumerGroup(
+	ormService fluxaorm.Context,
+	consumer fluxaorm.EventsConsumer,
+	redis fluxaorm.RedisCache,
+	consumerGroupName string,
+	indexToRemove int,
+) {
 	indexerValue, err := getConsumerGroupIndexer(ormService, redis, consumerGroupName)
 	if err != nil {
 		panic(err)

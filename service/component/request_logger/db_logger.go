@@ -20,7 +20,13 @@ func NewDBLogger(clockService clock.IClock) IRequestLogger {
 	return &DBLogger{clockService}
 }
 
-func (g *DBLogger) LogRequest(ormService fluxaorm.Context, appName, url string, request *http.Request, contentType string) *entity.RequestLoggerEntity {
+func (g *DBLogger) LogRequest(
+	ormService fluxaorm.Context,
+	appName string,
+	url string,
+	request *http.Request,
+	contentType string,
+) *entity.RequestLoggerEntity {
 	headers, err := httputil.DumpRequest(request, false)
 	if err != nil {
 		panic(err)

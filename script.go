@@ -223,7 +223,7 @@ func (processor *BackgroundProcessor) RunAsyncOrmConsumer() {
 		ctx, stop := signal.NotifyContext(appService.GlobalContext, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 		defer stop()
 
-		stopBuffer := fluxaorm.ConsumeAsyncBuffer(ormService, func(err error) {
+		stopBuffer := fluxaorm.ConsumeAsyncBuffer(ormService, func(_ error) {
 			errorLogger.LogError(errorLogger)
 		})
 

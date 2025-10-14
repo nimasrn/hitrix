@@ -95,7 +95,7 @@ func (s *serviceFeatureFlag) Disable(ormService fluxaorm.Context, name string) e
 	return nil
 }
 
-func (s *serviceFeatureFlag) getAllActive(ormService fluxaorm.Context, pager *fluxaorm.Pager) []IFeatureFlag {
+func (s *serviceFeatureFlag) getAllActive(ormService fluxaorm.Context, _ *fluxaorm.Pager) []IFeatureFlag {
 	//TODO Krasi ORM: use pager fix it
 	featureFlagEntitiesIterator := fluxaorm.GetByIndex[entity.FeatureFlagEntity](ormService, "Registered_Enabled", true, true)
 

@@ -18,11 +18,11 @@ const (
 
 type ILocalizer interface {
 	T(bucket string, key string) string
-	LoadBucketFromFile(bucket string, path string, append bool)
-	LoadBucketFromMap(bucket string, pairs map[string]string, append bool)
+	LoadBucketFromFile(bucket string, path string, toAppend bool)
+	LoadBucketFromMap(bucket string, pairs map[string]string, toAppend bool)
 	SaveBucketToFile(bucket string, path string)
 	PushBucketToSource(bucket string) (err error)
-	PullBucketFromSource(bucket string, append bool) (err error)
+	PullBucketFromSource(bucket string, toAppend bool) (err error)
 }
 
 type SimpleLocalizer struct {
@@ -120,7 +120,7 @@ func (l *SimpleLocalizer) PushBucketToSource(bucket string) (err error) {
 	return
 }
 
-func (l *SimpleLocalizer) PullBucketFromSource(bucket string, append bool) (err error) {
+func (l *SimpleLocalizer) PullBucketFromSource(bucket string, toAppend bool) (err error) {
 	if l.source == nil {
 		return errors.New("there is no defined sourced")
 	}
@@ -132,7 +132,7 @@ func (l *SimpleLocalizer) PullBucketFromSource(bucket string, append bool) (err 
 		return
 	}
 
-	l.LoadBucketFromMap(bucket, terms, append)
+	l.LoadBucketFromMap(bucket, terms, toAppend)
 
 	return
 }
