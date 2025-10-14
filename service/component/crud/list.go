@@ -523,86 +523,89 @@ func fetchDependencyValueInt(dependentCol *Column, cols []*Column, request *List
 
 // GenerateListRedisSearchQuery TODO : add full text queries when supported by hitrix
 func (c *Crud) GenerateListRedisSearchQuery(params SearchParams) *fluxaorm.RedisSearchFilter {
-	query := &fluxaorm.RedisSearchQuery{}
-	for field, value := range params.NumberFilters {
-		query.FilterInt(field, value)
-	}
+	//TODO Krasi ORM: fix it
+	return &fluxaorm.RedisSearchFilter{}
 
-	for field, value := range params.ArrayNumberFilters {
-		query.FilterInt(field, value...)
-	}
-
-	for field, value := range params.RangeNumberFilters {
-		query.FilterIntMinMax(field, value[0], value[1])
-	}
-
-	for field, value := range params.DateTimeFilters {
-		query.FilterDateTime(field, value)
-	}
-
-	for field, value := range params.DateFilters {
-		query.FilterDate(field, value)
-	}
-
-	for field, value := range params.RangeDateTimeFilters {
-		query.FilterDateTimeMinMax(field, value[0], value[1])
-	}
-
-	for field, value := range params.RangeDateFilters {
-		query.FilterDateMinMax(field, value[0], value[1])
-	}
-
-	for field, value := range params.TagFilters {
-		query.FilterTag(field, value)
-	}
-
-	for field, value := range params.StringFilters {
-		if c.cols[field].Normalize != nil {
-			value = c.cols[field].Normalize(value).(string)
-		}
-
-		if c.cols[field].FullTextSearch {
-			query.QueryRaw(fmt.Sprintf(
-				"@%s:*%v* ",
-				field, strings.TrimSpace(beeorm.EscapeRedisSearchString(value)),
-			))
-		} else {
-			query.QueryFieldPrefixMatch(field, value)
-		}
-	}
-
-	for field, value := range params.ArrayStringFilters {
-		query.FilterTag(field, value...)
-	}
-
-	for field, value := range params.BooleanFilters {
-		query.FilterBool(field, value)
-	}
-
-	orStatements := make([]string, 0)
-
-	for field, value := range params.StringORFilters {
-		if strings.TrimSpace(value) == "" {
-			continue
-		}
-
-		orStatements = append(orStatements, fmt.Sprintf(
-			"(@%s:%v*)",
-			field, strings.TrimSpace(beeorm.EscapeRedisSearchString(value)),
-		))
-	}
-
-	if len(orStatements) > 0 {
-		query.AppendQueryRaw("(" + strings.Join(orStatements, "|") + ")")
-	}
-
-	if len(params.Sort) == 1 {
-		for field, mode := range params.Sort {
-			query.Sort(field, !mode)
-		}
-	}
-
-	return query
+	//query := &fluxaorm.RedisSearchQuery{}
+	//for field, value := range params.NumberFilters {
+	//	query.FilterInt(field, value)
+	//}
+	//
+	//for field, value := range params.ArrayNumberFilters {
+	//	query.FilterInt(field, value...)
+	//}
+	//
+	//for field, value := range params.RangeNumberFilters {
+	//	query.FilterIntMinMax(field, value[0], value[1])
+	//}
+	//
+	//for field, value := range params.DateTimeFilters {
+	//	query.FilterDateTime(field, value)
+	//}
+	//
+	//for field, value := range params.DateFilters {
+	//	query.FilterDate(field, value)
+	//}
+	//
+	//for field, value := range params.RangeDateTimeFilters {
+	//	query.FilterDateTimeMinMax(field, value[0], value[1])
+	//}
+	//
+	//for field, value := range params.RangeDateFilters {
+	//	query.FilterDateMinMax(field, value[0], value[1])
+	//}
+	//
+	//for field, value := range params.TagFilters {
+	//	query.FilterTag(field, value)
+	//}
+	//
+	//for field, value := range params.StringFilters {
+	//	if c.cols[field].Normalize != nil {
+	//		value = c.cols[field].Normalize(value).(string)
+	//	}
+	//
+	//	if c.cols[field].FullTextSearch {
+	//		query.QueryRaw(fmt.Sprintf(
+	//			"@%s:*%v* ",
+	//			field, strings.TrimSpace(beeorm.EscapeRedisSearchString(value)),
+	//		))
+	//	} else {
+	//		query.QueryFieldPrefixMatch(field, value)
+	//	}
+	//}
+	//
+	//for field, value := range params.ArrayStringFilters {
+	//	query.FilterTag(field, value...)
+	//}
+	//
+	//for field, value := range params.BooleanFilters {
+	//	query.FilterBool(field, value)
+	//}
+	//
+	//orStatements := make([]string, 0)
+	//
+	//for field, value := range params.StringORFilters {
+	//	if strings.TrimSpace(value) == "" {
+	//		continue
+	//	}
+	//
+	//	orStatements = append(orStatements, fmt.Sprintf(
+	//		"(@%s:%v*)",
+	//		field, strings.TrimSpace(beeorm.EscapeRedisSearchString(value)),
+	//	))
+	//}
+	//
+	//if len(orStatements) > 0 {
+	//	query.AppendQueryRaw("(" + strings.Join(orStatements, "|") + ")")
+	//}
+	//
+	//if len(params.Sort) == 1 {
+	//	for field, mode := range params.Sort {
+	//		query.Sort(field, !mode)
+	//	}
+	//}
+	//
+	//return query
 }
 
 func (c *Crud) GenerateListMysqlQuery(params SearchParams) *fluxaorm.BaseWhere {

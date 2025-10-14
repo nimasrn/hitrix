@@ -43,9 +43,8 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 				}
 			} else {
 				ormService := ctn.Get(service.ORMGlobalService).(fluxaorm.Context)
-
-				settingsEntity := &entity.SettingsEntity{}
-				if _, found := fluxaorm.GetByUniqueIndex[settingsEntity](ormService, "Key", "otp_sms_provider"); !found {
+				settingsEntity, found := fluxaorm.GetByUniqueIndex[entity.SettingsEntity](ormService, "Key", "otp_sms_provider")
+				if !found {
 					return nil, errors.New("otp_sms_provider not found in settings")
 				}
 

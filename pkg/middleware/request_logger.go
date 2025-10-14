@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/response"
@@ -15,14 +16,14 @@ import (
 
 type dbLogger struct {
 	disabled bool
-	logs     []map[string]interface{}
+	logs     []map[string]any
 }
 
 func (l *dbLogger) Disable() {
 	l.disabled = true
 }
 
-func (l *dbLogger) Handle(data map[string]interface{}) {
+func (l *dbLogger) Handle(ormService fluxaorm.Context, data map[string]any) {
 	if l.disabled {
 		return
 	}
@@ -31,10 +32,8 @@ func (l *dbLogger) Handle(data map[string]interface{}) {
 }
 
 func RequestLogger(ginEngine *gin.Engine, extender func(context *gin.Context, requestEntity *entity.RequestLoggerEntity)) {
-	ormConfig := service.DI().OrmConfig()
-
-	entities := ormConfig.GetEntities()
-	if _, ok := entities["entity.RequestLoggerEntity"]; !ok {
+	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
+	if ormEngine.Registry().EntitySchema("entity.RequestLoggerEntity") == nil {
 		panic("you should register RequestLoggerEntity")
 	}
 

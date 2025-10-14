@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
@@ -13,7 +12,6 @@ import (
 	//"github.com/latolukasz/fluxaorm/tools"
 
 	"github.com/coretrix/hitrix/pkg/binding"
-	"github.com/coretrix/hitrix/pkg/dto/indexes"
 	"github.com/coretrix/hitrix/pkg/dto/list"
 	"github.com/coretrix/hitrix/pkg/entity"
 	errorhandling "github.com/coretrix/hitrix/pkg/error_handling"
@@ -198,13 +196,14 @@ func (controller *DevPanelController) GetAlters(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetRedisStreams(c *gin.Context) {
-	ormService := service.DI().OrmForContext(c.Request.Context())
-
-	stats := tools.GetRedisStreamsStatistics(ormService)
-	sort.Slice(stats, func(i, j int) bool {
-		return stats[i].Stream < stats[j].Stream
-	})
-	response.SuccessResponse(c, stats)
+	response.SuccessResponse(c, nil)
+	//ormService := service.DI().OrmForContext(c.Request.Context())
+	//
+	//stats := tools.GetRedisStreamsStatistics(ormService)
+	//sort.Slice(stats, func(i, j int) bool {
+	//	return stats[i].Stream < stats[j].Stream
+	//})
+	//response.SuccessResponse(c, stats)
 }
 
 func (controller *DevPanelController) GetRedisStatistics(c *gin.Context) {
@@ -227,9 +226,11 @@ func (controller *DevPanelController) GetRedisStatistics(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetRedisSearchStatistics(c *gin.Context) {
-	ormService := service.DI().OrmForContext(c.Request.Context())
+	response.SuccessResponse(c, nil)
 
-	response.SuccessResponse(c, tools.GetRedisSearchStatistics(ormService))
+	//ormService := service.DI().OrmForContext(c.Request.Context())
+	//
+	//response.SuccessResponse(c, tools.GetRedisSearchStatistics(ormService))
 }
 
 func (controller *DevPanelController) GetRedisSearchAlters(c *gin.Context) {
@@ -259,152 +260,160 @@ func (controller *DevPanelController) GetRedisSearchAlters(c *gin.Context) {
 }
 
 func (controller *DevPanelController) GetRedisSearchIndexes(c *gin.Context) {
-	ormService := service.DI().OrmForContext(c.Request.Context())
+	response.SuccessResponse(c, nil)
 
-	appService := service.DI().App()
-	if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
-		panic("stream pool is not defined")
-	}
-
-	indices := map[string][]string{}
-
-	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
-		sort.Strings(poolIndices)
-
-		indices[searchPool] = poolIndices
-	}
-
-	indexList := make([]indexes.Index, 0)
-
-	for searchPool, poolIndices := range indices {
-		for _, indexName := range poolIndices {
-			info, _ := ormService.Engine().Redis(searchPool).FTInfo(ormService, indexName)
-
-			indexList = append(
-				indexList,
-				indexes.Index{
-					Name:      indexName,
-					TotalDocs: info.NumDocs,
-					TotalSize: uint64(info.DocTableSizeMB + info.KeyTableSizeMB + info.SortableValuesSizeMB + info.InvertedSzMB + info.OffsetVectorsSzMB),
-				})
-		}
-	}
-
-	response.SuccessResponse(
-		c,
-		indexes.ResponseDTOList{
-			Indexes: indexList,
-		})
+	//ormService := service.DI().OrmForContext(c.Request.Context())
+	//
+	//appService := service.DI().App()
+	//if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
+	//	panic("stream pool is not defined")
+	//}
+	//
+	//indices := map[string][]string{}
+	//
+	//for _, searchPool := range appService.RedisPools.Search {
+	//	poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
+	//	sort.Strings(poolIndices)
+	//
+	//	indices[searchPool] = poolIndices
+	//}
+	//
+	//indexList := make([]indexes.Index, 0)
+	//
+	//for searchPool, poolIndices := range indices {
+	//	for _, indexName := range poolIndices {
+	//		info, _ := ormService.Engine().Redis(searchPool).FTInfo(ormService, indexName)
+	//
+	//		indexList = append(
+	//			indexList,
+	//			indexes.Index{
+	//				Name:      indexName,
+	//				TotalDocs: info.NumDocs,
+	//				TotalSize: uint64(info.DocTableSizeMB + info.KeyTableSizeMB + info.SortableValuesSizeMB + info.InvertedSzMB + info.OffsetVectorsSzMB),
+	//			})
+	//	}
+	//}
+	//
+	//response.SuccessResponse(
+	//	c,
+	//	indexes.ResponseDTOList{
+	//		Indexes: indexList,
+	//	})
 }
 
 func (controller *DevPanelController) PostRedisSearchForceReindex(c *gin.Context) {
-	ormService := service.DI().OrmForContext(c.Request.Context())
-
-	indexName := c.Param("index")
-	if indexName == "" {
-		response.ErrorResponseGlobal(c, "index is required", nil)
-
-		return
-	}
-
-	appService := service.DI().App()
-	if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
-		panic("stream pool is not defined")
-	}
-
-	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
-		for _, poolIndexName := range poolIndices {
-			if poolIndexName == indexName {
-				ormService.Engine().Redis(searchPool).ForceReindex(indexName)
-
-				break
-			}
-		}
-	}
-
 	response.SuccessResponse(c, nil)
+
+	//ormService := service.DI().OrmForContext(c.Request.Context())
+	//
+	//indexName := c.Param("index")
+	//if indexName == "" {
+	//	response.ErrorResponseGlobal(c, "index is required", nil)
+	//
+	//	return
+	//}
+	//
+	//appService := service.DI().App()
+	//if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
+	//	panic("stream pool is not defined")
+	//}
+	//
+	//for _, searchPool := range appService.RedisPools.Search {
+	//	poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
+	//	for _, poolIndexName := range poolIndices {
+	//		if poolIndexName == indexName {
+	//			ormService.Engine().Redis(searchPool).ForceReindex(indexName)
+	//
+	//			break
+	//		}
+	//	}
+	//}
+	//
+	//response.SuccessResponse(c, nil)
 }
 
 func (controller *DevPanelController) PostRedisSearchForceReindexAll(c *gin.Context) {
-	ormService := service.DI().OrmForContext(c.Request.Context())
-
-	appService := service.DI().App()
-	if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
-		panic("stream pool is not defined")
-	}
-
-	indices := map[string][]string{}
-	indicesCount := 0
-
-	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
-		sort.Strings(poolIndices)
-
-		indices[searchPool] = poolIndices
-		indicesCount++
-	}
-
-	concurrently := c.Query("concurrently")
-	if concurrently != "" {
-		wg := sync.WaitGroup{}
-		wg.Add(indicesCount)
-
-		for searchPool, poolIndices := range indices {
-			for _, index := range poolIndices {
-				go func(pool, index string) {
-					defer func() {
-						if r := recover(); r != nil {
-							service.DI().ErrorLogger().LogError(r)
-						}
-					}()
-
-					ormService.Engine().Redis(pool).ForceReindex(index)
-					wg.Done()
-				}(searchPool, index)
-			}
-		}
-
-		wg.Wait()
-	} else {
-		for searchPool, poolIndices := range indices {
-			for _, index := range poolIndices {
-				ormService.Engine().Redis(searchPool).ForceReindex(index)
-			}
-		}
-	}
-
 	response.SuccessResponse(c, nil)
+
+	//ormService := service.DI().OrmForContext(c.Request.Context())
+	//
+	//appService := service.DI().App()
+	//if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
+	//	panic("stream pool is not defined")
+	//}
+	//
+	//indices := map[string][]string{}
+	//indicesCount := 0
+	//
+	//for _, searchPool := range appService.RedisPools.Search {
+	//	poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
+	//	sort.Strings(poolIndices)
+	//
+	//	indices[searchPool] = poolIndices
+	//	indicesCount++
+	//}
+	//
+	//concurrently := c.Query("concurrently")
+	//if concurrently != "" {
+	//	wg := sync.WaitGroup{}
+	//	wg.Add(indicesCount)
+	//
+	//	for searchPool, poolIndices := range indices {
+	//		for _, index := range poolIndices {
+	//			go func(pool, index string) {
+	//				defer func() {
+	//					if r := recover(); r != nil {
+	//						service.DI().ErrorLogger().LogError(r)
+	//					}
+	//				}()
+	//
+	//				ormService.Engine().Redis(pool).ForceReindex(index)
+	//				wg.Done()
+	//			}(searchPool, index)
+	//		}
+	//	}
+	//
+	//	wg.Wait()
+	//} else {
+	//	for searchPool, poolIndices := range indices {
+	//		for _, index := range poolIndices {
+	//			ormService.Engine().Redis(searchPool).ForceReindex(index)
+	//		}
+	//	}
+	//}
+	//
+	//response.SuccessResponse(c, nil)
 }
 
 func (controller *DevPanelController) PostRedisSearchIndexInfo(c *gin.Context) {
-	ormService := service.DI().OrmForContext(c.Request.Context())
+	response.SuccessResponse(c, nil)
 
-	indexName := c.Param("index")
-	if indexName == "" {
-		response.ErrorResponseGlobal(c, "index is required", nil)
-
-		return
-	}
-
-	appService := service.DI().App()
-	if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
-		panic("stream pool is not defined")
-	}
-
-	for _, searchPool := range appService.RedisPools.Search {
-		poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
-		for _, poolIndexName := range poolIndices {
-			if poolIndexName == indexName {
-				info, _ := ormService.Engine().Redis(searchPool).FTInfo(ormService, indexName)
-
-				response.SuccessResponse(c, info)
-
-				break
-			}
-		}
-	}
+	//ormService := service.DI().OrmForContext(c.Request.Context())
+	//
+	//indexName := c.Param("index")
+	//if indexName == "" {
+	//	response.ErrorResponseGlobal(c, "index is required", nil)
+	//
+	//	return
+	//}
+	//
+	//appService := service.DI().App()
+	//if appService.DevPanel == nil || len(appService.RedisPools.Search) == 0 {
+	//	panic("stream pool is not defined")
+	//}
+	//
+	//for _, searchPool := range appService.RedisPools.Search {
+	//	poolIndices := ormService.Engine().Redis(searchPool).ListIndices()
+	//	for _, poolIndexName := range poolIndices {
+	//		if poolIndexName == indexName {
+	//			info, _ := ormService.Engine().Redis(searchPool).FTInfo(ormService, indexName)
+	//
+	//			response.SuccessResponse(c, info)
+	//
+	//			break
+	//		}
+	//	}
+	//}
 }
 
 func (controller *DevPanelController) GetFeatureFlags(c *gin.Context) {

@@ -38,7 +38,7 @@ func (s *FakeServiceFeatureFlag) Disable(_ fluxaorm.Context, name string) error 
 	return called.Error(0)
 }
 
-func (s *FakeServiceFeatureFlag) GetAll(_ fluxaorm.Context, pager *beeorm.Pager) []*entity.FeatureFlagEntity {
+func (s *FakeServiceFeatureFlag) GetAll(_ fluxaorm.Context, pager *fluxaorm.Pager) []*entity.FeatureFlagEntity {
 	called := s.Called(pager)
 
 	return called.Get(0).([]*entity.FeatureFlagEntity)

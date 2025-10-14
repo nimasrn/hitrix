@@ -28,9 +28,11 @@ func ServiceProviderErrorLogger() *service.DefinitionGlobal {
 				slackAPIService = slackAPIServiceInterface.(slack.Slack)
 			}
 
+			appService := ctn.Get(service.AppService).(*app.App)
 			return errorlogger.NewRedisErrorLogger(
-				ctn.Get(service.AppService).(*app.App),
+				appService,
 				ctn.Get(service.ORMGlobalService).(fluxaorm.Context),
+				ctn.Get(service.ORMGlobalService).(fluxaorm.Context).Engine().Redis(appService.RedisPools.Persistent),
 				slackAPIService,
 				sentryService,
 				service.RequestBodyKey,

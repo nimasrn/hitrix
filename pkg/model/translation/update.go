@@ -27,7 +27,7 @@ func Update(ctx context.Context, request *translation.RequestUpdateTranslation, 
 	translationTextEntity.Status = entity.TranslationStatusTranslated.String()
 
 	//TODO Krasi ORM: check for error
-	err := ormService.Flush()
+	err := ormService.FlushWithCheck()
 	if err != nil {
 		return nil, errors.New("translation text with this lang and key already exists")
 		//return nil, errors.HandleFlushWithCheckError(

@@ -19,13 +19,9 @@ func NewMysqlAPILogger(entity ILogEntity) IAPILogger {
 func (l *mysqlDBLog) LogStart(ormService fluxaorm.Context, logType string, request interface{}) {
 	var logEntity ILogEntity
 
-	if l.logEntity.GetID() == 0 {
-		logEntity = l.logEntity
-	} else {
-		logEntity = reflect.New(reflect.ValueOf(l.logEntity).Elem().Type()).Interface().(ILogEntity)
+	logEntity = reflect.New(reflect.ValueOf(l.logEntity).Elem().Type()).Interface().(ILogEntity)
 
-		ormService.NewEntity(logEntity)
-	}
+	ormService.NewEntity(logEntity)
 
 	logEntity.SetType(logType)
 	logEntity.SetRequest(request)

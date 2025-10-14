@@ -296,7 +296,7 @@ func setController(b []byte, profilerService *clockwork.Clockwork) string {
 }
 
 type ormDataProvider struct {
-	RedisStorageProvider *beeorm.RedisCache
+	RedisStorageProvider *fluxaorm.RedisCache
 }
 
 func (provider *ormDataProvider) Get(key string, id string) dataSource.DataBuffer {

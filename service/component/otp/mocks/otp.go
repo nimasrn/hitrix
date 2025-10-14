@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	beeorm "github.com/latolukasz/fluxaorm"
+	"github.com/latolukasz/fluxaorm"
 	mock "github.com/stretchr/testify/mock"
 
 	otp "github.com/coretrix/hitrix/service/component/otp"

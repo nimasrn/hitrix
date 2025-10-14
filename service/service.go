@@ -8,7 +8,6 @@ import (
 
 	apilogger "github.com/coretrix/hitrix/service/component/api_logger"
 	"github.com/coretrix/hitrix/service/component/app"
-	"github.com/coretrix/hitrix/service/component/authentication"
 	"github.com/coretrix/hitrix/service/component/calendar"
 	"github.com/coretrix/hitrix/service/component/checkout"
 	"github.com/coretrix/hitrix/service/component/clock"
@@ -181,9 +180,9 @@ func (d *DIContainer) Setting() setting.ServiceSettingInterface {
 	return GetServiceRequired(SettingService).(setting.ServiceSettingInterface)
 }
 
-func (d *DIContainer) Authentication() *authentication.Authentication {
-	return GetServiceRequired(AuthenticationService).(*authentication.Authentication)
-}
+//func (d *DIContainer) Authentication() *authentication.Authentication {
+//	return GetServiceRequired(AuthenticationService).(*authentication.Authentication)
+//}
 
 func (d *DIContainer) Mail() mail.ISender {
 	return GetServiceRequired(MailService).(mail.ISender)
