@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine
+FROM golang:1.24-alpine
 
 RUN mkdir -p /go/src/github.com/coretrix/hitrix
 
