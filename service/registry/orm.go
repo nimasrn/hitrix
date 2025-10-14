@@ -14,8 +14,9 @@ func ServiceProviderOrm() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.ORMGlobalService,
 		Build: func(ctn di.Container) (interface{}, error) {
-			appService := ctn.Get(service.AppService).(app.App)
-			orm := ctn.Get(service.ORMEngineService).(fluxaorm.Engine).NewContext(appService.GlobalContext)
+			orm := ctn.Get(service.ORMEngineService).(fluxaorm.Engine).NewContext(
+				ctn.Get(service.AppService).(app.App).GlobalContext,
+			)
 
 			ormDebug, ok := ctn.Get(service.ConfigService).(config.IConfig).Bool("orm_debug")
 			if ok && ormDebug {

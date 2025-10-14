@@ -29,7 +29,7 @@ func main() {
 	s, deferFunc := hitrix.New(
 		"my-app", "secret",
 	).RegisterDIGlobalService(
-
+		registry.ServiceProviderErrorLogger(),
 		registry.ServiceProviderConfigDirectory("config"),
 		registry.ServiceProviderOrmRegistry(entity.Init),
 		registry.ServiceProviderOrm(),
