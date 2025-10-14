@@ -1,8 +1,7 @@
 package registry
 
 import (
-	"context"
-
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/config"
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
@@ -15,7 +14,8 @@ func ServiceProviderOrm() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.ORMGlobalService,
 		Build: func(ctn di.Container) (interface{}, error) {
-			orm := ctn.Get(service.ORMEngineService).(fluxaorm.Engine).NewContext(context.Background())
+			appService := ctn.Get(service.AppService).(app.App)
+			orm := ctn.Get(service.ORMEngineService).(fluxaorm.Engine).NewContext(appService.GlobalContext)
 
 			ormDebug, ok := ctn.Get(service.ConfigService).(config.IConfig).Bool("orm_debug")
 			if ok && ormDebug {

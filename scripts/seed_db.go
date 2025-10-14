@@ -60,11 +60,10 @@ func Seeder(seedsPerProject map[string][]Seed, ormService fluxaorm.Context, appS
 				continue
 			}
 
-			seederEntity := &entity.SeederEntity{}
+			whereStmt := fluxaorm.NewWhere("`Name` = ?", seed.Name())
 
-			whereStmt := beeorm.NewWhere("`Name` = ?", seed.Name())
+			seederEntity, found := fluxaorm.SearchOne[entity.SeederEntity](ormService, whereStmt)
 
-			found := ormService.SearchOne(whereStmt, seederEntity)
 			if found {
 				continue
 			}
@@ -73,7 +72,9 @@ func Seeder(seedsPerProject map[string][]Seed, ormService fluxaorm.Context, appS
 
 			seederEntity.Name = seed.Name()
 			seederEntity.CreatedAt = service.DI().Clock().Now()
-			ormService.Flush(seederEntity)
+
+			fluxaorm.EditEntity(ormService, seederEntity)
+			ormService.Flush()
 
 			log.Println("Seeder " + seed.Name() + " has been executed")
 		}

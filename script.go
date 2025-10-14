@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/TwiN/go-color"
@@ -210,27 +212,32 @@ func (processor *BackgroundProcessor) runScript(s app.IScript) bool {
 }
 
 func (processor *BackgroundProcessor) RunAsyncOrmConsumer() {
-	//TODO Anton ORM: check
-	//ormService := service.DI().Orm().Clone()
-	//appService := service.DI().App()
-	//
-	//GoroutineWithRestart(func() {
-	//	log.Println("starting orm background consumer")
-	//
-	//	asyncConsumer := beeorm.NewBackgroundConsumer(ormService)
-	//	for {
-	//		if asyncConsumer.Digest(appService.GlobalContext) {
-	//			log.Println("orm background consumer exited successfully")
-	//
-	//			time.Sleep(time.Second * 30)
-	//
-	//			continue
-	//		}
-	//
-	//		log.Println("orm background consumer can not obtain lock, sleeping for 30 seconds")
-	//		time.Sleep(time.Second * 30)
-	//	}
-	//})
+	ormService := service.DI().Orm().Clone()
+	appService := service.DI().App()
+	errorLogger := service.DI().ErrorLogger()
+
+	GoroutineWithRestart(func() {
+		log.Println("starting orm ConsumeAsyncBuffer")
+
+		ctx, stop := signal.NotifyContext(appService.GlobalContext, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+		defer stop()
+
+		stopBuffer := fluxaorm.ConsumeAsyncBuffer(ormService, func(err error) {
+			errorLogger.LogError(errorLogger)
+		})
+
+		<-ctx.Done()
+		stopBuffer()
+	})
+
+	GoroutineWithRestart(func() {
+		log.Println("starting orm ConsumeAsyncFlushEvents")
+
+		err := fluxaorm.ConsumeAsyncFlushEvents(ormService, true)
+		if err != nil {
+			panic(err)
+		}
+	})
 }
 
 type FieldProcessor map[string]func(value interface{}) float64

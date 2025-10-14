@@ -19,26 +19,26 @@ const (
 
 type ConsumerOneByModulo interface {
 	GetMaxModulo() int
-	Consume(ormService fluxaorm.Context, event beeorm.Event) error
+	Consume(ormService fluxaorm.Context, event fluxaorm.Event) error
 	GetQueueName(moduloID int) string
 	GetGroupName(moduloID int, suffix *string) string
 }
 
 type ConsumerManyByModulo interface {
 	GetMaxModulo() int
-	Consume(ormService fluxaorm.Context, events []beeorm.Event) error
+	Consume(ormService fluxaorm.Context, events []fluxaorm.Event) error
 	GetQueueName(moduloID int) string
 	GetGroupName(moduloID int, suffix *string) string
 }
 
 type ConsumerOne interface {
-	Consume(ormService fluxaorm.Context, event beeorm.Event) error
+	Consume(ormService fluxaorm.Context, event fluxaorm.Event) error
 	GetQueueName() string
 	GetGroupName(suffix *string) string
 }
 
 type ConsumerMany interface {
-	Consume(ormService fluxaorm.Context, events []beeorm.Event) error
+	Consume(ormService fluxaorm.Context, events []fluxaorm.Event) error
 	GetQueueName() string
 	GetGroupName(suffix *string) string
 }
@@ -57,7 +57,7 @@ func (r *ConsumerRunner) RunConsumerMany(consumer ConsumerMany, groupNameSuffix 
 
 	log.Printf("RunConsumerMany initialized (%s)", queueName)
 
-	eventsConsumer := r.ormService.GetEventBroker().Consumer(consumer.GetGroupName(groupNameSuffix))
+	eventsConsumer := r.ormService.GetEventBroker().Consumer(r.ormService, consumer.GetGroupName(groupNameSuffix))
 
 	service.DI().App().Add(1)
 
@@ -67,7 +67,7 @@ func (r *ConsumerRunner) RunConsumerMany(consumer ConsumerMany, groupNameSuffix 
 		// eventsConsumer.Consume should block and not return anything
 		// if it returns true => this consumer is exited with no errors, but still not consuming
 		// if it returns false => this consumer is exited with error "could not obtain lock", so we should retry
-		if exitedWithNoErrors := eventsConsumer.Consume(r.ctx, prefetchCount, func(events []beeorm.Event) {
+		if exitedWithNoErrors := eventsConsumer.Consume(prefetchCount, func(events []fluxaorm.Event) {
 			log.Printf("We have %d new dirty events in %s", len(events), queueName)
 
 			if err := consumer.Consume(r.ormService, events); err != nil {
@@ -94,7 +94,7 @@ func (r *ConsumerRunner) RunConsumerOne(consumer ConsumerOne, groupNameSuffix *s
 
 	log.Printf("RunConsumerOne initialized (%s)", queueName)
 
-	eventsConsumer := r.ormService.GetEventBroker().Consumer(consumer.GetGroupName(groupNameSuffix))
+	eventsConsumer := r.ormService.GetEventBroker().Consumer(r.ormService, consumer.GetGroupName(groupNameSuffix))
 
 	service.DI().App().Add(1)
 
@@ -104,7 +104,7 @@ func (r *ConsumerRunner) RunConsumerOne(consumer ConsumerOne, groupNameSuffix *s
 		// eventsConsumer.Consume should block and not return anything
 		// if it returns true => this consumer is exited with no errors, but still not consuming
 		// if it returns false => this consumer is exited with error "could not obtain lock", so we should retry
-		if exitedWithNoErrors := eventsConsumer.Consume(r.ctx, prefetchCount, func(events []beeorm.Event) {
+		if exitedWithNoErrors := eventsConsumer.Consume(prefetchCount, func(events []fluxaorm.Event) {
 			log.Printf("We have %d new dirty events in %s", len(events), queueName)
 
 			for _, event := range events {
@@ -151,7 +151,7 @@ func (r *ConsumerRunner) RunConsumerOneByModulo(consumer ConsumerOneByModulo, gr
 			log.Printf("RunConsumerOneByModulo started goroutine %d (%s)", currentModulo, queueName)
 
 			ormService := r.ormService.Clone()
-			eventsConsumer := ormService.GetEventBroker().Consumer(consumerGroupName)
+			eventsConsumer := ormService.GetEventBroker().Consumer(r.ormService, consumerGroupName)
 			service.DI().App().Add(1)
 			defer service.DI().App().Done()
 
@@ -159,7 +159,7 @@ func (r *ConsumerRunner) RunConsumerOneByModulo(consumer ConsumerOneByModulo, gr
 				// eventsConsumer.Consume should block and not return anything
 				// if it returns true => this consumer is exited with no errors, but still not consuming
 				// if it returns false => this consumer is exited with error "could not obtain lock", so we should retry
-				if exitedWithNoErrors := eventsConsumer.Consume(r.ctx, prefetchCount, func(events []beeorm.Event) {
+				if exitedWithNoErrors := eventsConsumer.Consume(prefetchCount, func(events []fluxaorm.Event) {
 					log.Printf("We have %d new dirty events in %s", len(events), consumerGroupName)
 
 					for _, event := range events {
@@ -215,7 +215,7 @@ func (r *ConsumerRunner) RunConsumerManyByModulo(consumer ConsumerManyByModulo, 
 			log.Printf("RunConsumerManyByModulo started goroutine %d (%s)", currentModulo, queueName)
 
 			ormService := r.ormService.Clone()
-			eventsConsumer := ormService.GetEventBroker().Consumer(consumerGroupName)
+			eventsConsumer := ormService.GetEventBroker().Consumer(r.ormService, consumerGroupName)
 			service.DI().App().Add(1)
 			defer service.DI().App().Done()
 
@@ -223,7 +223,7 @@ func (r *ConsumerRunner) RunConsumerManyByModulo(consumer ConsumerManyByModulo, 
 				// eventsConsumer.Consume should block and not return anything
 				// if it returns true => this consumer is exited with no errors, but still not consuming
 				// if it returns false => this consumer is exited with error "could not obtain lock", so we should retry
-				if exitedWithNoErrors := eventsConsumer.Consume(r.ctx, prefetchCount, func(events []beeorm.Event) {
+				if exitedWithNoErrors := eventsConsumer.Consume(prefetchCount, func(events []fluxaorm.Event) {
 					log.Printf("We have %d new dirty events in %s", len(events), consumerGroupName)
 
 					if err := consumer.Consume(ormService, events); err != nil {
@@ -266,16 +266,16 @@ func NewScalableConsumerRunner(ctx context.Context, ormService fluxaorm.Context,
 }
 
 func (r *ScalableConsumerRunner) RunScalableConsumerMany(consumer ConsumerMany, groupNameSuffix *string, prefetchCount int) {
-	redis := r.ormService.GetRedis(r.redisPool)
+	redis := r.ormService.Engine().Redis(r.redisPool)
 
 	queueName := consumer.GetQueueName()
 	consumerGroupName := consumer.GetGroupName(groupNameSuffix)
 
-	currentIndex := addConsumerGroup(redis, consumerGroupName)
+	currentIndex := addConsumerGroup(r.ormService, redis, consumerGroupName)
 
 	log.Printf("RunScalableConsumerMany index (%d) initialized (%s)", currentIndex, queueName)
 
-	eventsConsumer := r.ormService.GetEventBroker().Consumer(consumerGroupName)
+	eventsConsumer := r.ormService.GetEventBroker().Consumer(r.ormService, consumerGroupName)
 
 	service.DI().App().Add(1)
 
@@ -285,11 +285,11 @@ func (r *ScalableConsumerRunner) RunScalableConsumerMany(consumer ConsumerMany, 
 		// eventsConsumer.ConsumeMany should block and not return anything
 		// if it returns true => this consumer is exited with no errors, but still not consuming
 		// if it returns false => this consumer is exited with error "could not obtain lock", so we should retry
-		if exitedWithNoErrors := eventsConsumer.ConsumeMany(r.ctx, currentIndex, prefetchCount, func(events []beeorm.Event) {
+		if exitedWithNoErrors := eventsConsumer.ConsumeMany(currentIndex, prefetchCount, func(events []fluxaorm.Event) {
 			log.Printf("We have %d new dirty events in %s", len(events), queueName)
 
 			if err := consumer.Consume(r.ormService, events); err != nil {
-				removeConsumerGroup(eventsConsumer, redis, consumerGroupName, currentIndex)
+				removeConsumerGroup(r.ormService, eventsConsumer, redis, consumerGroupName, currentIndex)
 				panic(err)
 			}
 
@@ -306,20 +306,20 @@ func (r *ScalableConsumerRunner) RunScalableConsumerMany(consumer ConsumerMany, 
 		break
 	}
 
-	removeConsumerGroup(eventsConsumer, redis, consumerGroupName, currentIndex)
+	removeConsumerGroup(r.ormService, eventsConsumer, redis, consumerGroupName, currentIndex)
 }
 
 func (r *ScalableConsumerRunner) RunScalableConsumerOne(consumer ConsumerOne, groupNameSuffix *string, prefetchCount int) {
-	redis := r.ormService.GetRedis(r.redisPool)
+	redis := r.ormService.Engine().Redis(r.redisPool)
 
 	queueName := consumer.GetQueueName()
 	consumerGroupName := consumer.GetGroupName(groupNameSuffix)
 
-	currentIndex := addConsumerGroup(redis, consumerGroupName)
+	currentIndex := addConsumerGroup(r.ormService, redis, consumerGroupName)
 
 	log.Printf("RunScalableConsumerOne index (%d) initialized (%s)", currentIndex, queueName)
 
-	eventsConsumer := r.ormService.GetEventBroker().Consumer(consumerGroupName)
+	eventsConsumer := r.ormService.GetEventBroker().Consumer(r.ormService, consumerGroupName)
 
 	service.DI().App().Add(1)
 
@@ -329,12 +329,12 @@ func (r *ScalableConsumerRunner) RunScalableConsumerOne(consumer ConsumerOne, gr
 		// eventsConsumer.ConsumeMany should block and not return anything
 		// if it returns true => this consumer is exited with no errors, but still not consuming
 		// if it returns false => this consumer is exited with error "could not obtain lock", so we should retry
-		if exitedWithNoErrors := eventsConsumer.ConsumeMany(r.ctx, currentIndex, prefetchCount, func(events []beeorm.Event) {
+		if exitedWithNoErrors := eventsConsumer.ConsumeMany(currentIndex, prefetchCount, func(events []fluxaorm.Event) {
 			log.Printf("We have %d new dirty events in %s", len(events), queueName)
 
 			for _, event := range events {
 				if err := consumer.Consume(r.ormService, event); err != nil {
-					removeConsumerGroup(eventsConsumer, redis, consumerGroupName, currentIndex)
+					removeConsumerGroup(r.ormService, eventsConsumer, redis, consumerGroupName, currentIndex)
 					panic(err)
 				}
 				event.Ack()
@@ -353,7 +353,7 @@ func (r *ScalableConsumerRunner) RunScalableConsumerOne(consumer ConsumerOne, gr
 		break
 	}
 
-	removeConsumerGroup(eventsConsumer, redis, consumerGroupName, currentIndex)
+	removeConsumerGroup(r.ormService, eventsConsumer, redis, consumerGroupName, currentIndex)
 
 	log.Printf("RunScalableConsumerOne exited (%s)", queueName)
 }
@@ -365,8 +365,8 @@ type indexer struct {
 	ActiveConsumerIndexes map[int]*struct{}
 }
 
-func addConsumerGroup(redis *beeorm.RedisCache, consumerGroupName string) int {
-	indexerValue, err := getConsumerGroupIndexer(redis, consumerGroupName)
+func addConsumerGroup(ormService fluxaorm.Context, redis fluxaorm.RedisCache, consumerGroupName string) int {
+	indexerValue, err := getConsumerGroupIndexer(ormService, redis, consumerGroupName)
 	if err != nil {
 		panic(err)
 	}
@@ -382,7 +382,7 @@ func addConsumerGroup(redis *beeorm.RedisCache, consumerGroupName string) int {
 	indexerValue.LatestIndex++
 	indexerValue.ActiveConsumerIndexes[indexerValue.LatestIndex] = &struct{}{}
 
-	err = setConsumerGroupIndexer(redis, consumerGroupName, indexerValue)
+	err = setConsumerGroupIndexer(ormService, redis, consumerGroupName, indexerValue)
 	if err != nil {
 		panic(err)
 	}
@@ -390,21 +390,25 @@ func addConsumerGroup(redis *beeorm.RedisCache, consumerGroupName string) int {
 	return indexerValue.LatestIndex
 }
 
-func removeConsumerGroup(consumer beeorm.EventsConsumer, redis *beeorm.RedisCache, consumerGroupName string, indexToRemove int) {
-	indexerValue, err := getConsumerGroupIndexer(redis, consumerGroupName)
+func removeConsumerGroup(ormService fluxaorm.Context, consumer fluxaorm.EventsConsumer, redis fluxaorm.RedisCache, consumerGroupName string, indexToRemove int) {
+	indexerValue, err := getConsumerGroupIndexer(ormService, redis, consumerGroupName)
 	if err != nil {
 		panic(err)
 	}
 
+	if indexerValue == nil {
+		panic("indexerValue should not be nil")
+	}
+
 	delete(indexerValue.ActiveConsumerIndexes, indexToRemove)
 
-	err = setConsumerGroupIndexer(redis, consumerGroupName, indexerValue)
+	err = setConsumerGroupIndexer(ormService, redis, consumerGroupName, indexerValue)
 	if err != nil {
 		panic(err)
 	}
 
 	// transfer pending items from stopped consumer to another if available as per:
-	// https://beeorm.io/guide/event_broker.html#consumers-scaling
+	// https://fluxaorm.io/guide/event_broker.html#consumers-scaling
 	if len(indexerValue.ActiveConsumerIndexes) != 0 {
 		indexToTransferClaimedItems := 0
 		for index := range indexerValue.ActiveConsumerIndexes {
@@ -420,19 +424,19 @@ func removeConsumerGroup(consumer beeorm.EventsConsumer, redis *beeorm.RedisCach
 	}
 }
 
-func setConsumerGroupIndexer(redis *beeorm.RedisCache, consumerGroupName string, indexer *indexer) error {
+func setConsumerGroupIndexer(ormService fluxaorm.Context, redis fluxaorm.RedisCache, consumerGroupName string, indexer *indexer) error {
 	marshaled, err := json.Marshal(indexer)
 	if err != nil {
 		return err
 	}
 
-	redis.HSet(consumerGroupsKey, consumerGroupName, marshaled)
+	redis.HSet(ormService, consumerGroupsKey, consumerGroupName, marshaled)
 
 	return err
 }
 
-func getConsumerGroupIndexer(redis *beeorm.RedisCache, consumerGroupName string) (*indexer, error) {
-	marshaled, has := redis.HGet(consumerGroupsKey, consumerGroupName)
+func getConsumerGroupIndexer(ormService fluxaorm.Context, redis fluxaorm.RedisCache, consumerGroupName string) (*indexer, error) {
+	marshaled, has := redis.HGet(ormService, consumerGroupsKey, consumerGroupName)
 	if !has {
 		return nil, nil
 	}

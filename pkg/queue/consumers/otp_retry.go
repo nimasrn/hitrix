@@ -30,10 +30,8 @@ func (c *OTPRetryConsumer) GetGroupName(suffix *string) string {
 	return streams.GetGroupName(c.GetQueueName(), suffix)
 }
 
-func (c *OTPRetryConsumer) Consume(_ fluxaorm.Context, event beeorm.Event) error {
+func (c *OTPRetryConsumer) Consume(ormService fluxaorm.Context, event fluxaorm.Event) error {
 	log.Println(".")
-
-	ormService := c.ormService.Clone()
 
 	retryDTO := &otp.RetryDTO{}
 	event.Unserialize(retryDTO)
@@ -42,9 +40,13 @@ func (c *OTPRetryConsumer) Consume(_ fluxaorm.Context, event beeorm.Event) error
 		return nil
 	}
 
-	otpTrackerEntity := &entity.OTPTrackerEntity{}
-	ormService.LoadByID(retryDTO.OTPTrackerEntityID, otpTrackerEntity)
+	otpTrackerEntity, found := fluxaorm.GetByID[entity.OTPTrackerEntity](ormService, retryDTO.OTPTrackerEntityID)
+	if !found {
+		return nil
+	}
 
+	if otpTrackerEntity.MaxRetriesReached {
+	}
 	RetryOTP(ormService, c.gatewayRegistry, retryDTO, otpTrackerEntity, c.maxRetries)
 
 	return nil
@@ -80,7 +82,8 @@ func RetryOTP(
 			otpTrackerEntity.MaxRetriesReached = true
 		}
 
-		ormService.Flush(otpTrackerEntity)
+		fluxaorm.EditEntity(ormService, otpTrackerEntity)
+		ormService.Flush()
 
 		if otpTrackerEntity.GatewaySendStatus == entity.OTPTrackerGatewaySendStatusSent {
 			break

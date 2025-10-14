@@ -24,31 +24,25 @@ func (script *ClearExpiredGeocodingCache) Run(_ context.Context, _ app.IExit, or
 		return
 	}
 
-	where := beeorm.NewWhere("ExpiresAt < ?", now)
+	where := fluxaorm.NewWhere("ExpiresAt < ?", now)
 
-	geocodingEntities := make([]*entity.GeocodingCacheEntity, 0)
-	ormService.Search(where, beeorm.NewPager(1, 10000), &geocodingEntities)
+	entityIterator := fluxaorm.Search[entity.GeocodingCacheEntity](ormService, where, fluxaorm.NewPager(1, 10000))
 
-	flusher := ormService.NewFlusher()
-
-	for _, geocodingEntity := range geocodingEntities {
-		flusher.Delete(geocodingEntity)
+	for _, geocodingEntity := range entityIterator.All() {
+		fluxaorm.DeleteEntity(ormService, geocodingEntity)
 	}
 
-	flusher.Flush()
+	ormService.Flush()
 
-	where = beeorm.NewWhere("ExpiresAt < ?", now)
+	where = fluxaorm.NewWhere("ExpiresAt < ?", now)
 
-	reverseGeocodingEntities := make([]*entity.GeocodingReverseCacheEntity, 0)
-	ormService.Search(where, beeorm.NewPager(1, 10000), &reverseGeocodingEntities)
+	entityIterator1 := fluxaorm.Search[entity.GeocodingReverseCacheEntity](ormService, where, fluxaorm.NewPager(1, 10000))
 
-	flusher = ormService.NewFlusher()
-
-	for _, ReverseGeocodingCacheEntity := range reverseGeocodingEntities {
-		flusher.Delete(ReverseGeocodingCacheEntity)
+	for _, reverseGeocodingCacheEntity := range entityIterator1.All() {
+		fluxaorm.DeleteEntity(ormService, reverseGeocodingCacheEntity)
 	}
 
-	flusher.Flush()
+	ormService.Flush()
 }
 
 func (script *ClearExpiredGeocodingCache) Interval() time.Duration {
