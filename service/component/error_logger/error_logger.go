@@ -116,11 +116,11 @@ func (e *RedisErrorLogger) LogErrorWithRequest(c *gin.Context, errData interface
 }
 
 func (e *RedisErrorLogger) LogWarning(errData interface{}) {
-	e.log(errData, 2, nil, false)
+	e.log(errData, 2, nil, true)
 }
 
 func (e *RedisErrorLogger) LogWarningWithRequest(c *gin.Context, errData interface{}) {
-	e.log(errData, 2, c, false)
+	e.log(errData, 2, c, true)
 }
 
 func (e *RedisErrorLogger) LogPanicWithRequest(c *gin.Context, errData interface{}) {
