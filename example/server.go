@@ -17,6 +17,7 @@ import (
 	"github.com/coretrix/hitrix/service/registry"
 )
 
+// nolint //var eventHandlersMap is unuse
 var eventHandlersMap = socket.NamespaceEventHandlerMap{
 	model.DefaultWebsocketNamespace: &socket.EventHandlers{
 		RegisterHandler:   model.RegisterSocketHandler,

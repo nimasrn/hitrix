@@ -95,6 +95,7 @@ func CreatePermission(ormService fluxaorm.Context, row map[string]interface{}) *
 	return permissionEntity
 }
 
+// nolint // result 0 (*github.com/coretrix/hitrix/pkg/entity.PrivilegeEntity) is never used
 func CreatePrivilege(ormService fluxaorm.Context, row map[string]interface{}) *entityHitrix.PrivilegeEntity {
 	privilegeEntity := &entityHitrix.PrivilegeEntity{
 		PermissionIDs: nil,
