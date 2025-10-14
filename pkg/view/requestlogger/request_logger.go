@@ -123,7 +123,11 @@ func RequestsLogger(ctx context.Context, userListRequest listDto.RequestDTOList)
 
 	ormService := service.DI().OrmForContext(ctx)
 
-	entityIterator, total := fluxaorm.SearchWithCount[entity.RequestLoggerEntity](ormService, where, fluxaorm.NewPager(searchParams.Page, searchParams.PageSize))
+	entityIterator, total := fluxaorm.SearchWithCount[entity.RequestLoggerEntity](
+		ormService,
+		where,
+		fluxaorm.NewPager(searchParams.Page, searchParams.PageSize),
+	)
 
 	requestLoggerEntityList := make([]*requestlogger.ResponseDTORequestLogger, entityIterator.Len())
 

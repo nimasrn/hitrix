@@ -62,7 +62,7 @@ func (e *CSVExporter) export(writer *csv.Writer, columns []string, rows [][]inte
 
 	err := writer.Write(record)
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 
 	record = make([]string, 0)
@@ -74,7 +74,7 @@ func (e *CSVExporter) export(writer *csv.Writer, columns []string, rows [][]inte
 
 		err := writer.Write(record)
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 
 		record = make([]string, 0)

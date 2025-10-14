@@ -3,6 +3,7 @@ package crud
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -217,6 +218,10 @@ mainLoop:
 			for selectFiledName := range filterTypes.mapIntStringFilters {
 				if field == selectFiledName {
 					for _, filterValue := range filterTypes.mapIntStringFilters[selectFiledName] {
+						if filterValue.Key > math.MaxInt64 {
+							panic("filter value is too large for " + selectFiledName)
+						}
+
 						if int64(filterValue.Key) == value.(int64) {
 							selectedNumberFilters[field] = value.(int64)
 
@@ -235,6 +240,10 @@ mainLoop:
 			for selectFiledName := range filterTypes.mapIntStringFilters {
 				if field == selectFiledName {
 					for _, filterValue := range filterTypes.mapIntStringFilters[selectFiledName] {
+						if filterValue.Key > math.MaxInt64 {
+							panic("filter value is too large for " + selectFiledName)
+						}
+
 						if int64(filterValue.Key) == int64(value.(float64)) {
 							selectedNumberFilters[field] = int64(value.(float64))
 

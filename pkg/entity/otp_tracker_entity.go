@@ -67,7 +67,7 @@ type OTPTrackerEntity struct {
 	To                    string `orm:"length=50"`
 	Code                  string
 	GatewayName           string
-	GatewayPriority       uint8
+	GatewayPriority       int
 	GatewaySendStatus     string `orm:"enum=entity.OTPTrackerGatewaySendStatusAll;required"`
 	GatewaySendRequest    string `orm:"length=max"`
 	GatewaySendResponse   string `orm:"length=max"`

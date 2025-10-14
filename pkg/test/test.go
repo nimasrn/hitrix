@@ -1,12 +1,11 @@
 package test
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
@@ -148,12 +147,10 @@ func executeAlters(ormService fluxaorm.Context) {
 }
 
 func getRandomString() string {
-	rand.Seed(time.Now().UnixNano())
-
 	b := make([]byte, 10)
-
-	//nolint //G404: Use of weak random number generator (math/rand instead of crypto/rand)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic(fmt.Errorf("failed to read secure random bytes: %w", err))
+	}
 
 	return fmt.Sprintf("%x%d", b, os.Getpid())[:5]
 }

@@ -100,14 +100,10 @@ func (processor *BackgroundProcessor) RunScript(s app.IScript) {
 			processor.run(s)
 			service.DI().App().Done()
 
-			//nolint //a
-			for {
-				select {
-				case <-ticker.C:
-					service.DI().App().Add(1)
-					processor.run(s)
-					service.DI().App().Done()
-				}
+			for range ticker.C {
+				service.DI().App().Add(1)
+				processor.run(s)
+				service.DI().App().Done()
 			}
 		}
 	}()

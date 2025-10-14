@@ -2,8 +2,7 @@ package errorlogger
 
 import (
 	"bytes"
-	//nolint //G501: Blocklisted import crypto/md5: weak cryptographic primitive
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -171,8 +170,7 @@ func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Conte
 
 	_, file, line, _ := runtime.Caller(callerSkip)
 
-	//nolint //G401: Use of weak cryptographic primitive
-	errorKeyBinary := md5.Sum([]byte(e.appService.Name + ":" + file + ":" + fmt.Sprint(line)))
+	errorKeyBinary := sha256.Sum256([]byte(e.appService.Name + ":" + file + ":" + fmt.Sprint(line)))
 	errorKey := hex.EncodeToString(errorKeyBinary[:])
 	value := &event{
 		File:    file,

@@ -1,6 +1,7 @@
 package authentication
 
-//import (
+// import (
+//
 //	"context"
 //	"errors"
 //	"fmt"
@@ -19,9 +20,11 @@ package authentication
 //	"github.com/coretrix/hitrix/service/component/password"
 //	"github.com/coretrix/hitrix/service/component/social"
 //	"github.com/coretrix/hitrix/service/component/uuid"
-//)
 //
-//const (
+// )
+//
+// const (
+//
 //	separator                = ":"
 //	accessListSeparator      = ";"
 //	accessKeyPrefix          = "ACCESS"
@@ -31,51 +34,53 @@ package authentication
 //	SocialLoginGoogle   = "google"
 //	SocialLoginFacebook = "facebook"
 //	SocialLoginApple    = "apple"
-//)
 //
-//type AuthenticatableEntity interface {
-//	CanAuthenticate() bool
-//}
+// )
 //
-//type OTPProviderEntity interface {
-//	AuthenticatableEntity
-//	GetID() uint64
-//	GetPhoneFieldName() string
-//	GetEmailFieldName() string
-//}
+//	type AuthenticatableEntity interface {
+//		CanAuthenticate() bool
+//	}
 //
-//type AuthProviderEntity interface {
-//	AuthenticatableEntity
-//	GetID() uint64
-//	GetUniqueFieldName() string
-//	GetPassword() string
-//}
+//	type OTPProviderEntity interface {
+//		AuthenticatableEntity
+//		GetID() uint64
+//		GetPhoneFieldName() string
+//		GetEmailFieldName() string
+//	}
 //
-//type EmailAuthEntity interface {
-//	AuthenticatableEntity
-//	GetID() uint64
-//	GetPassword() string
-//	GetEmailFieldName() string
-//}
+//	type AuthProviderEntity interface {
+//		AuthenticatableEntity
+//		GetID() uint64
+//		GetUniqueFieldName() string
+//		GetPassword() string
+//	}
 //
-//type Authentication struct {
-//	accessTokenTTL       int
-//	refreshTokenTTL      int
-//	otpTTL               int
-//	otpLength            int
-//	passwordService      password.IPassword
-//	errorLoggerService   errorlogger.ErrorLogger
-//	appService           *app.App
-//	jwtService           *jwt.JWT
-//	mailService          *mail.ISender
-//	socialServiceMapping map[string]social.IUserData
-//	generatorService     generator.IGenerator
-//	clockService         clock.IClock
-//	uuidService          uuid.IUUID
-//	secret               string
-//}
+//	type EmailAuthEntity interface {
+//		AuthenticatableEntity
+//		GetID() uint64
+//		GetPassword() string
+//		GetEmailFieldName() string
+//	}
 //
-//func NewAuthenticationService(
+//	type Authentication struct {
+//		accessTokenTTL       int
+//		refreshTokenTTL      int
+//		otpTTL               int
+//		otpLength            int
+//		passwordService      password.IPassword
+//		errorLoggerService   errorlogger.ErrorLogger
+//		appService           *app.App
+//		jwtService           *jwt.JWT
+//		mailService          *mail.ISender
+//		socialServiceMapping map[string]social.IUserData
+//		generatorService     generator.IGenerator
+//		clockService         clock.IClock
+//		uuidService          uuid.IUUID
+//		secret               string
+//	}
+//
+// func NewAuthenticationService(
+//
 //	secret string,
 //	accessTokenTTL int,
 //	refreshTokenTTL int,
@@ -90,203 +95,217 @@ package authentication
 //	mailService *mail.ISender,
 //	socialServiceMapping map[string]social.IUserData,
 //	uuidService uuid.IUUID,
-//) *Authentication {
-//	return &Authentication{
-//		secret:               secret,
-//		accessTokenTTL:       accessTokenTTL,
-//		refreshTokenTTL:      refreshTokenTTL,
-//		otpTTL:               otpTTL,
-//		otpLength:            otpLength,
-//		passwordService:      passwordService,
-//		errorLoggerService:   errorLoggerService,
-//		jwtService:           jwtService,
-//		appService:           appService,
-//		clockService:         clockService,
-//		generatorService:     generatorService,
-//		mailService:          mailService,
-//		socialServiceMapping: socialServiceMapping,
-//		uuidService:          uuidService,
-//	}
-//}
 //
-//type GenerateOTP struct {
-//	Mobile         string
-//	ExpirationTime string
-//	Token          string
-//}
-//
-//func (t *Authentication) VerifySocialLogin(ctx context.Context, source, token string, isAndroid bool) (*social.UserData, error) {
-//	socialProvider, ok := t.socialServiceMapping[source]
-//	if !ok {
-//		return nil, errors.New("not supported social provider: " + source)
+//	) *Authentication {
+//		return &Authentication{
+//			secret:               secret,
+//			accessTokenTTL:       accessTokenTTL,
+//			refreshTokenTTL:      refreshTokenTTL,
+//			otpTTL:               otpTTL,
+//			otpLength:            otpLength,
+//			passwordService:      passwordService,
+//			errorLoggerService:   errorLoggerService,
+//			jwtService:           jwtService,
+//			appService:           appService,
+//			clockService:         clockService,
+//			generatorService:     generatorService,
+//			mailService:          mailService,
+//			socialServiceMapping: socialServiceMapping,
+//			uuidService:          uuidService,
+//		}
 //	}
 //
-//	return socialProvider.GetUserData(ctx, token, isAndroid)
-//}
+//	type GenerateOTP struct {
+//		Mobile         string
+//		ExpirationTime string
+//		Token          string
+//	}
 //
-//func (t *Authentication) AuthenticateOTP(
+//	func (t *Authentication) VerifySocialLogin(ctx context.Context, source, token string, isAndroid bool) (*social.UserData, error) {
+//		socialProvider, ok := t.socialServiceMapping[source]
+//		if !ok {
+//			return nil, errors.New("not supported social provider: " + source)
+//		}
+//
+//		return socialProvider.GetUserData(ctx, token, isAndroid)
+//	}
+//
+// func (t *Authentication) AuthenticateOTP(
+//
 //	ormService fluxaorm.Context,
 //	phone string,
 //	entity app.IDevPanelUserEntity,
-//) (accessToken string, refreshToken string, err error) {
-//	//ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
-//	//entitySchema := ormEngine.Registry().EntitySchema(entity)
-//	//spew.Dump(1, entitySchema.GetTableName())
-//	//entitySchema.
-//	//q := &beeorm.RedisSearchQuery{}
-//	//q.FilterString(entity.GetPhoneFieldName(), phone)
-//	//
-//	//found := ormService.RedisSearchOne(entity, q)
-//	//found := entitySchema.
-//	//if !found {
-//	//	return "", "", errors.New("invalid credentials")
-//	//}
-//	//
-//	//if !entity.CanAuthenticate() {
-//	//	return "", "", errors.New("cannot authenticate this entity")
-//	//}
 //
-//	return t.generateUserTokens(ormService, entity.GetID())
-//}
+//	) (accessToken string, refreshToken string, err error) {
+//		//ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
+//		//entitySchema := ormEngine.Registry().EntitySchema(entity)
+//		//spew.Dump(1, entitySchema.GetTableName())
+//		//entitySchema.
+//		//q := &beeorm.RedisSearchQuery{}
+//		//q.FilterString(entity.GetPhoneFieldName(), phone)
+//		//
+//		//found := ormService.RedisSearchOne(entity, q)
+//		//found := entitySchema.
+//		//if !found {
+//		//	return "", "", errors.New("invalid credentials")
+//		//}
+//		//
+//		//if !entity.CanAuthenticate() {
+//		//	return "", "", errors.New("cannot authenticate this entity")
+//		//}
 //
-//func (t *Authentication) AuthenticateOTPEmail(
+//		return t.generateUserTokens(ormService, entity.GetID())
+//	}
+//
+// func (t *Authentication) AuthenticateOTPEmail(
+//
 //	ormService fluxaorm.Context,
 //	email string,
 //	entity OTPProviderEntity,
 //	useRedisSearch bool,
-//) (accessToken string, refreshToken string, err error) {
-//	found := false
 //
-//	if useRedisSearch {
-//		q := &beeorm.RedisSearchQuery{}
-//		q.FilterString(entity.GetEmailFieldName(), email)
+//	) (accessToken string, refreshToken string, err error) {
+//		found := false
 //
-//		found = ormService.RedisSearchOne(entity, q)
-//	} else {
-//		found = ormService.CachedSearchOne(entity, "CachedQueryEmail", email)
+//		if useRedisSearch {
+//			q := &beeorm.RedisSearchQuery{}
+//			q.FilterString(entity.GetEmailFieldName(), email)
+//
+//			found = ormService.RedisSearchOne(entity, q)
+//		} else {
+//			found = ormService.CachedSearchOne(entity, "CachedQueryEmail", email)
+//		}
+//
+//		if !found {
+//			return "", "", errors.New("invalid credentials")
+//		}
+//
+//		if !entity.CanAuthenticate() {
+//			return "", "", errors.New("cannot authenticate this entity")
+//		}
+//
+//		return t.generateUserTokens(ormService, entity.GetID())
 //	}
 //
-//	if !found {
-//		return "", "", errors.New("invalid credentials")
-//	}
+// func (t *Authentication) Authenticate(
 //
-//	if !entity.CanAuthenticate() {
-//		return "", "", errors.New("cannot authenticate this entity")
-//	}
-//
-//	return t.generateUserTokens(ormService, entity.GetID())
-//}
-//
-//func (t *Authentication) Authenticate(
 //	ormService fluxaorm.Context,
 //	uniqueValue string,
 //	password string,
 //	entity AuthProviderEntity,
-//) (accessToken string, refreshToken string, err error) {
-//	q := &beeorm.RedisSearchQuery{}
-//	q.FilterString(entity.GetUniqueFieldName(), uniqueValue)
 //
-//	found := ormService.RedisSearchOne(entity, q)
-//	if !found {
-//		return "", "", errors.New("invalid user/pass")
+//	) (accessToken string, refreshToken string, err error) {
+//		q := &beeorm.RedisSearchQuery{}
+//		q.FilterString(entity.GetUniqueFieldName(), uniqueValue)
+//
+//		found := ormService.RedisSearchOne(entity, q)
+//		if !found {
+//			return "", "", errors.New("invalid user/pass")
+//		}
+//
+//		if !t.passwordService.VerifyPassword(password, entity.GetPassword()) {
+//			return "", "", errors.New("invalid user/pass")
+//		}
+//
+//		if !entity.CanAuthenticate() {
+//			return "", "", errors.New("cannot authenticate this entity")
+//		}
+//
+//		return t.generateUserTokens(ormService, entity.GetID())
 //	}
 //
-//	if !t.passwordService.VerifyPassword(password, entity.GetPassword()) {
-//		return "", "", errors.New("invalid user/pass")
-//	}
+// func (t *Authentication) AuthenticateEmail(
 //
-//	if !entity.CanAuthenticate() {
-//		return "", "", errors.New("cannot authenticate this entity")
-//	}
-//
-//	return t.generateUserTokens(ormService, entity.GetID())
-//}
-//
-//func (t *Authentication) AuthenticateEmail(
 //	ormService fluxaorm.Context,
 //	email string,
 //	password string,
 //	entity EmailAuthEntity,
-//) (accessToken string, refreshToken string, err error) {
-//	found := ormService.CachedSearchOne(entity, "CachedQueryEmail", email)
-//	if !found {
-//		return "", "", errors.New("invalid credentials")
+//
+//	) (accessToken string, refreshToken string, err error) {
+//		found := ormService.CachedSearchOne(entity, "CachedQueryEmail", email)
+//		if !found {
+//			return "", "", errors.New("invalid credentials")
+//		}
+//
+//		if !t.passwordService.VerifyPassword(password, entity.GetPassword()) {
+//			return "", "", errors.New("invalid user/pass")
+//		}
+//
+//		if !entity.CanAuthenticate() {
+//			return "", "", errors.New("cannot authenticate this entity")
+//		}
+//
+//		return t.generateUserTokens(ormService, entity.GetID())
 //	}
 //
-//	if !t.passwordService.VerifyPassword(password, entity.GetPassword()) {
-//		return "", "", errors.New("invalid user/pass")
-//	}
+// func (t *Authentication) AuthenticateByID(
 //
-//	if !entity.CanAuthenticate() {
-//		return "", "", errors.New("cannot authenticate this entity")
-//	}
-//
-//	return t.generateUserTokens(ormService, entity.GetID())
-//}
-//
-//func (t *Authentication) AuthenticateByID(
 //	ormService fluxaorm.Context,
 //	id uint64,
 //	entity AuthProviderEntity,
-//) (accessToken string, refreshToken string, err error) {
-//	exists := ormService.LoadByID(id, entity)
 //
-//	if !exists {
-//		return "", "", errors.New("id_does_not_exists")
+//	) (accessToken string, refreshToken string, err error) {
+//		exists := ormService.LoadByID(id, entity)
+//
+//		if !exists {
+//			return "", "", errors.New("id_does_not_exists")
+//		}
+//
+//		if !entity.CanAuthenticate() {
+//			return "", "", errors.New("cannot authenticate this entity")
+//		}
+//
+//		return t.generateUserTokens(ormService, entity.GetID())
 //	}
 //
-//	if !entity.CanAuthenticate() {
-//		return "", "", errors.New("cannot authenticate this entity")
+//	func (t *Authentication) generateUserTokens(ormService fluxaorm.Context, ID uint64) (accessToken string, refreshToken string, err error) {
+//		accessKey := t.generateAndStoreAccessKey(ormService, ID, t.refreshTokenTTL)
+//
+//		accessToken, err = t.GenerateTokenPair(ID, accessKey, t.accessTokenTTL)
+//		if err != nil {
+//			return "", "", err
+//		}
+//
+//		refreshToken, err = t.GenerateTokenPair(ID, accessKey, t.refreshTokenTTL)
+//		if err != nil {
+//			return "", "", err
+//		}
+//
+//		t.addUserAccessKeyList(ormService, ID, accessKey, "", t.refreshTokenTTL)
+//
+//		return accessToken, refreshToken, nil
 //	}
 //
-//	return t.generateUserTokens(ormService, entity.GetID())
-//}
+//	func (t *Authentication) VerifyAccessToken(ormService fluxaorm.Context, accessToken string, entity beeorm.Entity) (map[string]string, error) {
+//		payload, err := t.jwtService.VerifyJWTAndGetPayload(t.secret, accessToken, t.clockService.Now().Unix())
+//		if err != nil {
+//			return nil, err
+//		}
 //
-//func (t *Authentication) generateUserTokens(ormService fluxaorm.Context, ID uint64) (accessToken string, refreshToken string, err error) {
-//	accessKey := t.generateAndStoreAccessKey(ormService, ID, t.refreshTokenTTL)
+//		id, err := strconv.ParseUint(payload["sub"], 10, 64)
+//		if err != nil {
+//			return nil, err
+//		}
 //
-//	accessToken, err = t.GenerateTokenPair(ID, accessKey, t.accessTokenTTL)
-//	if err != nil {
-//		return "", "", err
+//		accessKey := payload["jti"]
+//
+//		_, has := ormService.GetRedis(t.appService.RedisPools.Persistent).Get(accessKey)
+//		if !has {
+//			return nil, errors.New("access key not found")
+//		}
+//
+//		found := ormService.LoadByID(id, entity)
+//		if !found {
+//			return nil, errors.New("user_not_found")
+//		}
+//
+//		return payload, nil
 //	}
-//
-//	refreshToken, err = t.GenerateTokenPair(ID, accessKey, t.refreshTokenTTL)
-//	if err != nil {
-//		return "", "", err
-//	}
-//
-//	t.addUserAccessKeyList(ormService, ID, accessKey, "", t.refreshTokenTTL)
-//
-//	return accessToken, refreshToken, nil
-//}
-//
-//func (t *Authentication) VerifyAccessToken(ormService fluxaorm.Context, accessToken string, entity beeorm.Entity) (map[string]string, error) {
-//	payload, err := t.jwtService.VerifyJWTAndGetPayload(t.secret, accessToken, t.clockService.Now().Unix())
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	id, err := strconv.ParseUint(payload["sub"], 10, 64)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	accessKey := payload["jti"]
-//
-//	_, has := ormService.GetRedis(t.appService.RedisPools.Persistent).Get(accessKey)
-//	if !has {
-//		return nil, errors.New("access key not found")
-//	}
-//
-//	found := ormService.LoadByID(id, entity)
-//	if !found {
-//		return nil, errors.New("user_not_found")
-//	}
-//
-//	return payload, nil
-//}
-//
-//func (t *Authentication) VerifyAccessTokenTemporary(ormService fluxaorm.Context, accessToken string, entity beeorm.Entity) (map[string]string, error) {
+//func (t *Authentication) VerifyAccessTokenTemporary(
+//	ormService fluxaorm.Context,
+//	accessToken string,
+//	entity beeorm.Entity,
+//) (map[string]string, error) {
 //	payload, err := t.jwtService.VerifyJWTAndGetPayload(t.secret, accessToken, t.clockService.Now().Unix())
 //	if payload == nil && err != nil {
 //		return nil, err
@@ -311,6 +330,7 @@ package authentication
 //
 //	return payload, nil
 //}
+
 //
 //func (t *Authentication) RefreshToken(ormService fluxaorm.Context, refreshToken string) (newAccessToken string, newRefreshToken string, err error) {
 //	payload, err := t.jwtService.VerifyJWTAndGetPayload(t.secret, refreshToken, t.clockService.Now().Unix())

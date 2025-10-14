@@ -1,136 +1,139 @@
 package acl
 
-//type UserRoleSetter interface {
-//	SetRole(roleEntity *entity.RoleEntity)
-//}
-//
-//func CreateRole(c *gin.Context, request *acl.CreateOrUpdateRoleRequestDTO) error {
-//	ormService := service.DI().OrmForContext(c.Request.Context())
-//
-//	resourcesMapping, permissionsMapping, err := validateResourcesAndPermissions(ormService, request.Resources)
-//	if err != nil {
-//		return err
+//	type UserRoleSetter interface {
+//		SetRole(roleEntity *entity.RoleEntity)
 //	}
 //
-//	now := service.DI().Clock().Now()
+//	func CreateRole(c *gin.Context, request *acl.CreateOrUpdateRoleRequestDTO) error {
+//		ormService := service.DI().OrmForContext(c.Request.Context())
 //
-//	roleEntity := &entity.RoleEntity{
-//		Name:      request.Name,
-//		CreatedAt: now,
+//		resourcesMapping, permissionsMapping, err := validateResourcesAndPermissions(ormService, request.Resources)
+//		if err != nil {
+//			return err
+//		}
+//
+//		now := service.DI().Clock().Now()
+//
+//		roleEntity := &entity.RoleEntity{
+//			Name:      request.Name,
+//			CreatedAt: now,
+//		}
+//
+//		ormService.NewEntity(roleEntity)
+//
+//		if err := createPrivileges(ormService, roleEntity, request.Resources, resourcesMapping, permissionsMapping, now); err != nil {
+//			return err
+//		}
+//
+//		err = ormService.FlushWithCheck()
+//		if err != nil {
+//			return err
+//		}
+//
+//		return nil
 //	}
 //
-//	ormService.NewEntity(roleEntity)
+//	func UpdateRole(c *gin.Context, roleID *acl.RoleRequestDTO, request *acl.CreateOrUpdateRoleRequestDTO) error {
+//		ormService := service.DI().OrmForContext(c.Request.Context())
 //
-//	if err := createPrivileges(ormService, roleEntity, request.Resources, resourcesMapping, permissionsMapping, now); err != nil {
-//		return err
+//		roleEntity, found := fluxaorm.GetByID[entity.RoleEntity](ormService, roleID.ID)
+//		if !found {
+//			return fmt.Errorf("role with ID: %d not found", roleID.ID)
+//		}
+//
+//		resourcesMapping, permissionsMapping, err := validateResourcesAndPermissions(ormService, request.Resources)
+//		if err != nil {
+//			return err
+//		}
+//
+//		//TODO Krasi ORM: pager
+//		privilegeEntitiesToDelete := fluxaorm.GetByIndex[entity.PrivilegeEntity](
+//			ormService,
+//			"RoleID_FakeDelete",
+//			roleID,
+//			false)
+//
+//		now := service.DI().Clock().Now()
+//
+//		for _, privilegeEntity := range privilegeEntitiesToDelete.All() {
+//			ormService.DeleteEntity(privilegeEntity)
+//		}
+//
+//		err = ormService.FlushWithCheck()
+//		if err != nil {
+//			return err
+//		}
+//
+//		ormService.EditEntity(roleEntity)
+//
+//		roleEntity.Name = request.Name
+//
+//		if err := createPrivileges(ormService, roleEntity, request.Resources, resourcesMapping, permissionsMapping, now); err != nil {
+//			return err
+//		}
+//
+//		return ormService.FlushWithCheck()
 //	}
 //
-//	err = ormService.FlushWithCheck()
-//	if err != nil {
-//		return err
+//	func DeleteRole(c *gin.Context, roleID *acl.RoleRequestDTO) error {
+//		ormService := service.DI().OrmForContext(c.Request.Context())
+//
+//		roleEntity, found := fluxaorm.GetByID[entity.RoleEntity](ormService, roleID.ID)
+//		if !found {
+//			return fmt.Errorf("role with ID: %d not found", roleID.ID)
+//		}
+//
+//		privilegeEntitiesIterator := fluxaorm.GetByIndex[entity.PrivilegeEntity](
+//			ormService,
+//			"RoleID_FakeDelete",
+//			roleID,
+//			false,
+//		)
+//
+//		ormService.DeleteEntity(roleEntity)
+//
+//		for _, privilegeEntity := range privilegeEntitiesIterator.All() {
+//			ormService.DeleteEntity(privilegeEntity)
+//		}
+//
+//		return ormService.FlushWithCheck()
 //	}
 //
-//	return nil
-//}
+//	func PostAssignRoleToUserAction(c *gin.Context, getUserFunc func() beeorm.Entity, request *acl.AssignRoleToUserRequestDTO) error {
+//		ormService := service.DI().OrmForContext(c.Request.Context())
 //
-//func UpdateRole(c *gin.Context, roleID *acl.RoleRequestDTO, request *acl.CreateOrUpdateRoleRequestDTO) error {
-//	ormService := service.DI().OrmForContext(c.Request.Context())
+//		roleEntity := &entity.RoleEntity{}
+//		if !ormService.LoadByID(request.RoleID, roleEntity) {
+//			return fmt.Errorf("role with ID: %d not found", request.RoleID)
+//		}
 //
-//	roleEntity, found := fluxaorm.GetByID[entity.RoleEntity](ormService, roleID.ID)
-//	if !found {
-//		return fmt.Errorf("role with ID: %d not found", roleID.ID)
+//		userEntity := getUserFunc()
+//		if !ormService.LoadByID(request.UserID, userEntity) {
+//			return fmt.Errorf("user with ID: %d not found", request.UserID)
+//		}
+//
+//		userWithSettableRole, ok := userEntity.(UserRoleSetter)
+//		if !ok {
+//			panic("user entity does not implement UserRoleSetter interface")
+//		}
+//
+//		userWithSettableRole.SetRole(roleEntity)
+//
+//		userEntityWithNewRole, _ := userWithSettableRole.(beeorm.Entity)
+//
+//		ormService.Flush(userEntityWithNewRole)
+//
+//		return nil
 //	}
 //
-//	resourcesMapping, permissionsMapping, err := validateResourcesAndPermissions(ormService, request.Resources)
-//	if err != nil {
-//		return err
-//	}
+// type resourceMapping map[uint64]*entity.ResourceEntity
 //
-//	//TODO Krasi ORM: pager
-//	privilegeEntitiesToDelete := fluxaorm.GetByIndex[entity.PrivilegeEntity](
-//		ormService,
-//		"RoleID_FakeDelete",
-//		roleID,
-//		false)
+// type permissionMapping map[uint64]*entity.PermissionEntity
 //
-//	now := service.DI().Clock().Now()
-//
-//	for _, privilegeEntity := range privilegeEntitiesToDelete.All() {
-//		ormService.DeleteEntity(privilegeEntity)
-//	}
-//
-//	err = ormService.FlushWithCheck()
-//	if err != nil {
-//		return err
-//	}
-//
-//	ormService.EditEntity(roleEntity)
-//
-//	roleEntity.Name = request.Name
-//
-//	if err := createPrivileges(ormService, roleEntity, request.Resources, resourcesMapping, permissionsMapping, now); err != nil {
-//		return err
-//	}
-//
-//	return ormService.FlushWithCheck()
-//}
-//
-//func DeleteRole(c *gin.Context, roleID *acl.RoleRequestDTO) error {
-//	ormService := service.DI().OrmForContext(c.Request.Context())
-//
-//	roleEntity, found := fluxaorm.GetByID[entity.RoleEntity](ormService, roleID.ID)
-//	if !found {
-//		return fmt.Errorf("role with ID: %d not found", roleID.ID)
-//	}
-//
-//	privilegeEntitiesIterator := fluxaorm.GetByIndex[entity.PrivilegeEntity](
-//		ormService,
-//		"RoleID_FakeDelete",
-//		roleID,
-//		false,
-//	)
-//
-//	ormService.DeleteEntity(roleEntity)
-//
-//	for _, privilegeEntity := range privilegeEntitiesIterator.All() {
-//		ormService.DeleteEntity(privilegeEntity)
-//	}
-//
-//	return ormService.FlushWithCheck()
-//}
-//
-//func PostAssignRoleToUserAction(c *gin.Context, getUserFunc func() beeorm.Entity, request *acl.AssignRoleToUserRequestDTO) error {
-//	ormService := service.DI().OrmForContext(c.Request.Context())
-//
-//	roleEntity := &entity.RoleEntity{}
-//	if !ormService.LoadByID(request.RoleID, roleEntity) {
-//		return fmt.Errorf("role with ID: %d not found", request.RoleID)
-//	}
-//
-//	userEntity := getUserFunc()
-//	if !ormService.LoadByID(request.UserID, userEntity) {
-//		return fmt.Errorf("user with ID: %d not found", request.UserID)
-//	}
-//
-//	userWithSettableRole, ok := userEntity.(UserRoleSetter)
-//	if !ok {
-//		panic("user entity does not implement UserRoleSetter interface")
-//	}
-//
-//	userWithSettableRole.SetRole(roleEntity)
-//
-//	userEntityWithNewRole, _ := userWithSettableRole.(beeorm.Entity)
-//
-//	ormService.Flush(userEntityWithNewRole)
-//
-//	return nil
-//}
-//
-//type resourceMapping map[uint64]*entity.ResourceEntity
-//
-//type permissionMapping map[uint64]*entity.PermissionEntity
-//
-//func validateResourcesAndPermissions(ormService fluxaorm.Context, resources []*acl.RoleResourceRequestDTO) (resourceMapping, permissionMapping, error) {
+//func validateResourcesAndPermissions(
+//	ormService fluxaorm.Context,
+//	resources []*acl.RoleResourceRequestDTO,
+//) (resourceMapping, permissionMapping, error) {
 //	resourceIDs := make([]uint64, len(resources))
 //	permissionIDs := make([]uint64, 0)
 //
@@ -181,6 +184,7 @@ package acl
 //
 //	return resourcesMapping, permissionsMapping, nil
 //}
+//
 //
 //func createPrivileges(
 //	ormService fluxaorm.Context,

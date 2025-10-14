@@ -1,8 +1,7 @@
 package otp
 
 import (
-	//nolint //G501: Blocklisted import crypto/md5: weak cryptographic primitive
-	"crypto/md5"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"math"
@@ -196,7 +195,7 @@ func (o *OTP) sendSMS(ormService fluxaorm.Context, send Send) (string, error) {
 			To:                phone.Number,
 			Code:              code,
 			GatewayName:       gateway.GetName(),
-			GatewayPriority:   uint8(priority),
+			GatewayPriority:   priority,
 			GatewaySendStatus: entity.OTPTrackerGatewaySendStatusNew,
 			SentAt:            o.ClockService.Now(),
 		}
@@ -345,8 +344,7 @@ func (o *OTP) getOTPTrackerEntity(ormService fluxaorm.Context, verifyKey string)
 }
 
 func (o *OTP) getRedisKey(verifyKey string) string {
-	// #nosec
-	return fmt.Sprintf("otp_%x", md5.Sum([]byte(verifyKey)))
+	return fmt.Sprintf("otp_%x", sha256.Sum256([]byte(verifyKey)))
 }
 
 func (o *OTP) getCode() string {

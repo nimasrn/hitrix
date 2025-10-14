@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/bojanz/currency"
 )
@@ -42,7 +43,11 @@ func NewPrice(amount float64) Price {
 }
 
 func NewTotalPrice(amount float64, quantity uint64) Price {
-	return NewPrice(float64(NewPrice(amount).Units()*int64(quantity)) / unit)
+	if quantity > math.MaxInt64 {
+		panic("quantity is too big")
+	}
+
+	return NewPrice(float64(NewPrice(amount).Units() * int64(quantity) / unit))
 }
 
 func GetPriceDTO(priceValue float64, priceCurrencyISO4217, countryCodeAlpha2 string) *DTOPrice {

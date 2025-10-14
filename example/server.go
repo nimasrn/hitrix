@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/davecgh/go-spew/spew"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
 
@@ -69,7 +70,7 @@ func auth(
 ) {
 	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
 	entitySchema := ormEngine.Registry().EntitySchema(entity)
-	spew.Dump(1, entitySchema.GetTableName())
+	log.Println(1, entitySchema.GetTableName())
 	//entitySchema.
 	//q := &beeorm.RedisSearchQuery{}
 	//q.FilterString(entity.GetPhoneFieldName(), phone)

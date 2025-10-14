@@ -59,10 +59,10 @@ func (g *SimpleGenerator) RandomPINCodeGenerator(codeLength int) string {
 
 	var code strings.Builder
 
-	max := big.NewInt(int64(len(charSet)))
+	maxInt := big.NewInt(int64(len(charSet)))
 
 	for i := 0; i < codeLength; i++ {
-		num, err := rand.Int(rand.Reader, max)
+		num, err := rand.Int(rand.Reader, maxInt)
 		if err != nil {
 			panic(err)
 		}

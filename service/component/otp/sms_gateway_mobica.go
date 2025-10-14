@@ -1,7 +1,9 @@
 package otp
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/coretrix/hitrix/service/component/sms"
@@ -27,8 +29,14 @@ func (m *Mobica) GetCode() string {
 	rangeMin := 10000
 	rangeMax := 100000
 
-	//nolint //G404: Use of weak random number generator (math/rand instead of crypto/rand)
-	return strconv.Itoa(rand.Intn(rangeMax-rangeMin+1) + rangeMin)
+	diff := rangeMax - rangeMin + 1
+
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(diff)))
+	if err != nil {
+		panic(fmt.Errorf("failed to generate secure random number: %w", err))
+	}
+
+	return strconv.Itoa(int(nBig.Int64()) + rangeMin)
 }
 
 func (m *Mobica) GetPhonePrefixes() []string {

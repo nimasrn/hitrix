@@ -1,8 +1,7 @@
 package account
 
 import (
-	//nolint //G501: Blocklisted import crypto/md5: weak cryptographic primitive
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -36,22 +35,22 @@ func GenerateDevTokenAndRefreshToken(ormService fluxaorm.Context, userID uint64)
 	}
 
 	redisService := ormService.Engine().Redis(appService.RedisPools.Cache)
-	// #nosec
+
 	redisService.Set(
 		ormService,
 		fmt.Sprintf(
 			"%x",
-			md5.Sum([]byte(token)),
+			sha256.Sum256([]byte(token)),
 		),
 		token,
 		expireTimeToken,
 	)
-	// #nosec
+
 	redisService.Set(
 		ormService,
 		fmt.Sprintf(
 			"%x",
-			md5.Sum([]byte(refreshToken)),
+			sha256.Sum256([]byte(refreshToken)),
 		),
 		refreshToken,
 		expireTimeRefreshToken,
@@ -104,10 +103,9 @@ func IsValidDevToken(c *gin.Context, token string) error {
 func verifyDevUser(c *gin.Context, userID uint64, token string) error {
 	ormService := service.DI().OrmForContext(c.Request.Context())
 
-	// #nosec
 	v, has := ormService.Engine().Redis(service.DI().App().RedisPools.Cache).Get(
 		ormService,
-		fmt.Sprintf("%x", md5.Sum([]byte(token))),
+		fmt.Sprintf("%x", sha256.Sum256([]byte(token))),
 	)
 	if !has || strings.Compare(v, token) != 0 {
 		return fmt.Errorf("token doesnt match")
