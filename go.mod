@@ -29,7 +29,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/icza/gox v0.0.0-20201215141822-6edfac6c05b5
 	github.com/joho/godotenv v1.3.0
-	github.com/latolukasz/fluxaorm v1.10.2
+	github.com/latolukasz/fluxaorm v1.11.0
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
 	github.com/mailjet/mailjet-apiv3-go/v3 v3.1.1
 	github.com/mattbaird/gochimp v0.0.0-20200820164431-f1082bcdf63f

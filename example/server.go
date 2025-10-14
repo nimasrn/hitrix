@@ -34,6 +34,7 @@ func main() {
 		registry.ServiceProviderOrmRegistry(entity.Init),
 		registry.ServiceProviderOrm(),
 		registry.ServiceProviderClock(),
+		registry.ServiceProviderJWT(),
 	).RegisterDIRequestService(
 		registry.ServiceProviderOrmForContext(),
 	).RegisterRedisPools(
