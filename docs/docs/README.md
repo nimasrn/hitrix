@@ -122,17 +122,10 @@ If you want to use our dev panel and to be able to manage alters, error log, red
 ```go
 package entity
 
-import (
-	"github.com/latolukasz/fluxaorm"
-)
-
 type DevPanelUserEntity struct {
-	beeorm.ORM   `orm:"table=admin_users;redisCache"`
-	ID        uint64
-	Email     string `orm:"unique=Email"`
+	ID        uint64  `orm:"table=admin_users;redisCache"`
+	Email     string `orm:"unique=Email;cached"`
 	Password  string
-
-	UserEmailIndex *beeorm.CachedQuery `queryOne:":Email = ?"`
 }
 
 func (e *DevPanelUserEntity) GetUsername() string {
@@ -149,9 +142,7 @@ After that you should register it to the `entity.Init` function
 ```go
 package entity
 
-import "github.com/latolukasz/fluxaorm"
-
-func Init(registry *beeorm.Registry) {
+func Init(registry *fluxaorm.Registry) {
 	registry.RegisterEntity(
 		&DevPanelUserEntity{},
 	)

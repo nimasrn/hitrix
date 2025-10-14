@@ -144,8 +144,8 @@ type PriceChangedDirtyAllProducer struct {
 
 func (p *PriceChangedDirtyAllProducer) Produce(ormService fluxaorm.Context) error {
 	variantEntity := entity.VariantEntity{}
-	where := beeorm.NewWhere("1 ORDER BY ID ASC")
-	pager := &beeorm.Pager{CurrentPage: 1, PageSize: 1000}
+	where := fluxaorm.NewWhere("1 ORDER BY ID ASC")
+	pager := fluxaorm.Pager{CurrentPage: 1, PageSize: 1000}
 	hasMoreToIndex := true
 	for hasMoreToIndex {
 		ids := ormService.SearchIDs(where, pager, &variantEntity)

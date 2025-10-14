@@ -224,7 +224,7 @@ func ListExport(ormService fluxaorm.Context, request *hitrixCrud.ListRequest, _ 
 	exportColumns := make([]string, 0) // excel or csv Columns for passing to our exporter service
 	allExportData := make([][]interface{}, 0) // data for passing to our exporter service
 
-	pager := beeorm.NewPager(1, 1000)
+	pager := fluxaorm.NewPager(1, 1000)
 
 	for {
 		

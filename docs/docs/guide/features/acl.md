@@ -4,24 +4,21 @@ You can use ACL feature by including 4 hitrix entities in you orm init:
 
 ```go
 type RoleEntity struct {
-    beeorm.ORM `orm:"table=roles;redisCache;redisSearch=search_pool"`
-    ID         uint64    `orm:"sortable"`
+    ID         uint64    `orm:"table=roles;redisCache;redisSearch=search_pool;sortable"`
     Name       string    `orm:"required;searchable;unique=Name_FakeDelete:1"`
     CreatedAt  time.Time `orm:"time=true"`
     FakeDelete bool      `orm:"unique=Name_FakeDelete:2"`
 }
 
 type ResourceEntity struct {
-    beeorm.ORM `orm:"table=resources;redisCache;redisSearch=search_pool"`
-    ID         uint64    `orm:"searchable"`
+    ID         uint64    `orm:"table=resources;redisCache;redisSearch=search_pool;searchable"`
     Name       string    `orm:"required;searchable;unique=Name_FakeDelete:1"`
     CreatedAt  time.Time `orm:"time=true"`
     FakeDelete bool      `orm:"unique=Name_FakeDelete:2"`
 }
 
 type PermissionEntity struct {
-    beeorm.ORM `orm:"table=permissions;redisCache;redisSearch=search_pool"`
-    ID         uint64          `orm:"searchable;sortable"`
+    ID         uint64          `orm:"table=permissions;redisCache;redisSearch=search_pool;searchable;sortable"`
     ResourceID *ResourceEntity `orm:"required;searchable;unique=ResourceID_Name_FakeDelete:1"`
     Name       string          `orm:"required;searchable;unique=ResourceID_Name_FakeDelete:2"`
     CreatedAt  time.Time       `orm:"time=true"`
@@ -29,8 +26,7 @@ type PermissionEntity struct {
 }
 
 type PrivilegeEntity struct {
-    beeorm.ORM    `orm:"table=privileges;redisCache;redisSearch=search_pool"`
-    ID            uint64
+    ID            uint64 `orm:"table=privileges;redisCache;redisSearch=search_pool"`
     RoleID        *RoleEntity         `orm:"required;searchable;unique=RoleID_ResourceID_FakeDelete:1"`
     ResourceID    *ResourceEntity     `orm:"required;searchable;unique=RoleID_ResourceID_FakeDelete:2"`
     PermissionIDs []*PermissionEntity `orm:"required;searchable"`
@@ -44,8 +40,7 @@ role entity like this:
 ```go
 
 type UserEntity struct {
-    beeorm.ORM `orm:"table=users;log=log_db_pool;redisCache;redisSearch=search_pool"`
-    ID         uint64
+    ID         uint64 `orm:"table=users;log=log_db_pool;redisCache;redisSearch=search_pool"`
     RoleID     *hitrixEntity.RoleEntity `orm:"required"`
 }
 ```

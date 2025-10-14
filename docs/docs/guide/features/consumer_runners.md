@@ -1,6 +1,6 @@
 # Consumer runners
 
-Consumer runners enable you to quickly spin up BeeORM queue consumers easily.
+Consumer runners enable you to quickly spin up FluxaORM queue consumers easily.
 There are 2 types of consumer.
 - scalable
 - non scalable
