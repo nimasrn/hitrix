@@ -194,10 +194,10 @@ func getStorageCounter(ormService fluxaorm.Context, appService app.App, bucketCo
 
 		ossBucketCounterEntity.Counter = ossBucketCounterEntity.Counter + 1
 	} else {
-		ossBucketCounterEntity = fluxaorm.NewEntityWithID[entity.OSSBucketCounterEntity](ormService, bucketID)
-		ossBucketCounterEntity.Counter = 1
-
-		fluxaorm.NewEntityWithID[entity.OSSBucketCounterEntity, uint64](ormService, bucketID)
+		ormService.NewEntity(entity.OSSBucketCounterEntity{
+			ID:      bucketID,
+			Counter: 1,
+		})
 	}
 
 	ormService.Flush()
