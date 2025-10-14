@@ -3,10 +3,10 @@ package account
 import (
 	"errors"
 
-	"github.com/coretrix/hitrix/example/entity"
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
 
+	"github.com/coretrix/hitrix/example/entity"
 	"github.com/coretrix/hitrix/pkg/binding"
 	"github.com/coretrix/hitrix/pkg/view/account"
 	"github.com/coretrix/hitrix/service"

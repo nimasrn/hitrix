@@ -72,6 +72,7 @@ func (g *SinchProvider) SendSMSMessage(message *Message) (string, error) {
 	}
 
 	headers := g.getSinchHeaders()
+
 	responseBody, _, code, err := helper.Call(
 		context.Background(),
 		"POST",
@@ -80,7 +81,6 @@ func (g *SinchProvider) SendSMSMessage(message *Message) (string, error) {
 		time.Duration(timeoutInSeconds)*time.Second,
 		body,
 		nil)
-
 	if err != nil {
 		return failure, err
 	}

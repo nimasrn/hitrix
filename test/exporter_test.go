@@ -40,10 +40,12 @@ func TestExporter(t *testing.T) {
 	rows := make([][]interface{}, 0)
 
 	var firstRow []interface{}
+
 	firstRow = append(firstRow, cell1, cell2)
 	rows = append(rows, firstRow)
 
 	var secondRow []interface{}
+
 	secondRow = append(secondRow, cell1, cell2)
 	rows = append(rows, secondRow)
 

@@ -2,6 +2,7 @@ package geocoding
 
 import (
 	"context"
+
 	"googlemaps.github.io/maps"
 )
 
@@ -113,7 +114,6 @@ func (g *GoogleMapsProvider) ReverseGeocode(ctx context.Context, latLng *LatLng,
 
 func (g *GoogleMapsProvider) SnapToRoad(ctx context.Context, dto *maps.SnapToRoadRequest) (*maps.SnapToRoadResponse, error) {
 	snapResponse, err := g.client.SnapToRoad(ctx, dto)
-
 	if err != nil {
 		return nil, err
 	}

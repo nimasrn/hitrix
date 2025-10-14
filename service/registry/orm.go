@@ -1,13 +1,13 @@
 package registry
 
 import (
-	"github.com/coretrix/hitrix/service/component/app"
-	"github.com/coretrix/hitrix/service/component/config"
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
 	"github.com/sarulabs/di"
 
 	"github.com/coretrix/hitrix/service"
+	"github.com/coretrix/hitrix/service/component/app"
+	"github.com/coretrix/hitrix/service/component/config"
 )
 
 func ServiceProviderOrm() *service.DefinitionGlobal {

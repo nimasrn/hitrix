@@ -167,19 +167,21 @@ func (c *Crud) ExtractListParams(cols []*Column, request *ListRequest) SearchPar
 
 	filterTypes := c.groupColumnNamesByFilterType(cols, request)
 
-	var selectedMapStringStringFilters = make(map[string]string)
-	var selectedStringStartsWithFilters = make(map[string]string)
-	var selectedArrayStringFilters = make(map[string][]string)
-	var selectedNumberFilters = make(map[string]int64)
-	var selectedRangeNumberFilters = make(map[string][]int64, 2)
-	var selectedArrayNumberFilters = make(map[string][]int64)
-	var selectedDateTimeFilters = make(map[string]time.Time)
-	var selectedDateFilters = make(map[string]time.Time)
-	var selectedRangeDateTimeFilters = make(map[string][]time.Time)
-	var selectedRangeDateFilters = make(map[string][]time.Time)
-	var selectedBooleanFilters = make(map[string]bool)
-	var selectedSort = make(map[string]bool)
-	var selectedORFilters = make(map[string]string)
+	var (
+		selectedMapStringStringFilters  = make(map[string]string)
+		selectedStringStartsWithFilters = make(map[string]string)
+		selectedArrayStringFilters      = make(map[string][]string)
+		selectedNumberFilters           = make(map[string]int64)
+		selectedRangeNumberFilters      = make(map[string][]int64, 2)
+		selectedArrayNumberFilters      = make(map[string][]int64)
+		selectedDateTimeFilters         = make(map[string]time.Time)
+		selectedDateFilters             = make(map[string]time.Time)
+		selectedRangeDateTimeFilters    = make(map[string][]time.Time)
+		selectedRangeDateFilters        = make(map[string][]time.Time)
+		selectedBooleanFilters          = make(map[string]bool)
+		selectedSort                    = make(map[string]bool)
+		selectedORFilters               = make(map[string]string)
+	)
 
 mainLoop:
 	for field, value := range request.Search {
@@ -263,6 +265,7 @@ mainLoop:
 				if s.Len() == 0 {
 					continue mainLoop
 				}
+
 				for i := 0; i < s.Len(); i++ {
 					selectedArrayStringFilters[field] = append(selectedArrayStringFilters[field], fmt.Sprintf("%v", s.Index(i)))
 				}
@@ -362,24 +365,25 @@ mainLoop:
 }
 
 func (c *Crud) groupColumnNamesByFilterType(cols []*Column, request *ListRequest) groupedFilterTypes {
-	var stringStartsWithSearch = make([]string, 0)
-	var arrayStringFilters = make([]string, 0)
-	var booleanFilters = make([]string, 0)
-	var mapStringStringFilters = make(map[string][]*StringKeyStringValue)
-	var mapIntStringFilters = make(map[string][]*IntKeyStringValue)
-	var numberFilters = make([]string, 0)
-	var rangeNumberFilters = make([]string, 0)
-	var arrayNumberFilters = make([]string, 0)
-	var dateTimeFilters = make([]string, 0)
-	var dateFilters = make([]string, 0)
-	var rangeDateTimeFilters = make([]string, 0)
-	var rangeDateFilters = make([]string, 0)
-	var sortables = make([]string, 0)
+	var (
+		stringStartsWithSearch = make([]string, 0)
+		arrayStringFilters     = make([]string, 0)
+		booleanFilters         = make([]string, 0)
+		mapStringStringFilters = make(map[string][]*StringKeyStringValue)
+		mapIntStringFilters    = make(map[string][]*IntKeyStringValue)
+		numberFilters          = make([]string, 0)
+		rangeNumberFilters     = make([]string, 0)
+		arrayNumberFilters     = make([]string, 0)
+		dateTimeFilters        = make([]string, 0)
+		dateFilters            = make([]string, 0)
+		rangeDateTimeFilters   = make([]string, 0)
+		rangeDateFilters       = make([]string, 0)
+		sortables              = make([]string, 0)
+	)
 
 	c.cols = map[string]Column{}
 
 	for _, column := range cols {
-
 		c.cols[column.Key] = *column
 
 		if column.Sortable {
@@ -493,7 +497,6 @@ func fetchDependencyValueInt(dependentCol *Column, cols []*Column, request *List
 	}
 
 	if dependentCol.DataMapIntIntKeyStringValue != nil {
-
 		value, ok := v.(float64)
 		if !ok {
 			return nil
@@ -506,7 +509,6 @@ func fetchDependencyValueInt(dependentCol *Column, cols []*Column, request *List
 	}
 
 	if dependentCol.DataMapStringIntKeyStringValue != nil {
-
 		value, ok := v.(string)
 		if !ok {
 			return nil
@@ -522,7 +524,7 @@ func fetchDependencyValueInt(dependentCol *Column, cols []*Column, request *List
 }
 
 // GenerateListRedisSearchQuery TODO : add full text queries when supported by hitrix
-func (c *Crud) GenerateListRedisSearchQuery(params SearchParams) *fluxaorm.RedisSearchFilter {
+func (c *Crud) GenerateListRedisSearchQuery(_ SearchParams) *fluxaorm.RedisSearchFilter {
 	//TODO Krasi ORM: fix it
 	return &fluxaorm.RedisSearchFilter{}
 

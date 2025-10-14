@@ -44,7 +44,6 @@ func (t *Twilio) SendOTP(phone *Phone, _ string) (string, string, error) {
 	createVerificationParams.SetTo(phone.Number)
 
 	request, jsonError := t.toJSON(createVerificationParams)
-
 	if jsonError != nil {
 		return "", "", jsonError
 	}
@@ -52,7 +51,6 @@ func (t *Twilio) SendOTP(phone *Phone, _ string) (string, string, error) {
 	verifyV2Verification, err := t.Client.VerifyV2.CreateVerification(t.VerificationSID, createVerificationParams)
 
 	response, jsonError := t.toJSON(verifyV2Verification)
-
 	if jsonError != nil {
 		return request, "", jsonError
 	}
@@ -73,7 +71,6 @@ func (t *Twilio) VerifyOTP(phone *Phone, code, _ string) (string, string, bool, 
 	createVerificationCheckParams.SetCode(code)
 
 	request, jsonError := t.toJSON(createVerificationCheckParams)
-
 	if jsonError != nil {
 		return "", "", false, false, jsonError
 	}
@@ -81,7 +78,6 @@ func (t *Twilio) VerifyOTP(phone *Phone, code, _ string) (string, string, bool, 
 	verifyV2VerificationCheck, err := t.Client.VerifyV2.CreateVerificationCheck(t.VerificationSID, createVerificationCheckParams)
 
 	response, jsonError := t.toJSON(verifyV2VerificationCheck)
-
 	if jsonError != nil {
 		return request, "", false, false, jsonError
 	}
@@ -106,7 +102,6 @@ func (t *Twilio) VerifyOTP(phone *Phone, code, _ string) (string, string, bool, 
 
 func (t *Twilio) toJSON(data interface{}) (string, error) {
 	dataJSON, err := json.Marshal(data)
-
 	if err != nil {
 		return "", err
 	}

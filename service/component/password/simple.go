@@ -16,7 +16,6 @@ func NewSimpleManager(_ config.IConfig) IPassword {
 
 func (p *SimpleManager) VerifyPassword(password string, hash string) bool {
 	passwordHash, err := p.HashPassword(password)
-
 	if err != nil {
 		panic(err)
 	}
@@ -26,8 +25,8 @@ func (p *SimpleManager) VerifyPassword(password string, hash string) bool {
 
 func (p *SimpleManager) HashPassword(password string) (string, error) {
 	sha256Hash := sha256.New()
-	_, err := sha256Hash.Write([]byte(password))
 
+	_, err := sha256Hash.Write([]byte(password))
 	if err != nil {
 		return "", err
 	}

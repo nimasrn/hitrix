@@ -29,6 +29,7 @@ func ServiceProviderFCM() *service.DefinitionGlobal {
 					if os.IsNotExist(err) {
 						// specified config file doesn't exists
 						credentialsFile := configService.GetFolderPath() + "/.fcm.json"
+
 						err := os.Setenv(fcmConfigEnvName, credentialsFile)
 						if err != nil {
 							return nil, err

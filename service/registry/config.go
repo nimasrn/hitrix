@@ -10,7 +10,7 @@ import (
 func ServiceProviderConfigDirectory(configDirectory string) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: "config_directory",
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return configDirectory, nil
 		},
 	}

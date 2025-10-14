@@ -17,7 +17,7 @@ var upGrader = websocket.Upgrader{
 	ReadBufferSize:    1024,
 	WriteBufferSize:   1024,
 	EnableCompression: true,
-	CheckOrigin: func(r *http.Request) bool {
+	CheckOrigin: func(_ *http.Request) bool {
 		return true
 	},
 }
@@ -60,6 +60,7 @@ func (controller *WebsocketController) InitConnection(c *gin.Context) {
 	hitrix.Goroutine(func() {
 		socketHolder.ReadPump(socketRegistryService, func(rawData []byte) {
 			dto := &DTOMessage{}
+
 			err = json.Unmarshal(rawData, dto)
 			if err != nil {
 				errorLogger.LogError(err)

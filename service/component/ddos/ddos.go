@@ -4,8 +4,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
+
+	"github.com/coretrix/hitrix/service/component/app"
 )
 
 type IDDOS interface {

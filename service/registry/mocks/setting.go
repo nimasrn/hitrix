@@ -9,7 +9,7 @@ import (
 func ServiceSetting(mock interface{}) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.SettingService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return mock, nil
 		},
 	}

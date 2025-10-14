@@ -24,8 +24,10 @@ type Sender struct {
 }
 
 func (s *Sender) SendMessage(ormService fluxaorm.Context, message *Message) error {
-	var primaryProvider IProvider
-	var secondaryProvider IProvider
+	var (
+		primaryProvider   IProvider
+		secondaryProvider IProvider
+	)
 
 	if message.Provider != nil {
 		primaryProvider = message.Provider.Primary
@@ -47,8 +49,11 @@ func (s *Sender) SendMessage(ormService fluxaorm.Context, message *Message) erro
 	smsTrackerEntity.SentAt = s.ClockService.Now()
 
 	trySecondaryProvider := false
-	var status string
-	var err error
+
+	var (
+		status string
+		err    error
+	)
 
 	if !s.SandboxMode {
 		status, err = primaryProvider.SendSMSMessage(message)

@@ -41,14 +41,14 @@ func main() {
 	r.RegisterDIGlobalService(&service.DefinitionGlobal{
 		Name:   "aa",
 		Script: true,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return &testScript{"takie tam", false}, nil
 		},
 	})
 	r.RegisterDIGlobalService(&service.DefinitionGlobal{
 		Name:   "bb",
 		Script: true,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return &testScript{"takie tam dwa", true}, nil
 		},
 	})

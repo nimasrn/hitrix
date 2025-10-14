@@ -9,7 +9,7 @@ import (
 func ServiceProviderMockGoogleAnalytics(mock interface{}) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.GoogleAnalyticsService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return mock, nil
 		},
 	}

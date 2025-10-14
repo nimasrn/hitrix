@@ -16,11 +16,11 @@ func GetImageURLTemplate(image string) string {
 
 func GetImageURLTemplateFilled(image, fit, format, quality, width, dpr string) string {
 	image = service.DI().Config().MustString("oss.cdn_url") + Options + image
-	image = strings.Replace(image, "${fit}", fit, -1)
-	image = strings.Replace(image, "${format}", format, -1)
-	image = strings.Replace(image, "${quality}", quality, -1)
-	image = strings.Replace(image, "${width}", width, -1)
-	image = strings.Replace(image, "${dpr}", dpr, -1)
+	image = strings.ReplaceAll(image, "${fit}", fit)
+	image = strings.ReplaceAll(image, "${format}", format)
+	image = strings.ReplaceAll(image, "${quality}", quality)
+	image = strings.ReplaceAll(image, "${width}", width)
+	image = strings.ReplaceAll(image, "${dpr}", dpr)
 
 	return image
 }

@@ -1,8 +1,9 @@
 package entity
 
 import (
-	hitrixEntity "github.com/coretrix/hitrix/pkg/entity"
 	"github.com/latolukasz/fluxaorm"
+
+	hitrixEntity "github.com/coretrix/hitrix/pkg/entity"
 )
 
 type AdminUserEntity struct {

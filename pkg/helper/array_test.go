@@ -22,6 +22,7 @@ func TestSubtractInt64Slice(t *testing.T) {
 
 func TestSubtractUInt32Slice(t *testing.T) {
 	var a []uint32
+
 	b := []uint32{1}
 	res := SubtractUInt32Slice(a, b)
 	assert.Equal(t, []uint32{}, res)
@@ -29,7 +30,9 @@ func TestSubtractUInt32Slice(t *testing.T) {
 
 func TestSubtractInt32Slice(t *testing.T) {
 	a := []int32{1, 2, 3}
+
 	var b []int32
+
 	res := SubtractInt32Slice(a, b)
 	assert.Equal(t, a, res)
 }

@@ -108,6 +108,7 @@ func NewConfig(appName, mode, localConfigFolder string) (*Config, error) {
 
 func parseEnvVariables(content []byte) []byte {
 	var newContent string
+
 	newContent = string(content)
 
 	re := regexp.MustCompile(`ENV\[(.*?)\]`)
@@ -119,9 +120,9 @@ func parseEnvVariables(content []byte) []byte {
 
 		values := strings.Split(os.Getenv(element), ";")
 		if len(values) > 1 {
-			newContent = strings.Replace(newContent, "ENV["+element+"]", "["+strings.Join(values, ",")+"]", -1)
+			newContent = strings.ReplaceAll(newContent, "ENV["+element+"]", "["+strings.Join(values, ",")+"]")
 		} else {
-			newContent = strings.Replace(newContent, "ENV["+element+"]", os.Getenv(element), -1)
+			newContent = strings.ReplaceAll(newContent, "ENV["+element+"]", os.Getenv(element))
 		}
 	}
 

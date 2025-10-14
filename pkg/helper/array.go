@@ -1,8 +1,10 @@
 package helper
 
 func UniqueString(a []string) []string {
-	var res = make([]string, 0)
-	var found = make(map[string]bool)
+	var (
+		res   = make([]string, 0)
+		found = make(map[string]bool)
+	)
 
 	for i := range a {
 		if !found[a[i]] {
@@ -15,8 +17,10 @@ func UniqueString(a []string) []string {
 }
 
 func UniqueInt64(a []int64) []int64 {
-	var res = make([]int64, 0)
-	var found = make(map[int64]bool)
+	var (
+		res   = make([]int64, 0)
+		found = make(map[int64]bool)
+	)
 
 	for i := range a {
 		if !found[a[i]] {
@@ -29,8 +33,10 @@ func UniqueInt64(a []int64) []int64 {
 }
 
 func UniqueInt32(a []int32) []int32 {
-	var res = make([]int32, 0)
-	var found = make(map[int32]bool)
+	var (
+		res   = make([]int32, 0)
+		found = make(map[int32]bool)
+	)
 
 	for i := range a {
 		if !found[a[i]] {
@@ -43,8 +49,10 @@ func UniqueInt32(a []int32) []int32 {
 }
 
 func UniqueInt(a []int) []int {
-	var res = make([]int, 0)
-	var found = make(map[int]bool)
+	var (
+		res   = make([]int, 0)
+		found = make(map[int]bool)
+	)
 
 	for i := range a {
 		if !found[a[i]] {
@@ -57,8 +65,10 @@ func UniqueInt(a []int) []int {
 }
 
 func UniqueUInt64(a []uint64) []uint64 {
-	var res = make([]uint64, 0)
-	var found = make(map[uint64]bool)
+	var (
+		res   = make([]uint64, 0)
+		found = make(map[uint64]bool)
+	)
 
 	for i := range a {
 		if !found[a[i]] {
@@ -71,8 +81,10 @@ func UniqueUInt64(a []uint64) []uint64 {
 }
 
 func UniqueUInt32(a []uint32) []uint32 {
-	var res = make([]uint32, 0)
-	var found = make(map[uint32]bool)
+	var (
+		res   = make([]uint32, 0)
+		found = make(map[uint32]bool)
+	)
 
 	for i := range a {
 		if !found[a[i]] {
@@ -152,6 +164,7 @@ func HasIntersectionInt64(a []int64, b []int64) bool {
 	}
 
 	found := false
+
 mainLoop:
 	for _, l := range low {
 		for _, h := range high {
@@ -174,6 +187,7 @@ func HasIntersectionInt32(a []int32, b []int32) bool {
 	}
 
 	found := false
+
 mainLoop:
 	for _, l := range low {
 		for _, h := range high {
@@ -196,6 +210,7 @@ func HasIntersectionInt(a []int, b []int) bool {
 	}
 
 	found := false
+
 mainLoop:
 	for _, l := range low {
 		for _, h := range high {
@@ -218,6 +233,7 @@ func HasIntersectionUInt64(a []uint64, b []uint64) bool {
 	}
 
 	found := false
+
 mainLoop:
 	for _, l := range low {
 		for _, h := range high {
@@ -240,6 +256,7 @@ func HasIntersectionUInt32(a []uint32, b []uint32) bool {
 	}
 
 	found := false
+
 mainLoop:
 	for _, l := range low {
 		for _, h := range high {
@@ -255,8 +272,10 @@ mainLoop:
 }
 
 func SubtractUInt64Slice(a []uint64, b []uint64) []uint64 { // a-b
-	var res = make([]uint64, 0)
-	var bMap = make(map[uint64]bool)
+	var (
+		res  = make([]uint64, 0)
+		bMap = make(map[uint64]bool)
+	)
 
 	for i := range b {
 		bMap[b[i]] = true
@@ -273,8 +292,10 @@ func SubtractUInt64Slice(a []uint64, b []uint64) []uint64 { // a-b
 }
 
 func SubtractInt64Slice(a []int64, b []int64) []int64 { // a-b
-	var res = make([]int64, 0)
-	var bMap = make(map[int64]bool)
+	var (
+		res  = make([]int64, 0)
+		bMap = make(map[int64]bool)
+	)
 
 	for i := range b {
 		bMap[b[i]] = true
@@ -291,8 +312,10 @@ func SubtractInt64Slice(a []int64, b []int64) []int64 { // a-b
 }
 
 func SubtractInt32Slice(a []int32, b []int32) []int32 { // a-b
-	var res = make([]int32, 0)
-	var bMap = make(map[int32]bool)
+	var (
+		res  = make([]int32, 0)
+		bMap = make(map[int32]bool)
+	)
 
 	for i := range b {
 		bMap[b[i]] = true
@@ -309,8 +332,10 @@ func SubtractInt32Slice(a []int32, b []int32) []int32 { // a-b
 }
 
 func SubtractUInt32Slice(a []uint32, b []uint32) []uint32 { // a-b
-	var res = make([]uint32, 0)
-	var bMap = make(map[uint32]bool)
+	var (
+		res  = make([]uint32, 0)
+		bMap = make(map[uint32]bool)
+	)
 
 	for i := range b {
 		bMap[b[i]] = true
@@ -327,8 +352,10 @@ func SubtractUInt32Slice(a []uint32, b []uint32) []uint32 { // a-b
 }
 
 func SubtractIntSlice(a []int, b []int) []int { // a-b
-	var res = make([]int, 0)
-	var bMap = make(map[int]bool)
+	var (
+		res  = make([]int, 0)
+		bMap = make(map[int]bool)
+	)
 
 	for i := range b {
 		bMap[b[i]] = true
@@ -345,8 +372,10 @@ func SubtractIntSlice(a []int, b []int) []int { // a-b
 }
 
 func SubtractUIntSlice(a []uint, b []uint) []uint { // a-b
-	var res = make([]uint, 0)
-	var bMap = make(map[uint]bool)
+	var (
+		res  = make([]uint, 0)
+		bMap = make(map[uint]bool)
+	)
 
 	for i := range b {
 		bMap[b[i]] = true

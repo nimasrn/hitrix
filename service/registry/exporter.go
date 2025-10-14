@@ -10,7 +10,7 @@ import (
 func ServiceProviderExporter() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.ExporterService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return exporter.NewExportService(exporter.NewXLSXExportService(), exporter.NewCSVExportService()), nil
 		},
 	}

@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/latolukasz/fluxaorm"
+
 	"github.com/coretrix/hitrix/pkg/dto/translation"
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/errors"
 	"github.com/coretrix/hitrix/service"
-	"github.com/latolukasz/fluxaorm"
 )
 
 func Get(ctx context.Context, id uint64) (*translation.ResponseTranslation, error) {

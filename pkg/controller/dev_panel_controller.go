@@ -8,9 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
 
-	//"github.com/latolukasz/fluxaorm"
-	//"github.com/latolukasz/fluxaorm/tools"
-
 	"github.com/coretrix/hitrix/pkg/binding"
 	"github.com/coretrix/hitrix/pkg/dto/list"
 	"github.com/coretrix/hitrix/pkg/entity"

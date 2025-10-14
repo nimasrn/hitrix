@@ -165,7 +165,6 @@ func (s *Mailjet) sendTemplate(
 	}
 
 	results, err := s.client.SendMailV31(message)
-
 	if err != nil {
 		return err
 	}

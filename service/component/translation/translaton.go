@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/latolukasz/fluxaorm"
 
+	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/helper"
 	errorlogger "github.com/coretrix/hitrix/service/component/error_logger"
 )
@@ -122,7 +122,7 @@ func (u *translationService) GetTextWithVars(
 	text := translationTextEntity.Text
 
 	for paramName, value := range variables {
-		text = strings.Replace(text, fmt.Sprintf("[[%s]]", paramName), fmt.Sprintf("%v", value), -1)
+		text = strings.ReplaceAll(text, fmt.Sprintf("[[%s]]", paramName), fmt.Sprintf("%v", value))
 	}
 
 	re := regexp.MustCompile(`\[\[(.*?)\]\]`)

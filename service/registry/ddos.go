@@ -10,7 +10,7 @@ import (
 func ServiceProviderDDOS() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.DDOSService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return &ddos.DDOS{}, nil
 		},
 	}

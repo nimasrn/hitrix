@@ -77,7 +77,6 @@ func overwriteORMConfig(appService *app.App, configService config.IConfig, yamlC
 	color.Blue("DB name: %s", newDBName)
 
 	_, err = db.Exec("CREATE DATABASE IF NOT EXISTS `" + newDBName + "`")
-
 	if err != nil {
 		panic(err)
 	}
@@ -98,7 +97,6 @@ func overwriteORMConfig(appService *app.App, configService config.IConfig, yamlC
 		newDBLogName := newDBName + "_log"
 
 		_, err = db.Exec("CREATE DATABASE IF NOT EXISTS `" + newDBLogName + "`")
-
 		if err != nil {
 			panic(err)
 		}

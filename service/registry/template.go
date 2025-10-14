@@ -10,7 +10,7 @@ import (
 func ServiceProviderTemplate() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.TemplateService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return template.NewTemplateService(), nil
 		},
 	}

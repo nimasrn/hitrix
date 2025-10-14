@@ -64,6 +64,7 @@ func (s *Sinch) SendOTP(phone *Phone, _ string) (string, string, error) {
 	}
 
 	headers := s.getSinchHeaders()
+
 	responseBody, _, code, err := helper.Call(
 		context.Background(),
 		"POST",
@@ -72,7 +73,6 @@ func (s *Sinch) SendOTP(phone *Phone, _ string) (string, string, error) {
 		time.Duration(5)*time.Second,
 		body,
 		nil)
-
 	if err != nil {
 		return request, string(responseBody), err
 	}
@@ -103,6 +103,7 @@ func (s *Sinch) VerifyOTP(phone *Phone, code, _ string) (string, string, bool, b
 	}
 
 	headers := s.getSinchHeaders()
+
 	responseBody, _, respCode, err := helper.Call(
 		context.Background(),
 		"PUT",
@@ -111,7 +112,6 @@ func (s *Sinch) VerifyOTP(phone *Phone, code, _ string) (string, string, bool, b
 		time.Duration(5)*time.Second,
 		body,
 		nil)
-
 	if err != nil {
 		return request, string(responseBody), false, false, err
 	}
@@ -147,7 +147,6 @@ func (s *Sinch) getSinchHeaders() map[string]string {
 
 func (s *Sinch) toJSON(data interface{}) (string, error) {
 	dataJSON, err := json.Marshal(data)
-
 	if err != nil {
 		return "", err
 	}

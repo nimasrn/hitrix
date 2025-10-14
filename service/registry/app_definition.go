@@ -10,7 +10,7 @@ import (
 func ServiceProviderApp(app *app.App) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.AppService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return app, nil
 		},
 	}

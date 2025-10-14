@@ -4,9 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/coretrix/hitrix/service"
 	"github.com/latolukasz/fluxaorm"
 	tusd "github.com/tus/tusd/pkg/handler"
+
+	"github.com/coretrix/hitrix/service"
 )
 
 type RedisLocker struct {

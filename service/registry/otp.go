@@ -27,6 +27,7 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 			generatorService := ctn.Get(service.GeneratorService).(generator.IGenerator)
 
 			providers := make([]otp.IOTPSMSGateway, 0)
+
 			if len(SMSForceProviders) > 0 {
 				for _, forceProvider := range SMSForceProviders {
 					builderFunc, ok := smsOTPProviderBuilderFactory[forceProvider]
@@ -43,6 +44,7 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 				}
 			} else {
 				ormService := ctn.Get(service.ORMGlobalService).(fluxaorm.Context)
+
 				settingsEntity, found := fluxaorm.GetByUniqueIndex[entity.SettingsEntity](ormService, "Key", "otp_sms_provider")
 				if !found {
 					return nil, errors.New("otp_sms_provider not found in settings")
@@ -61,6 +63,7 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 					var phonePrefixes []string
 					if len(providerNameWithPhonePrefixes) > 1 {
 						phonePrefixes = make([]string, 0)
+
 						phonePrefixesSplit := strings.Split(providerNameWithPhonePrefixes[1], ",")
 						if len(phonePrefixesSplit) != 0 {
 							phonePrefixes = phonePrefixesSplit
@@ -82,6 +85,7 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 			}
 
 			var emailSender *mail.Sender
+
 			if emailSenderFunc != nil {
 				ormEngine := ctn.Get(service.ORMEngineService).(fluxaorm.Engine)
 				if ormEngine.Registry().EntitySchema("entity.MailTrackerEntity") == nil {
@@ -89,6 +93,7 @@ func ServiceProviderOTP(emailSenderFunc mail.NewSenderFunc, SMSForceProviders ..
 				}
 
 				var err error
+
 				emailSender, err = mail.NewSender(
 					ctn.Get(service.ConfigService).(config.IConfig),
 					ctn.Get(service.ClockService).(clock.IClock),

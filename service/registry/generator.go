@@ -10,7 +10,7 @@ import (
 func ServiceProviderGenerator() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.GeneratorService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return &generator.SimpleGenerator{}, nil
 		},
 	}

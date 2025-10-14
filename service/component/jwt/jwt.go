@@ -25,13 +25,11 @@ func (t *JWT) EncodeJWT(secret string, headers, payload map[string]string) (stri
 	hashData := t.createHash(secret, algo)
 
 	head, err := json.Marshal(headers)
-
 	if err != nil {
 		return "", err
 	}
 
 	payl, err := json.Marshal(payload)
-
 	if err != nil {
 		return "", err
 	}
@@ -42,7 +40,6 @@ func (t *JWT) EncodeJWT(secret string, headers, payload map[string]string) (stri
 	token := fmt.Sprintf("%s.%s", h, pl)
 
 	_, err = hashData.Write([]byte(token))
-
 	if err != nil {
 		return "", err
 	}
@@ -105,13 +102,11 @@ func (t *JWT) checkSignature(secret string, jwtToken []string) error {
 	header := make(map[string]string)
 
 	h, err := base64.URLEncoding.DecodeString(jwtToken[0])
-
 	if err != nil {
 		return err
 	}
 
 	err = json.Unmarshal(h, &header)
-
 	if err != nil {
 		return err
 	}
@@ -130,8 +125,7 @@ func (t *JWT) checkSignature(secret string, jwtToken []string) error {
 
 	mhash := t.createHash(secret, algo)
 
-	_, err = mhash.Write([]byte(fmt.Sprintf("%s.%s", jwtToken[0], jwtToken[1])))
-
+	_, err = fmt.Fprintf(mhash, "%s.%s", jwtToken[0], jwtToken[1])
 	if err != nil {
 		return err
 	}

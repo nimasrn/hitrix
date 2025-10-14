@@ -15,8 +15,10 @@ func ServiceProviderErrorLogger() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.ErrorLoggerService,
 		Build: func(ctn di.Container) (interface{}, error) {
-			var sentryService sentry.ISentry
-			var slackAPIService slack.Slack
+			var (
+				sentryService   sentry.ISentry
+				slackAPIService slack.Slack
+			)
 
 			sentryServiceInterface, err := ctn.SafeGet(service.SentryService)
 			if err == nil {
@@ -29,6 +31,7 @@ func ServiceProviderErrorLogger() *service.DefinitionGlobal {
 			}
 
 			appService := ctn.Get(service.AppService).(*app.App)
+
 			return errorlogger.NewRedisErrorLogger(
 				appService,
 				ctn.Get(service.ORMGlobalService).(fluxaorm.Context),

@@ -11,13 +11,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/dongri/phonenumber"
 	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/helper"
 	"github.com/coretrix/hitrix/pkg/queue/streams"
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/clock"
 	"github.com/coretrix/hitrix/service/component/generator"
 	"github.com/coretrix/hitrix/service/component/mail"
@@ -165,8 +165,11 @@ func (o *OTP) GetSMSGatewayRegistry() map[string]IOTPSMSGateway {
 func (o *OTP) sendSMS(ormService fluxaorm.Context, send Send) (string, error) {
 	//validate phone
 	phone := send.Phone
-	var code string
-	var err error
+
+	var (
+		code string
+		err  error
+	)
 
 	gatewayPriority := make([]IOTPSMSGateway, 0)
 
@@ -185,7 +188,7 @@ func (o *OTP) sendSMS(ormService fluxaorm.Context, send Send) (string, error) {
 		text := code
 
 		if send.SMSCustomMessage != "" {
-			text = strings.Replace(send.SMSCustomMessage, "_CODE_", code, -1)
+			text = strings.ReplaceAll(send.SMSCustomMessage, "_CODE_", code)
 		}
 
 		otpTrackerEntity := &entity.OTPTrackerEntity{
@@ -199,7 +202,6 @@ func (o *OTP) sendSMS(ormService fluxaorm.Context, send Send) (string, error) {
 		}
 
 		otpTrackerEntity.GatewaySendRequest, otpTrackerEntity.GatewaySendResponse, err = gateway.SendOTP(phone, text)
-
 		if err != nil {
 			otpTrackerEntity.GatewaySendStatus = entity.OTPTrackerGatewaySendStatusGatewayError
 		} else {
@@ -256,7 +258,6 @@ func (o *OTP) sendEmail(ormService fluxaorm.Context, send Send) (string, error) 
 		TemplateName: send.EmailConfig.TemplateName,
 		TemplateData: map[string]interface{}{"code": code},
 	})
-
 	if err != nil {
 		otpTrackerEntity.GatewaySendStatus = entity.OTPTrackerGatewaySendStatusGatewayError
 	} else {
@@ -280,14 +281,15 @@ func (o *OTP) verifySMS(ormService fluxaorm.Context, verify Verify) (bool, bool,
 
 	gateway := o.SMSGatewayName[otpTrackerEntity.GatewayName]
 
-	var otpRequestValid bool
-	var otpCodeValid bool
+	var (
+		otpRequestValid bool
+		otpCodeValid    bool
+	)
 
 	ormService.EditEntity(otpTrackerEntity)
 
 	otpTrackerEntity.GatewayVerifyRequest, otpTrackerEntity.GatewayVerifyResponse, otpRequestValid, otpCodeValid, err =
 		gateway.VerifyOTP(verify.Phone, verify.Code, otpTrackerEntity.Code)
-
 	if err != nil {
 		otpTrackerEntity.GatewayVerifyStatus = entity.OTPTrackerGatewayVerifyStatusGatewayError
 	} else if !otpRequestValid {
@@ -330,7 +332,6 @@ func (o *OTP) getOTPTrackerEntity(ormService fluxaorm.Context, verifyKey string)
 	}
 
 	otpTrackerEntityID, err := strconv.ParseUint(otpTrackerEntityIDString, 10, 64)
-
 	if err != nil {
 		return nil, errors.New("OTP: " + err.Error())
 	}

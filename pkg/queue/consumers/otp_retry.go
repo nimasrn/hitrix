@@ -47,6 +47,7 @@ func (c *OTPRetryConsumer) Consume(ormService fluxaorm.Context, event fluxaorm.E
 
 	if otpTrackerEntity.MaxRetriesReached {
 	}
+
 	RetryOTP(ormService, c.gatewayRegistry, retryDTO, otpTrackerEntity, c.maxRetries)
 
 	return nil

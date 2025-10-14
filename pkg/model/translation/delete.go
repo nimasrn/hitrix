@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/latolukasz/fluxaorm"
+
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service"
-	"github.com/latolukasz/fluxaorm"
 )
 
 func Delete(ctx context.Context, id uint64) error {

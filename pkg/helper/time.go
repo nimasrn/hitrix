@@ -73,8 +73,10 @@ func TruncateTime(in time.Time) time.Time {
 }
 
 func ValidateAndParseTimeRange(startsAt, endsAt, fromName string, startsAtGTENow bool) (*time.Time, *time.Time, error) {
-	var from *time.Time
-	var to *time.Time
+	var (
+		from *time.Time
+		to   *time.Time
+	)
 
 	startDate, err := time.Parse(TimeLayoutYMDHM, startsAt)
 	if err == nil {

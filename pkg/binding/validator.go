@@ -57,6 +57,7 @@ func NewValidator() *Validator {
 	once.Do(func() {
 		validatorInstance := validator.New()
 		validatorInstance.SetTagName("binding")
+
 		english := en.New()
 		uni := ut.New(english, english)
 		translator, _ := uni.GetTranslator("en")
@@ -76,6 +77,7 @@ func NewValidator() *Validator {
 				panic(err)
 			}
 		}
+
 		_ = vEn.RegisterDefaultTranslations(validatorInstance, translator)
 
 		singleton = &Validator{validator: validatorInstance, translator: translator}
@@ -91,7 +93,7 @@ func (t *Validator) translateError(err error) (errs []error) {
 
 	validatorErrs := err.(validator.ValidationErrors)
 	for _, e := range validatorErrs {
-		translatedErr := fmt.Errorf(e.Translate(t.translator))
+		translatedErr := fmt.Errorf("%s", e.Translate(t.translator))
 		errs = append(errs, translatedErr)
 	}
 

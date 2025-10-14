@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/latolukasz/fluxaorm"
+
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/clock"
 	errorlogger "github.com/coretrix/hitrix/service/component/error_logger"
-	"github.com/latolukasz/fluxaorm"
 )
 
 type IFeatureFlag interface {
@@ -79,8 +80,6 @@ func (s *serviceFeatureFlag) Disable(ormService fluxaorm.Context, name string) e
 		panic("name cannot be empty")
 	}
 
-	featureFlagEntity := &entity.FeatureFlagEntity{}
-
 	//TODO Krasi ORM: fix it
 	featureFlagEntity, found := fluxaorm.GetByUniqueIndex[entity.FeatureFlagEntity](ormService, "Name", name)
 	if !found {
@@ -150,8 +149,10 @@ func (s *serviceFeatureFlag) Register(featureFlags ...IFeatureFlag) {
 }
 
 func (s *serviceFeatureFlag) Sync(ormService fluxaorm.Context, clockService clock.IClock) {
-	var featureFlagEntities []*entity.FeatureFlagEntity
-	var lastID uint64
+	var (
+		featureFlagEntities []*entity.FeatureFlagEntity
+		lastID              uint64
+	)
 
 	for {
 		pager := fluxaorm.NewPager(1, 1000)

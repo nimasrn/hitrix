@@ -15,6 +15,7 @@ func ServiceProviderHTML2PDF() *service.DefinitionGlobal {
 		Name: service.HTML2PDFService,
 		Build: func(ctn di.Container) (interface{}, error) {
 			configService := ctn.Get(service.ConfigService).(config.IConfig)
+
 			chromeWebSocketURL, ok := configService.String("chrome_headless.web_socket_url")
 			if !ok {
 				return nil, errors.New("missing chrome_headless.web_socket_url")

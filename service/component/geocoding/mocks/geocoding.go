@@ -3,12 +3,12 @@ package mocks
 import (
 	"context"
 	"fmt"
-	"googlemaps.github.io/maps"
 	"strconv"
 	"strings"
 
 	"github.com/latolukasz/fluxaorm"
 	"github.com/stretchr/testify/mock"
+	"googlemaps.github.io/maps"
 
 	"github.com/coretrix/hitrix/service/component/geocoding"
 )

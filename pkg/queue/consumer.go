@@ -126,6 +126,7 @@ func (r *ConsumerRunner) RunConsumerOne(consumer ConsumerOne, groupNameSuffix *s
 
 		break
 	}
+
 	log.Printf("RunConsumerOne exited (%s)", queueName)
 }
 
@@ -152,6 +153,7 @@ func (r *ConsumerRunner) RunConsumerOneByModulo(consumer ConsumerOneByModulo, gr
 
 			ormService := r.ormService.Clone()
 			eventsConsumer := ormService.GetEventBroker().Consumer(r.ormService, consumerGroupName)
+
 			service.DI().App().Add(1)
 			defer service.DI().App().Done()
 
@@ -180,6 +182,7 @@ func (r *ConsumerRunner) RunConsumerOneByModulo(consumer ConsumerOneByModulo, gr
 
 					continue
 				}
+
 				log.Printf("eventsConsumer.Consume returned true for goroutine %d (%s)", currentModulo, queueName)
 				log.Printf("RunConsumerOneByModulo exited (%s)", baseQueueName)
 
@@ -216,6 +219,7 @@ func (r *ConsumerRunner) RunConsumerManyByModulo(consumer ConsumerManyByModulo, 
 
 			ormService := r.ormService.Clone()
 			eventsConsumer := ormService.GetEventBroker().Consumer(r.ormService, consumerGroupName)
+
 			service.DI().App().Add(1)
 			defer service.DI().App().Done()
 

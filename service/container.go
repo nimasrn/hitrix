@@ -95,7 +95,7 @@ func getServiceRequired(ctn di.Container, key string) interface{} {
 	if err != nil {
 		panic(err)
 	} else if !has {
-		panic(fmt.Errorf("missing service " + key))
+		panic(fmt.Errorf("%s", "missing service "+key))
 	}
 
 	return service

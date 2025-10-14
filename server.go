@@ -45,8 +45,10 @@ func (h *Hitrix) RunServer(
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}
+
 		h.done <- true
 	}()
+
 	h.await()
 
 	appService := service.DI().App()
@@ -156,6 +158,7 @@ func (h *Hitrix) forceAlters() {
 
 	for pool, db := range dbPools {
 		queries := ""
+
 		for _, alter := range alters {
 			if alter.Pool == pool {
 				queries += alter.SQL

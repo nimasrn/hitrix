@@ -9,7 +9,7 @@ import (
 func ServiceProviderMockOTP(fake interface{}) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.OTPService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return fake, nil
 		},
 	}

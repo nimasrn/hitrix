@@ -50,7 +50,7 @@ func (l *SimpleLocalizer) T(bucket string, key string) string {
 	return key
 }
 
-func (l *SimpleLocalizer) LoadBucketFromMap(bucket string, pairs map[string]string, append bool) {
+func (l *SimpleLocalizer) LoadBucketFromMap(bucket string, pairs map[string]string, toAppend bool) {
 	if bucket == "" {
 		return
 	}
@@ -62,7 +62,7 @@ func (l *SimpleLocalizer) LoadBucketFromMap(bucket string, pairs map[string]stri
 		l.pairs = map[string]string{}
 	}
 
-	if !append {
+	if !toAppend {
 		l.removeBucket(bucket)
 	}
 
@@ -71,11 +71,12 @@ func (l *SimpleLocalizer) LoadBucketFromMap(bucket string, pairs map[string]stri
 	}
 }
 
-func (l *SimpleLocalizer) LoadBucketFromFile(bucket string, path string, append bool) {
+func (l *SimpleLocalizer) LoadBucketFromFile(bucket string, path string, toAppend bool) {
 	jsonBytes, err := os.ReadFile(path)
 	if err != nil {
 		panic("no such file or directory: " + path)
 	}
+
 	var tempParis map[string]string
 
 	err = json.Unmarshal(jsonBytes, &tempParis)
@@ -83,7 +84,7 @@ func (l *SimpleLocalizer) LoadBucketFromFile(bucket string, path string, append 
 		log.Println("translation file not well formated json", err)
 	}
 
-	l.LoadBucketFromMap(bucket, tempParis, append)
+	l.LoadBucketFromMap(bucket, tempParis, toAppend)
 }
 
 func (l *SimpleLocalizer) SaveBucketToFile(bucket string, path string) {

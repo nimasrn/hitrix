@@ -21,10 +21,11 @@ type ExtractParams struct {
 
 func (l *FileExtractor) Extract(params ExtractParams) ([]string, error) {
 	err := filepath.Walk(params.SearchPath,
-		func(path string, info os.FileInfo, err error) error {
+		func(path string, _ os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
+
 			if strings.HasSuffix(path, ".go") &&
 				!strings.HasSuffix(path, "_test.go") &&
 				!strings.HasSuffix(path, "_gen.go") &&

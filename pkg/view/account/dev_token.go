@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coretrix/hitrix/example/entity"
 	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
 
+	"github.com/coretrix/hitrix/example/entity"
 	"github.com/coretrix/hitrix/service"
 )
 
@@ -127,7 +127,6 @@ func isValid(token, tokenSecret string, tokenExpire int64) (uint64, error) {
 	jwtService := service.DI().JWT()
 
 	err := jwtService.VerifyJWT(tokenSecret, token, tokenExpire)
-
 	if err != nil {
 		return 0, err
 	}

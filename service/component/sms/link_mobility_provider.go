@@ -88,6 +88,7 @@ func (g *LinkMobilityProvider) SendSMSMessage(message *Message) (string, error) 
 	body := []*linkMobilityMsg{row}
 
 	headers := g.getHeaders(body)
+
 	responseBody, _, code, err := helper.Call(
 		context.Background(),
 		"POST",
@@ -96,7 +97,6 @@ func (g *LinkMobilityProvider) SendSMSMessage(message *Message) (string, error) 
 		time.Duration(timeoutInSeconds)*time.Second,
 		body,
 		nil)
-
 	if err != nil {
 		return failure, err
 	}

@@ -30,7 +30,6 @@ func (c Price) StringWithCurrency(currencySymbol string) string {
 
 func (c Price) StringByLocale(locale, inCurrency string) (string, error) {
 	amount, err := currency.NewAmount(c.String(), inCurrency)
-
 	if err != nil {
 		return "", err
 	}
@@ -50,7 +49,6 @@ func GetPriceDTO(priceValue float64, priceCurrencyISO4217, countryCodeAlpha2 str
 	price := NewPrice(priceValue)
 
 	priceWithCurrency, err := price.StringByLocale(countryCodeAlpha2, priceCurrencyISO4217)
-
 	if err != nil {
 		panic(err)
 	}

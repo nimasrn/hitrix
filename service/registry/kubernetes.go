@@ -19,6 +19,7 @@ func ServiceProviderKubernetes() *service.DefinitionGlobal {
 			configService := ctn.Get(service.ConfigService).(config.IConfig)
 
 			configFilePath := ""
+
 			configFile, ok := configService.String("kubernetes.config_file")
 			if ok {
 				var configFolder string

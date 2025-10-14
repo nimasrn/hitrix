@@ -89,6 +89,7 @@ func (processor *BackgroundProcessor) RunScript(s app.IScript) {
 
 			processor.run(s)
 			log.Println(color.InGreen("Finished script") + " - " + s.Description())
+
 			processor.Server.done <- true
 
 			return
@@ -330,7 +331,6 @@ func (processor *BackgroundProcessor) RunAsyncMetricsCollector(fieldProcessor Fi
 						//
 						//	continue
 						//}
-
 						if k == "PauseNs" {
 							pauseNSInfSlice := v.([]interface{})
 							pauseNS := [256]uint64{}

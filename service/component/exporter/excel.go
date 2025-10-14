@@ -29,7 +29,6 @@ func (e *XLSXExporter) exportToFile(sheet string, columns []string, rows [][]int
 
 func (e *XLSXExporter) exportToByte(sheet string, columns []string, rows [][]interface{}) ([]byte, error) {
 	xlsxFile, err := e.export(sheet, columns, rows)
-
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +36,6 @@ func (e *XLSXExporter) exportToByte(sheet string, columns []string, rows [][]int
 	byteXLSX := new(bytes.Buffer)
 
 	err = xlsxFile.Write(byteXLSX)
-
 	if err != nil {
 		return nil, err
 	}
@@ -47,19 +45,20 @@ func (e *XLSXExporter) exportToByte(sheet string, columns []string, rows [][]int
 
 func (e *XLSXExporter) export(sheet string, columns []string, rows [][]interface{}) (*xlsx.File, error) {
 	err := verifyRows(columns, rows)
-
 	if err != nil {
 		return nil, err
 	}
 
-	var xlsxFile *xlsx.File
-	var xlsxSheet *xlsx.Sheet
-	var xlsxRow *xlsx.Row
-	var xlsxCell *xlsx.Cell
+	var (
+		xlsxFile  *xlsx.File
+		xlsxSheet *xlsx.Sheet
+		xlsxRow   *xlsx.Row
+		xlsxCell  *xlsx.Cell
+	)
 
 	xlsxFile = xlsx.NewFile()
-	xlsxSheet, err = xlsxFile.AddSheet(sheet)
 
+	xlsxSheet, err = xlsxFile.AddSheet(sheet)
 	if err != nil {
 		return nil, err
 	}

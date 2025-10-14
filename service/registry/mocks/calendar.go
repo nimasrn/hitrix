@@ -10,7 +10,7 @@ import (
 func ServiceProviderMockCalendar(mock calendar.ICalendar) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.CalendarService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return mock, nil
 		},
 	}

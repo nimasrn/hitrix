@@ -1,6 +1,10 @@
 package main
 
 import (
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gin-gonic/gin"
+	"github.com/latolukasz/fluxaorm"
+
 	"github.com/coretrix/hitrix"
 	"github.com/coretrix/hitrix/example/entity"
 	model "github.com/coretrix/hitrix/example/model/socket"
@@ -10,9 +14,6 @@ import (
 	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/socket"
 	"github.com/coretrix/hitrix/service/registry"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gin-gonic/gin"
-	"github.com/latolukasz/fluxaorm"
 )
 
 var eventHandlersMap = socket.NamespaceEventHandlerMap{
@@ -52,6 +53,7 @@ func main() {
 		exampleMiddleware.Router(ginEngine)
 		middleware.Cors(ginEngine)
 	})
+
 	e := &entity.DevPanelUserEntity{
 		ID:       10,
 		Username: "pass",
@@ -61,8 +63,8 @@ func main() {
 }
 
 func auth(
-	ormService fluxaorm.Context,
-	phone string,
+	_ fluxaorm.Context,
+	_ string,
 	entity app.IDevPanelUserEntity,
 ) {
 	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)

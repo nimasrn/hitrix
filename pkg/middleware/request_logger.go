@@ -23,7 +23,7 @@ func (l *dbLogger) Disable() {
 	l.disabled = true
 }
 
-func (l *dbLogger) Handle(ormService fluxaorm.Context, data map[string]any) {
+func (l *dbLogger) Handle(_ fluxaorm.Context, data map[string]any) {
 	if l.disabled {
 		return
 	}
@@ -63,6 +63,7 @@ func RequestLogger(ginEngine *gin.Engine, extender func(context *gin.Context, re
 		requestLoggerEntity.RequestDuration = time.Now().Sub(requestStart).Milliseconds()
 
 		logger.Disable()
+
 		encoded, err := json.Marshal(logger.logs)
 		if err != nil {
 			return

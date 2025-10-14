@@ -19,6 +19,7 @@ func ServiceProviderSentry(tracesSampleRate *float64) *service.DefinitionGlobal 
 			}
 
 			backendVersionFinal := ""
+
 			backendVersion, ok := configService.String("backend_version")
 			if ok {
 				backendVersionFinal = backendVersion

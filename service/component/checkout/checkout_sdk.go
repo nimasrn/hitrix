@@ -44,8 +44,8 @@ func (c *Checkout) RequestPayment(request *payments.Request) *payments.Response 
 	}
 
 	var client = payments.NewClient(*config)
-	response, err := client.Request(request, &params)
 
+	response, err := client.Request(request, &params)
 	if err != nil {
 		panic("checkout.com new payment request error: " + err.Error())
 	}
@@ -128,9 +128,10 @@ func (c *Checkout) GetCustomer(idOrEmail string) (bool, *CustomerResponse) {
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, _ := client.Do(req)
-	if resp.StatusCode == 404 {
+	switch resp.StatusCode {
+	case 404:
 		return false, nil
-	} else if resp.StatusCode == 200 {
+	case 200:
 		res := &CustomerResponse{}
 
 		err := json.NewDecoder(resp.Body).Decode(res)
@@ -227,9 +228,10 @@ func (c *Checkout) GetPaymentDetail(paymentID string) (*payments.PaymentResponse
 	if err != nil {
 		return nil, err
 	}
-	var client = payments.NewClient(*config)
-	response, err := client.Get(paymentID)
 
+	var client = payments.NewClient(*config)
+
+	response, err := client.Get(paymentID)
 	if err != nil {
 		return nil, err
 	}

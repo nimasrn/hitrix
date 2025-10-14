@@ -45,9 +45,9 @@ func (c *CookieSession) Save() error {
 }
 
 func (c *CookieSession) setCookieExpiry() {
-	createdAt := c.Session.Get("created_at")
+	createdAt := c.Get("created_at")
 	if createdAt == nil {
-		c.Session.Options(sessions.Options{
+		c.Options(sessions.Options{
 			MaxAge:   c.ttl,
 			Secure:   true,
 			HttpOnly: true,
@@ -55,7 +55,7 @@ func (c *CookieSession) setCookieExpiry() {
 			SameSite: http.SameSiteNoneMode,
 		})
 
-		c.Session.Set("created_at", c.now.Unix())
+		c.Set("created_at", c.now.Unix())
 	} else {
 		updatedMaxAge := -1
 
@@ -64,7 +64,7 @@ func (c *CookieSession) setCookieExpiry() {
 			updatedMaxAge = c.ttl - secondsSinceCookieCreation
 		}
 
-		c.Session.Options(sessions.Options{
+		c.Options(sessions.Options{
 			MaxAge:   updatedMaxAge,
 			Secure:   true,
 			HttpOnly: true,
@@ -77,7 +77,7 @@ func (c *CookieSession) setCookieExpiry() {
 func (c *CookieSession) getCookieItems(cookieName string) map[string]*struct{} {
 	result := make(map[string]*struct{})
 
-	cookieData := c.Session.Get(cookieName)
+	cookieData := c.Get(cookieName)
 	if cookieData != nil {
 		items := strings.Split(strings.TrimSpace(cookieData.(string)), ",")
 		for _, item := range items {
@@ -98,5 +98,5 @@ func (c *CookieSession) setCookieItems(cookieName string, items map[string]*stru
 		arr = append(arr, item)
 	}
 
-	c.Session.Set(cookieName, strings.Join(arr, ","))
+	c.Set(cookieName, strings.Join(arr, ","))
 }

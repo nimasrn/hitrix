@@ -18,6 +18,7 @@ func ServiceProviderLocalize(projectNameEnvVar string) *service.DefinitionGlobal
 		Name: service.LocalizeService,
 		Build: func(ctn di.Container) (interface{}, error) {
 			configService := ctn.Get(service.ConfigService).(config.IConfig)
+
 			var apiSource localize.Source
 
 			if _, ok := configService.StringMap("translation.poeditor"); ok {
@@ -25,10 +26,12 @@ func ServiceProviderLocalize(projectNameEnvVar string) *service.DefinitionGlobal
 				if !ok {
 					return nil, errors.New("missing translation.poeditor.api_key")
 				}
+
 				projectID, ok := configService.String("translation.poeditor.project_id")
 				if !ok {
 					return nil, errors.New("missing translation.poeditor.project_id")
 				}
+
 				language, ok := configService.String("translation.poeditor.language")
 				if !ok {
 					return nil, errors.New("missing translation.poeditor.language")

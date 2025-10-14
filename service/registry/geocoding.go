@@ -44,6 +44,7 @@ func ServiceProviderGeocoding(provider string) *service.DefinitionGlobal {
 				}
 
 				var has bool
+
 				cacheTTLMinDays, has = configService.Int("geocoding.cache_ttl_min_days")
 				if !has {
 					return nil, fmt.Errorf("you must specify geocoding.cache_ttl_min_days")

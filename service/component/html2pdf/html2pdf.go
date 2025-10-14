@@ -36,8 +36,11 @@ func (c *HTML2PDF) HTMLToPdf(html string) []byte {
 		panic(err)
 	}
 
-	var buf []byte
-	var wg sync.WaitGroup
+	var (
+		buf []byte
+		wg  sync.WaitGroup
+	)
+
 	wg.Add(1)
 	// waiting to page load event
 	chromedp.ListenTarget(ctx, func(ev interface{}) {
@@ -47,6 +50,7 @@ func (c *HTML2PDF) HTMLToPdf(html string) []byte {
 				if err := chromedp.Run(ctx, printToPDF(&buf)); err != nil {
 					panic(err)
 				}
+
 				wg.Done()
 			}()
 		}
@@ -75,6 +79,7 @@ func printToPDF(res *[]byte) chromedp.Tasks {
 			if err != nil {
 				return err
 			}
+
 			*res = buf
 
 			return nil

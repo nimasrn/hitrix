@@ -20,8 +20,10 @@ func Call(ctx context.Context,
 	timeout time.Duration,
 	payload interface{},
 	cookies []*http.Cookie) ([]byte, http.Header, int, error) {
-	var d []byte
-	var e error
+	var (
+		d []byte
+		e error
+	)
 
 	switch v := payload.(type) {
 	case string:
@@ -34,6 +36,7 @@ func Call(ctx context.Context,
 	}
 
 	var b io.Reader
+
 	b = bytes.NewReader(d)
 
 	method = strings.ToUpper(method)
@@ -88,6 +91,7 @@ func CallXML(ctx context.Context,
 	}
 
 	var b io.Reader
+
 	b = bytes.NewReader(d)
 
 	method = strings.ToUpper(method)

@@ -15,6 +15,7 @@ func ServiceProviderLicensePlateRecognizer() *service.DefinitionGlobal {
 		Name: service.LicensePlateRecognizerService,
 		Build: func(ctn di.Container) (interface{}, error) {
 			configService := ctn.Get(service.ConfigService).(config.IConfig)
+
 			apiKey, ok := configService.String("platerecognizer.api_key")
 			if !ok {
 				return nil, errors.New("missing platerecognizer.api_key")

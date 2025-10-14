@@ -12,10 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/clock"
 	"github.com/coretrix/hitrix/service/component/config"
 )
@@ -63,7 +63,6 @@ func NewAmazonOSS(configService config.IConfig, clockService clock.IClock, appSe
 		Region:           aws.String(region),
 		DisableSSL:       aws.Bool(disableSSL),
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +213,6 @@ func (ossStorage *AmazonOSS) UploadObjectFromBase64(
 
 func (ossStorage *AmazonOSS) GetNamespaceBucketConfig(namespace Namespace) (*BucketConfig, error) {
 	bucketConfig, err := ossStorage.namespaces.getBucketConfig(namespace)
-
 	if err != nil {
 		return nil, err
 	}

@@ -56,9 +56,9 @@ func (m *Mada) GetCode() string {
 	if m.otpLength == 0 {
 		code = m.generatorService.GenerateRandomRangeNumber(10000, 99999)
 	} else {
-		min := int64(math.Pow(10, float64(m.otpLength-1)))
-		max := int64(math.Pow(10, float64(m.otpLength))) - 1
-		code = m.generatorService.GenerateRandomRangeNumber(min, max)
+		minInt := int64(math.Pow(10, float64(m.otpLength-1)))
+		maxInt := int64(math.Pow(10, float64(m.otpLength))) - 1
+		code = m.generatorService.GenerateRandomRangeNumber(minInt, maxInt)
 	}
 
 	return strconv.FormatInt(code, 10)

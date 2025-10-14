@@ -64,8 +64,10 @@ func CSVToMap(reader *bytes.Buffer) ([]map[string]string, error) {
 	r := csv.NewReader(reader)
 	r.Comma = ';'
 
-	var rows []map[string]string
-	var header []string
+	var (
+		rows   []map[string]string
+		header []string
+	)
 
 	for {
 		record, err := r.Read()

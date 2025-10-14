@@ -18,7 +18,6 @@ func DevPanelRouter(ginEngine *gin.Engine) {
 		}
 		{
 			//ginEngine.GET("/dev/action-list/", devPanel.GetActionListAction)
-
 			devGroup.GET("settings/", devPanel.GetSettingsAction)
 			devGroup.GET("clear-cache/", devPanel.GetClearCacheAction)
 			devGroup.GET("clear-redis-streams/", devPanel.GetClearRedisStreamsAction)

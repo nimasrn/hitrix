@@ -10,7 +10,7 @@ import (
 func ServiceProviderExtractor() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.ExtractorService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return fileextractor.NewFileExtractor(), nil
 		},
 	}

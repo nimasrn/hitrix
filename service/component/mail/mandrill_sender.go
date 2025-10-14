@@ -37,7 +37,6 @@ func NewMandrill(configService config.IConfig) (IProvider, error) {
 	}
 
 	mandrillAPI, err := gochimp.NewMandrill(apiKey)
-
 	if err != nil {
 		panic(err)
 	}
@@ -128,8 +127,8 @@ func (s *Mandrill) sendTemplate(
 	}
 
 	message.AddMergeVar(gochimp.MergeVars{Recipient: to, Vars: templateContent})
-	responses, err := s.client.MessageSendTemplate(templateName, templateContent, message, false)
 
+	responses, err := s.client.MessageSendTemplate(templateName, templateContent, message, false)
 	if err != nil {
 		return err
 	}

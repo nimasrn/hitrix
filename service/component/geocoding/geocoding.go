@@ -2,9 +2,6 @@ package geocoding
 
 import (
 	"context"
-
-	"googlemaps.github.io/maps"
-
 	//nolint //G501: Blocklisted import crypto/md5: weak cryptographic primitive, but just fine for caching
 	"crypto/md5"
 	"crypto/rand"
@@ -16,6 +13,7 @@ import (
 	"time"
 
 	"github.com/latolukasz/fluxaorm"
+	"googlemaps.github.io/maps"
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/service/component/clock"
@@ -102,6 +100,7 @@ func (g *Geocoding) Geocode(ctx context.Context, ormService fluxaorm.Context, ad
 	if err != nil {
 		return nil, err
 	}
+
 	if g.useCaching && geocodedAddress.Found {
 		now := g.clock.Now()
 

@@ -33,20 +33,20 @@ func NewStripe(token string, webhookSecrets map[string]string, appService *app.A
 }
 
 func (s *Stripe) CreateAccount(accountParams *stripe.AccountParams) (*stripe.Account, error) {
-	if accountParams.Params.Metadata == nil {
-		accountParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if accountParams.Metadata == nil {
+		accountParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		accountParams.Params.Metadata[Env] = s.appService.Mode
+		accountParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return account.New(accountParams)
 }
 
 func (s *Stripe) UpdateAccount(accountID string, accountParams *stripe.AccountParams) (*stripe.Account, error) {
-	if accountParams.Params.Metadata == nil {
-		accountParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if accountParams.Metadata == nil {
+		accountParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		accountParams.Params.Metadata[Env] = s.appService.Mode
+		accountParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return account.Update(accountID, accountParams)
@@ -57,30 +57,30 @@ func (s *Stripe) GetAccount(accountID string, params *stripe.AccountParams) (*st
 }
 
 func (s *Stripe) CreateCustomer(customerParams *stripe.CustomerParams) (*stripe.Customer, error) {
-	if customerParams.Params.Metadata == nil {
-		customerParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if customerParams.Metadata == nil {
+		customerParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		customerParams.Params.Metadata[Env] = s.appService.Mode
+		customerParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return customer.New(customerParams)
 }
 
 func (s *Stripe) UpdateCustomer(customerID string, customerParams *stripe.CustomerParams) (*stripe.Customer, error) {
-	if customerParams.Params.Metadata == nil {
-		customerParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if customerParams.Metadata == nil {
+		customerParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		customerParams.Params.Metadata[Env] = s.appService.Mode
+		customerParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return customer.Update(customerID, customerParams)
 }
 
 func (s *Stripe) CreateCheckoutSession(checkoutSessionParams *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
-	if checkoutSessionParams.Params.Metadata == nil {
-		checkoutSessionParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if checkoutSessionParams.Metadata == nil {
+		checkoutSessionParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		checkoutSessionParams.Params.Metadata[Env] = s.appService.Mode
+		checkoutSessionParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return session.New(checkoutSessionParams)
@@ -95,40 +95,40 @@ func (s *Stripe) GetSubscription(subscriptionID string, params *stripe.Subscript
 }
 
 func (s *Stripe) CreateSubscription(subscriptionParams *stripe.SubscriptionParams) (*stripe.Subscription, error) {
-	if subscriptionParams.Params.Metadata == nil {
-		subscriptionParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if subscriptionParams.Metadata == nil {
+		subscriptionParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		subscriptionParams.Params.Metadata[Env] = s.appService.Mode
+		subscriptionParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return sub.New(subscriptionParams)
 }
 
 func (s *Stripe) UpdateSubscription(subscriptionID string, subscriptionParams *stripe.SubscriptionParams) (*stripe.Subscription, error) {
-	if subscriptionParams.Params.Metadata == nil {
-		subscriptionParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if subscriptionParams.Metadata == nil {
+		subscriptionParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		subscriptionParams.Params.Metadata[Env] = s.appService.Mode
+		subscriptionParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return sub.Update(subscriptionID, subscriptionParams)
 }
 
 func (s *Stripe) CancelSubscription(subscriptionID string, subscriptionCancelParams *stripe.SubscriptionCancelParams) (*stripe.Subscription, error) {
-	if subscriptionCancelParams.Params.Metadata == nil {
-		subscriptionCancelParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if subscriptionCancelParams.Metadata == nil {
+		subscriptionCancelParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		subscriptionCancelParams.Params.Metadata[Env] = s.appService.Mode
+		subscriptionCancelParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return sub.Cancel(subscriptionID, subscriptionCancelParams)
 }
 
 func (s *Stripe) CreateSetupIntent(setupIntentParams *stripe.SetupIntentParams) (*stripe.SetupIntent, error) {
-	if setupIntentParams.Params.Metadata == nil {
-		setupIntentParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if setupIntentParams.Metadata == nil {
+		setupIntentParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		setupIntentParams.Params.Metadata[Env] = s.appService.Mode
+		setupIntentParams.Metadata[Env] = s.appService.Mode
 	}
 
 	return setupintent.New(setupIntentParams)
@@ -146,10 +146,10 @@ func (s *Stripe) CreatePaymentIntentMultiparty(
 	paymentIntentParams *stripe.PaymentIntentParams,
 	linkedAccountID string,
 ) (*stripe.PaymentIntent, error) {
-	if paymentIntentParams.Params.Metadata == nil {
-		paymentIntentParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if paymentIntentParams.Metadata == nil {
+		paymentIntentParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		paymentIntentParams.Params.Metadata[Env] = s.appService.Mode
+		paymentIntentParams.Metadata[Env] = s.appService.Mode
 	}
 
 	paymentIntentParams.SetStripeAccount(linkedAccountID)
@@ -158,10 +158,10 @@ func (s *Stripe) CreatePaymentIntentMultiparty(
 }
 
 func (s *Stripe) CreateRefundMultiparty(refundParams *stripe.RefundParams, linkedAccountID string) (*stripe.Refund, error) {
-	if refundParams.Params.Metadata == nil {
-		refundParams.Params.Metadata = map[string]string{Env: s.appService.Mode}
+	if refundParams.Metadata == nil {
+		refundParams.Metadata = map[string]string{Env: s.appService.Mode}
 	} else {
-		refundParams.Params.Metadata[Env] = s.appService.Mode
+		refundParams.Metadata[Env] = s.appService.Mode
 	}
 
 	refundParams.SetStripeAccount(linkedAccountID)
@@ -186,8 +186,8 @@ func (s *Stripe) NewCheckoutSession(
 		CancelURL:          stripe.String(CancelURL),
 		Discounts:          discounts,
 	}
-	checkoutSession, err := session.New(params)
 
+	checkoutSession, err := session.New(params)
 	if err != nil {
 		panic("failed creating new session for stripe checkout" + err.Error())
 	}

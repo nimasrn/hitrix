@@ -30,10 +30,11 @@ func NewAppleSocial(
 
 	credentialsFile := configService.GetFolderPath() + "/.apple-id.json"
 
-	var dat []byte
-	var configApple = &Apple{}
-	var err error
-
+	var (
+		dat         []byte
+		configApple = &Apple{}
+		err         error
+	)
 	if dat, err = os.ReadFile(credentialsFile); err != nil {
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func (a *Apple) GetUserData(ctx context.Context, token string, isAndroid bool) (
 	}
 
 	if resp.Error != "" {
-		return nil, fmt.Errorf(resp.Error)
+		return nil, fmt.Errorf("%s", resp.Error)
 	}
 
 	claim, err := apple.GetClaims(resp.IDToken)

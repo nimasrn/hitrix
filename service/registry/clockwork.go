@@ -10,7 +10,7 @@ import (
 func ServiceProviderClockWorkForContext() *service.DefinitionRequest {
 	return &service.DefinitionRequest{
 		Name: service.ClockWorkRequestService,
-		Build: func(c *gin.Context) (interface{}, error) {
+		Build: func(_ *gin.Context) (interface{}, error) {
 			return &clockwork.Clockwork{}, nil
 		},
 	}

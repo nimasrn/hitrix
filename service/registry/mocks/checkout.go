@@ -9,7 +9,7 @@ import (
 func ServiceProviderMockCheckout(mock interface{}) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.CheckoutService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return mock, nil
 		},
 	}

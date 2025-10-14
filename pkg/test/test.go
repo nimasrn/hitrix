@@ -16,7 +16,7 @@ import (
 	"github.com/coretrix/hitrix/service/component/app"
 )
 
-var createTableExecuted bool = false
+var createTableExecuted = false
 var parallelTestID string
 
 type Environment struct {
@@ -112,7 +112,9 @@ func executeAlters(ormService fluxaorm.Context) {
 
 		for pool, db := range ormService.Engine().Registry().DBPools() {
 			dbAlters := ""
+
 			dropTables(ormService, db)
+
 			for _, alter := range alters {
 				if alter.Pool == pool {
 					dbAlters += alter.SQL
@@ -170,6 +172,7 @@ func getParallelID() string {
 
 func dropTables(ormService fluxaorm.Context, db fluxaorm.DB) {
 	var query string
+
 	rows, deferF := db.Query(ormService,
 		"SELECT CONCAT('DROP TABLE IF EXISTS ',table_schema,'.',table_name,';') AS query "+
 			"FROM information_schema.tables WHERE table_schema IN ('"+db.GetConfig().GetDatabaseName()+"')",
@@ -194,6 +197,7 @@ func dropTables(ormService fluxaorm.Context, db fluxaorm.DB) {
 // TODO Krasi ORM: delete -> truncate
 func truncateTables(ormService fluxaorm.Context, db fluxaorm.DB) {
 	var query string
+
 	rows, deferF := db.Query(ormService,
 		"SELECT CONCAT('delete from  ',table_schema,'.',table_name,';' , 'ALTER TABLE ', table_schema,'.',table_name , ' AUTO_INCREMENT = 1;') AS query "+
 			"FROM information_schema.tables WHERE table_schema IN ('"+db.GetConfig().GetDatabaseName()+"');",

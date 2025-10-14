@@ -83,7 +83,6 @@ func (gc *GoogleCalendar) RefreshToken(token *oauth2.Token) (bool, *oauth2.Token
 	tokenSource := gc.Oauth2Config.TokenSource(gc.Ctx, token)
 
 	newToken, err := tokenSource.Token()
-
 	if err != nil {
 		return false, nil, err
 	}
@@ -104,7 +103,6 @@ func (gc *GoogleCalendar) GetCalendars(token *oauth2.Token) ([]*calendar.Calenda
 
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +152,6 @@ func (gc *GoogleCalendar) GetCalendarEvents(token *oauth2.Token, calendarID stri
 	}
 
 	eventsRes, err := eventsConfig.Do()
-
 	if err != nil {
 		return nil, fmt.Errorf("google calendar API, unable to retrieve Calendar events list: %v", err)
 	}

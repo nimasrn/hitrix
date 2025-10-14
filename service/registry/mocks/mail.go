@@ -10,7 +10,7 @@ import (
 func ServiceProviderMockMail(mock mail.ISender) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.MailService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return mock, nil
 		},
 	}

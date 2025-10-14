@@ -10,7 +10,7 @@ import (
 func ServiceProviderAPILogger(entity apilogger.ILogEntity) *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.APILoggerService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return apilogger.NewMysqlAPILogger(entity), nil
 		},
 	}

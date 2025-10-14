@@ -139,8 +139,10 @@ func (g *GoogleAnalytics4) GetMetrics(
 		data := make(map[string]interface{})
 
 		for i, metric := range row.MetricValues {
-			var castErr error
-			var value interface{}
+			var (
+				castErr error
+				value   interface{}
+			)
 
 			switch types[i] {
 			case "TYPE_FLOAT":

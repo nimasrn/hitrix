@@ -60,7 +60,6 @@ func CreateFile(ctx context.Context, newFile *file.RequestDTOUploadImage) (*file
 	}
 
 	obj, err := service.DI().OSService().UploadImageFromFile(ormService, namespace, tempFile.Name())
-
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,6 @@ func (t templateService) RenderTemplate(html string, data interface{}) (string, 
 	var templateBuffer bytes.Buffer
 
 	template, err := templatePackage.New("invoice").Parse(html)
-
 	if err != nil {
 		return "", err
 	}

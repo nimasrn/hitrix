@@ -11,15 +11,15 @@ import (
 type SimpleGenerator struct {
 }
 
-func (g *SimpleGenerator) GenerateRandomRangeNumber(min, max int64) int64 {
-	bg := big.NewInt(max - min)
+func (g *SimpleGenerator) GenerateRandomRangeNumber(minInt, maxInt int64) int64 {
+	bg := big.NewInt(maxInt - minInt)
 
 	n, err := rand.Int(rand.Reader, bg)
 	if err != nil {
 		panic(err)
 	}
 
-	return n.Int64() + min
+	return n.Int64() + minInt
 }
 
 func (g *SimpleGenerator) GenerateSha256Hash(input string) string {
@@ -39,10 +39,11 @@ const (
 
 func (g *SimpleGenerator) RandomPasswordGenerator(passwordLength int) string {
 	var password strings.Builder
-	max := big.NewInt(int64(len(allCharSet)))
+
+	maxInt := big.NewInt(int64(len(allCharSet)))
 
 	for i := 0; i < passwordLength; i++ {
-		num, err := rand.Int(rand.Reader, max)
+		num, err := rand.Int(rand.Reader, maxInt)
 		if err != nil {
 			panic(err)
 		}
@@ -55,7 +56,9 @@ func (g *SimpleGenerator) RandomPasswordGenerator(passwordLength int) string {
 
 func (g *SimpleGenerator) RandomPINCodeGenerator(codeLength int) string {
 	charSet := lowerCharSet + numberSet
+
 	var code strings.Builder
+
 	max := big.NewInt(int64(len(charSet)))
 
 	for i := 0; i < codeLength; i++ {

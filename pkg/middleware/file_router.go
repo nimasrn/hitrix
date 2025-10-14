@@ -10,6 +10,7 @@ func FileRouter(ginEngine *gin.Engine) {
 	v1Group := ginEngine.Group("/v1/")
 
 	var fileController *controller.FileController
+
 	fileGroup := v1Group.Group("file/")
 	{
 		fileGroup.POST("upload/", fileController.PostUploadImageAction)

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/coretrix/hitrix/pkg/entity"
 	"github.com/coretrix/hitrix/pkg/helper"
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/clock"
 	"github.com/coretrix/hitrix/service/component/config"
 )
@@ -122,7 +122,6 @@ func (ossStorage *GoogleOSS) GetObjectCDNURL(namespace Namespace, object *entity
 
 func (ossStorage *GoogleOSS) GetNamespaceBucketConfig(namespace Namespace) (*BucketConfig, error) {
 	bucketConfig, err := ossStorage.namespaces.getBucketConfig(namespace)
-
 	if err != nil {
 		return nil, err
 	}

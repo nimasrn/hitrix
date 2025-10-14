@@ -32,6 +32,7 @@ func (c *Connection) write(mt int, payload []byte) error {
 func (s *Socket) ReadPump(registry *Registry, readMessageHandler func(rawData []byte)) {
 	defer func() {
 		registry.Unregister <- s
+
 		s.Connection.Ws.Close()
 	}()
 
@@ -59,6 +60,7 @@ func (s *Socket) ReadPump(registry *Registry, readMessageHandler func(rawData []
 
 func (s *Socket) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
+
 	defer func() {
 		ticker.Stop()
 		s.Connection.Ws.Close()

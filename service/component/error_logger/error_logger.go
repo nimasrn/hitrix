@@ -2,9 +2,6 @@ package errorlogger
 
 import (
 	"bytes"
-	"strconv"
-	"strings"
-
 	//nolint //G501: Blocklisted import crypto/md5: weak cryptographic primitive
 	"crypto/md5"
 	"encoding/hex"
@@ -16,6 +13,8 @@ import (
 	"net/http/httputil"
 	"os"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -231,7 +230,7 @@ func (e *RedisErrorLogger) log(errData interface{}, callerSkip int, c *gin.Conte
 
 	if (e.sentryService != nil && !e.appService.IsInLocalMode() && !e.appService.IsInTestMode()) &&
 		logg == float64(int64(logg)) {
-		e.sentryService.CaptureException(fmt.Errorf(value.Message))
+		e.sentryService.CaptureException(fmt.Errorf("%s", value.Message))
 	}
 }
 
@@ -278,17 +277,20 @@ func (e *RedisErrorLogger) get(group string) []EventRow {
 			eventsList[splitKeys[0]].Line = eventData.Line
 			eventsList[splitKeys[0]].AppName = eventData.AppName
 		} else if len(splitKeys) == 2 {
-			if splitKeys[1] == "time" {
+			switch splitKeys[1] {
+			case "time":
 				i, err := strconv.ParseInt(value, 10, 64)
 				if err != nil {
 					i = 0
 				}
+
 				eventsList[splitKeys[0]].Time = time.Unix(i, 0).String()
-			} else if splitKeys[1] == "counter" {
+			case "counter":
 				counter, err := strconv.Atoi(value)
 				if err != nil {
 					counter = 0
 				}
+
 				eventsList[splitKeys[0]].Counter = counter
 			}
 		}
@@ -322,8 +324,11 @@ func (e *RedisErrorLogger) getEventConfig(warning bool) eventConfig {
 
 func stack(skip int) []byte {
 	buf := new(bytes.Buffer)
-	var lines [][]byte
-	var lastFile string
+
+	var (
+		lines    [][]byte
+		lastFile string
+	)
 
 	for i := skip; ; i++ {
 		pc, file, line, ok := runtime.Caller(i)
@@ -373,7 +378,7 @@ func function(pc uintptr) []byte {
 		name = name[period+1:]
 	}
 
-	name = bytes.Replace(name, centerDot, dot, -1)
+	name = bytes.ReplaceAll(name, centerDot, dot)
 
 	return name
 }

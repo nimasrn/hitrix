@@ -10,7 +10,7 @@ import (
 func ServiceProviderClock() *service.DefinitionGlobal {
 	return &service.DefinitionGlobal{
 		Name: service.ClockService,
-		Build: func(ctn di.Container) (interface{}, error) {
+		Build: func(_ di.Container) (interface{}, error) {
 			return &clock.SysClock{}, nil
 		},
 	}

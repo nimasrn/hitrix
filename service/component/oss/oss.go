@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix/pkg/entity"
+	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/clock"
 	"github.com/coretrix/hitrix/service/component/config"
 )
