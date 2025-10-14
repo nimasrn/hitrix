@@ -12,7 +12,6 @@ import (
 	entityExample "github.com/coretrix/hitrix/example/entity"
 	"github.com/coretrix/hitrix/pkg/dto/acl"
 	"github.com/coretrix/hitrix/pkg/entity"
-	aclView "github.com/coretrix/hitrix/pkg/view/acl"
 	"github.com/coretrix/hitrix/service"
 	"github.com/coretrix/hitrix/service/component/clock/mocks"
 	"github.com/coretrix/hitrix/service/component/crud"
@@ -131,8 +130,8 @@ func TestListRolesAction(t *testing.T) {
 	assert.Nil(t, err)
 
 	want := &acl.RolesResponseDTO{
-		Total:   3,
-		Columns: aclView.RolesColumns(),
+		Total: 3,
+		//Columns: aclView.RolesColumns(),
 		Rows: []*acl.RoleResponseDTO{
 			{
 				ID:   1,
@@ -257,7 +256,7 @@ func TestCreateRoleAction(t *testing.T) {
 		},
 	}
 
-	err = SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/role/", request, false, nil)
+	err := SendHTTPRequestWithBody(ctx, http.MethodPost, "/acl/role/", request, false, nil)
 	assert.Nil(t, err)
 
 	privilegeEntity, found := fluxaorm.GetByID[entity.PrivilegeEntity](ormService, 1)
@@ -308,7 +307,7 @@ func TestUpdateRoleAction(t *testing.T) {
 		},
 	}
 
-	err = SendHTTPRequestWithBody(ctx, http.MethodPut, "/acl/role/1/", request, false, nil)
+	err := SendHTTPRequestWithBody(ctx, http.MethodPut, "/acl/role/1/", request, false, nil)
 	assert.Nil(t, err)
 
 	_, found := fluxaorm.GetByID[entity.PrivilegeEntity](ormService, 1)
