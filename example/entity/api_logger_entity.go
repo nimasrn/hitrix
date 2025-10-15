@@ -36,8 +36,8 @@ type APILogEntity struct {
 	ID        uint64 `orm:"table=api_log;redisCache"`
 	Type      string `orm:"enum=entity.APILogTypeAll;required"`
 	Status    string `orm:"enum=entity.APILogStatusAll;required"`
-	Request   interface{}
-	Response  interface{}
+	Request   string
+	Response  string
 	Message   string
 	CreatedAt time.Time `orm:"time=true"`
 }
@@ -54,12 +54,12 @@ func (e *APILogEntity) SetStatus(value string) {
 	e.Status = value
 }
 
-func (e *APILogEntity) SetRequest(value interface{}) {
-	e.Request = value.(string)
+func (e *APILogEntity) SetRequest(value string) {
+	e.Request = value
 }
 
-func (e *APILogEntity) SetResponse(value interface{}) {
-	e.Response = value.(string)
+func (e *APILogEntity) SetResponse(value string) {
+	e.Response = value
 }
 
 func (e *APILogEntity) SetMessage(value string) {
