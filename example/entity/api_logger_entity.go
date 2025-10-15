@@ -55,11 +55,11 @@ func (e *APILogEntity) SetStatus(value string) {
 }
 
 func (e *APILogEntity) SetRequest(value interface{}) {
-	e.Request = value
+	e.Request = value.(string)
 }
 
 func (e *APILogEntity) SetResponse(value interface{}) {
-	e.Response = value
+	e.Response = value.(string)
 }
 
 func (e *APILogEntity) SetMessage(value string) {

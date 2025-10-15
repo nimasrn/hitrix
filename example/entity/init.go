@@ -11,15 +11,15 @@ func Init(registry fluxaorm.Registry) {
 		&APILogEntity{},
 		&AdminUserEntity{},
 		&DevPanelUserEntity{},
-		&entity.FileEntity{},
+		//&entity.FileEntity{},
 		&entity.SmsTrackerEntity{},
 		&entity.OTPTrackerEntity{},
 		&entity.FeatureFlagEntity{},
 		&entity.RequestLoggerEntity{},
-		&entity.RoleEntity{},
-		&entity.ResourceEntity{},
-		&entity.PrivilegeEntity{},
-		&entity.PermissionEntity{},
+		//&entity.RoleEntity{},
+		//&entity.ResourceEntity{},
+		//&entity.PrivilegeEntity{},
+		//&entity.PermissionEntity{},
 	)
 
 	//registry.RegisterEnumStruct("entity.FileStatusAll", entity.FileStatusAll)
