@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 
-	exampleMiddleware "github.com/coretrix/hitrix/example/rest/middleware"
-	"github.com/gin-gonic/gin"
 	"github.com/latolukasz/fluxaorm"
 
 	"github.com/coretrix/hitrix"
@@ -26,7 +24,7 @@ var eventHandlersMap = socket.NamespaceEventHandlerMap{
 }
 
 func main() {
-	s, deferFunc := hitrix.New(
+	_, deferFunc := hitrix.New(
 		"my-app", "secret",
 	).RegisterDIGlobalService(
 		registry.ServiceProviderErrorLogger(),
@@ -51,18 +49,11 @@ func main() {
 	//b.RunAsyncOrmConsumer()
 	//b.RunAsyncRequestLoggerCleaner()
 	//
-	s.RunServer(9999, func(ginEngine *gin.Engine) {
-		//middleware.RequestLogger(ginEngine, nil)
-		exampleMiddleware.Router(ginEngine)
-		middleware.Cors(ginEngine)
-	})
-
-	//e := &entity.DevPanelUserEntity{
-	//	ID:       10,
-	//	Username: "pass",
-	//	Password: "pass",
-	//}
-	//auth(service.DI().Orm(), "123", e)
+	//s.RunServer(9999, func(ginEngine *gin.Engine) {
+	//	//middleware.RequestLogger(ginEngine, nil)
+	//	exampleMiddleware.Router(ginEngine)
+	//	middleware.Cors(ginEngine)
+	//})
 }
 
 func auth(
@@ -73,17 +64,4 @@ func auth(
 	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
 	entitySchema := ormEngine.Registry().EntitySchema(entity)
 	log.Println(1, entitySchema.GetTableName())
-	//entitySchema.
-	//q := &beeorm.RedisSearchQuery{}
-	//q.FilterString(entity.GetPhoneFieldName(), phone)
-	//
-	//found := ormService.RedisSearchOne(entity, q)
-	//found := entitySchema.
-	//if !found {
-	//	return "", "", errors.New("invalid credentials")
-	//}
-	//
-	//if !entity.CanAuthenticate() {
-	//	return "", "", errors.New("cannot authenticate this entity")
-	//}
 }
