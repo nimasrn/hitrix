@@ -1,18 +1,15 @@
 package main
 
 import (
-	"log"
-
-	"github.com/latolukasz/fluxaorm"
-
 	"github.com/coretrix/hitrix"
 	"github.com/coretrix/hitrix/example/entity"
 	model "github.com/coretrix/hitrix/example/model/socket"
+	exampleMiddleware "github.com/coretrix/hitrix/example/rest/middleware"
 	"github.com/coretrix/hitrix/pkg/middleware"
-	"github.com/coretrix/hitrix/service"
 	"github.com/coretrix/hitrix/service/component/app"
 	"github.com/coretrix/hitrix/service/component/socket"
 	"github.com/coretrix/hitrix/service/registry"
+	"github.com/gin-gonic/gin"
 )
 
 // nolint //var eventHandlersMap is unuse
@@ -24,7 +21,7 @@ var eventHandlersMap = socket.NamespaceEventHandlerMap{
 }
 
 func main() {
-	_, deferFunc := hitrix.New(
+	s, deferFunc := hitrix.New(
 		"my-app", "secret",
 	).RegisterDIGlobalService(
 		registry.ServiceProviderErrorLogger(),
@@ -45,23 +42,13 @@ func main() {
 	).RegisterDevPanel(&entity.DevPanelUserEntity{}, middleware.DevPanelRouter).Build()
 	defer deferFunc()
 
-	//b := &hitrix.BackgroundProcessor{Server: s}
-	//b.RunAsyncOrmConsumer()
-	//b.RunAsyncRequestLoggerCleaner()
-	//
-	//s.RunServer(9999, func(ginEngine *gin.Engine) {
-	//	//middleware.RequestLogger(ginEngine, nil)
-	//	exampleMiddleware.Router(ginEngine)
-	//	middleware.Cors(ginEngine)
-	//})
-}
+	b := &hitrix.BackgroundProcessor{Server: s}
+	b.RunAsyncOrmConsumer()
+	b.RunAsyncRequestLoggerCleaner()
 
-func auth(
-	_ fluxaorm.Context,
-	_ string,
-	entity app.IDevPanelUserEntity,
-) {
-	ormEngine := service.GetServiceRequired(service.ORMEngineService).(fluxaorm.Engine)
-	entitySchema := ormEngine.Registry().EntitySchema(entity)
-	log.Println(1, entitySchema.GetTableName())
+	s.RunServer(9999, func(ginEngine *gin.Engine) {
+		//middleware.RequestLogger(ginEngine, nil)
+		exampleMiddleware.Router(ginEngine)
+		middleware.Cors(ginEngine)
+	})
 }
